@@ -212,7 +212,7 @@
       </div>
     </section>
 
-    <!-- 採購與請款明細表 -->
+    <!-- 採購與請款明細表（已加入「編輯」與「刪除」雙按鈕） -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
         <h2 class="font-bold text-sm text-slate-800">近期叫料與發包明細</h2>
@@ -327,6 +327,68 @@
     </div>
   </div>
 
+  <!-- 【新增】視窗 C：編輯單筆叫料與發包明細 -->
+  <div id="editExpenseModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">編輯叫料與發包明細</h3>
+          <p class="text-xs text-slate-500 mt-0.5">修改後將自動重新計算含稅總額、工項執行率與盈虧</p>
+        </div>
+        <button type="button" onclick="closeEditExpenseModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <form onsubmit="saveEditedExpense(event)" class="space-y-3">
+        <input type="hidden" id="editExpIndex">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">叫料/請款日期</label>
+            <input id="editExpDate" type="date" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">所屬 WBS 工項</label>
+            <select id="editExpCategory" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:border-amber-500 focus:outline-none"></select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">協力廠商 / 供應商名稱</label>
+          <input id="editExpVendor" type="text" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">品名 / 規格說明</label>
+          <input id="editExpItem" type="text" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">數量</label>
+            <input id="editExpQty" type="number" min="1" step="any" required oninput="updateEditPreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">未稅單價（元）</label>
+            <input id="editExpPrice" type="number" min="0" step="any" required oninput="updateEditPreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+          <span class="text-slate-500">修改後含稅總額（含 5% 營業稅）：</span>
+          <span id="editExpTotalPreview" class="text-sm font-bold text-amber-700">NT$ 0</span>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition">
+            儲存變更
+          </button>
+          <button type="button" onclick="closeEditExpenseModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm">
+            取消
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- 升級 Pro 商業變現引導彈窗 -->
   <div id="upgradeModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
@@ -356,7 +418,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "civilcost_data_v5";
+    const STORAGE_KEY = "civilcost_data_v6";
     let isPro = false;
     let chartInstance = null;
     let tempWbsList = [];
@@ -380,7 +442,6 @@
       ]
     };
 
-    // 安全讀取 localStorage（防止 Safari 私密瀏覽或權限限制報錯中斷程式）
     function loadState() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -464,7 +525,6 @@
     function renderAll() {
       const m = calculateMetrics();
 
-      // 1. 延誤預警橫幅
       const alertBanner = document.getElementById("delayAlertBanner");
       if (m.delayedItems.length > 0) {
         alertBanner.classList.remove("hidden");
@@ -476,12 +536,10 @@
         alertBanner.classList.add("hidden");
       }
 
-      // 2. 更新案場名稱與記帳下拉選單
       const totalWan = (m.totalContract / 10000).toLocaleString();
       document.getElementById("mainProjectOption").textContent = appState.projectName + "（合約 " + totalWan + " 萬）";
       renderCategorySelect();
 
-      // 3. 更新整體雙進度條
       document.getElementById("overallPlannedText").textContent = m.weightedPlanned + "%";
       document.getElementById("overallPlannedBar").style.width = Math.min(m.weightedPlanned, 100) + "%";
 
@@ -505,7 +563,6 @@
         badgeEl.textContent = "✅ 進度符合排程";
       }
 
-      // 4. 更新四大財務與盈虧卡片
       document.getElementById("kpiBudget").textContent = "NT$ " + m.totalContract.toLocaleString();
       const extraSign = appState.extraContract >= 0 ? "+" : "";
       document.getElementById("kpiExtraNote").textContent = "原始 " + (appState.baseContract / 10000).toLocaleString() + "萬 ｜ 變更 " + extraSign + (appState.extraContract / 10000).toLocaleString() + "萬";
@@ -726,6 +783,7 @@
       renderAll();
     }
 
+    // 渲染近期叫料與發包明細（新增「編輯」按鈕）
     function renderExpenses() {
       const tbody = document.getElementById("expenseTableBody");
       tbody.innerHTML = appState.expenses.map((e, idx) => {
@@ -737,9 +795,76 @@
           '<td class="py-2.5 px-3"><div class="font-semibold text-slate-800">' + e.vendor + '</div><div class="text-xs text-slate-500">' + e.item + '</div></td>' +
           '<td class="py-2.5 px-3 text-right text-slate-600 whitespace-nowrap">' + e.qty + ' × ' + e.price.toLocaleString() + '</td>' +
           '<td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">NT$ ' + totalWithTax.toLocaleString() + '</td>' +
-          '<td class="py-2.5 px-3 text-center whitespace-nowrap"><button type="button" onclick="deleteExpense(' + idx + ')" class="text-xs text-rose-500 hover:text-rose-700 font-medium">刪除</button></td>' +
+          '<td class="py-2.5 px-3 text-center whitespace-nowrap space-x-2">' +
+            '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-xs text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-2 py-1 rounded font-semibold transition">編輯</button>' +
+            '<button type="button" onclick="deleteExpense(' + idx + ')" class="text-xs text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded font-semibold transition">刪除</button>' +
+          '</td>' +
         '</tr>';
       }).join("");
+    }
+
+    // 【新增】開啟單筆明細編輯視窗
+    function openEditExpenseModal(idx) {
+      const exp = appState.expenses[idx];
+      if (!exp) return;
+
+      document.getElementById("editExpIndex").value = idx;
+      document.getElementById("editExpDate").value = exp.date;
+
+      // 填充最新的 WBS 工項選項
+      const catSelect = document.getElementById("editExpCategory");
+      const optionsHtml = appState.wbsBudgets.map(w =>
+        '<option value="' + w.name + '">' + w.name + '</option>'
+      ).join("");
+      catSelect.innerHTML = optionsHtml;
+
+      // 若原工項已被刪除，暫時保留該選項以免資料遺失
+      if (!appState.wbsBudgets.some(w => w.name === exp.category)) {
+        catSelect.innerHTML += '<option value="' + exp.category + '">' + exp.category + '（已移除工項）</option>';
+      }
+      catSelect.value = exp.category;
+
+      document.getElementById("editExpVendor").value = exp.vendor;
+      document.getElementById("editExpItem").value = exp.item;
+      document.getElementById("editExpQty").value = exp.qty;
+      document.getElementById("editExpPrice").value = exp.price;
+
+      updateEditPreview();
+
+      document.getElementById("editExpenseModal").classList.remove("hidden");
+      document.getElementById("editExpenseModal").classList.add("flex");
+    }
+
+    function updateEditPreview() {
+      const qty = Number(document.getElementById("editExpQty").value) || 0;
+      const price = Number(document.getElementById("editExpPrice").value) || 0;
+      const totalWithTax = Math.round(qty * price * 1.05);
+      document.getElementById("editExpTotalPreview").textContent = "NT$ " + totalWithTax.toLocaleString();
+    }
+
+    function closeEditExpenseModal() {
+      document.getElementById("editExpenseModal").classList.add("hidden");
+      document.getElementById("editExpenseModal").classList.remove("flex");
+    }
+
+    function saveEditedExpense(e) {
+      e.preventDefault();
+      const idx = Number(document.getElementById("editExpIndex").value);
+      if (!appState.expenses[idx]) return;
+
+      appState.expenses[idx] = {
+        ...appState.expenses[idx],
+        date: document.getElementById("editExpDate").value,
+        category: document.getElementById("editExpCategory").value,
+        vendor: document.getElementById("editExpVendor").value.trim(),
+        item: document.getElementById("editExpItem").value.trim(),
+        qty: Number(document.getElementById("editExpQty").value) || 1,
+        price: Number(document.getElementById("editExpPrice").value) || 0
+      };
+
+      saveState();
+      closeEditExpenseModal();
+      renderAll();
     }
 
     function addExpense(e) {
@@ -760,9 +885,11 @@
     }
 
     function deleteExpense(idx) {
-      appState.expenses.splice(idx, 1);
-      saveState();
-      renderAll();
+      if (confirm("確定要刪除這筆叫料/發包紀錄嗎？")) {
+        appState.expenses.splice(idx, 1);
+        saveState();
+        renderAll();
+      }
     }
 
     function updatePlanUI() {
@@ -852,7 +979,6 @@
       });
     }
 
-    // 確保網頁載入完成後執行初始化
     document.addEventListener("DOMContentLoaded", renderAll);
   </script>
 </body>
