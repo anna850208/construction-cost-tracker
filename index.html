@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工地算盤 CivilCost｜土木營造成本控制系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .pro-badge { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 pb-20">
+
+  <!-- 頂部導覽列 & 方案切換測試器 -->
+  <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center font-bold text-slate-900">工</div>
+        <div>
+          <h1 class="font-bold text-base leading-tight">工地算盤 CivilCost</h1>
+          <p class="text-xs text-slate-400">土木營造成本與毛利即時監控</p>
+        </div>
+      </div>
+
+      <!-- 商業模式模擬切換器（開發測試用） -->
+      <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
+        <span class="text-xs text-slate-300">目前身份：</span>
+        <button id="togglePlanBtn" onclick="togglePlan()" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-600 text-white transition">
+          免費版 Free
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 pt-5 space-y-5">
+
+    <!-- 案場選擇器（展現 Free 限 1 案場 vs Pro 無限案場） -->
+    <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <label class="text-sm font-semibold text-slate-600">目前工地案場：</label>
+        <select id="projectSelect" onchange="switchProject()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-amber-500">
+          <option value="0">桃園中壢區集合住宅新建工程（合約 4,500 萬）</option>
+          <option value="1" id="proProjectOption">🔒 [Pro] 新竹竹北廠房基礎開挖工程（合約 2,800 萬）</option>
+        </select>
+      </div>
+      <button onclick="handleProAction('新增多個工地案場')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition">
+        + 新增案場 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded ml-1">PRO</span>
+      </button>
+    </section>
+
+    <!-- 核心財務儀表板卡片 -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <p class="text-xs text-slate-500">合約總預算（含追加）</p>
+        <p id="kpiBudget" class="text-lg md:text-xl font-bold text-slate-800 mt-1">NT$ 45,000,000</p>
+        <span class="text-[11px] text-emerald-600 font-medium">含變更追加 +120萬</span>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <p class="text-xs text-slate-500">累計實際支出</p>
+        <p id="kpiActual" class="text-lg md:text-xl font-bold text-amber-600 mt-1">NT$ 28,450,000</p>
+        <span id="kpiRate" class="text-[11px] text-slate-500">執行率 63.2%</span>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <p class="text-xs text-slate-500">預估剩餘毛利</p>
+        <p id="kpiMargin" class="text-lg md:text-xl font-bold text-emerald-600 mt-1">NT$ 16,550,000</p>
+        <span class="text-[11px] text-slate-500">目前毛利率 36.8%</span>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <p class="text-xs text-slate-500">協力廠商保留款 (10%)</p>
+        <p id="kpiRetention" class="text-lg md:text-xl font-bold text-indigo-600 mt-1">NT$ 2,845,000</p>
+        <span class="text-[11px] text-slate-400">驗收後撥付</span>
+      </div>
+    </section>
+
+    <!-- 中間區塊：WBS 工項預算執行進度條 + 結構圖表 -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- 土木 WBS 工項進度條 -->
+      <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="font-bold text-sm text-slate-800">土木營造 WBS 工項預算執行率</h2>
+          <button onclick="handleProAction('變更設計追加減帳管理')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+            + 追加減帳 <span class="pro-badge text-white text-[10px] px-1 rounded">PRO</span>
+          </button>
+        </div>
+        <div id="wbsContainer" class="space-y-3 pt-1">
+          <!-- 由 JS 動態生成 -->
+        </div>
+      </div>
+
+      <!-- 成本結構圓餅圖 -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+        <h2 class="font-bold text-sm text-slate-800 mb-2">五大成本佔比分析</h2>
+        <div class="relative h-48 w-full flex items-center justify-center">
+          <canvas id="costChart"></canvas>
+        </div>
+        <p class="text-[11px] text-slate-400 text-center mt-2">大宗材料（鋼筋/混凝土）波動監控中</p>
+      </div>
+    </section>
+
+    <!-- 快速記帳表單（工地現場手機優化） -->
+    <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+      <h2 class="font-bold text-sm text-slate-800 mb-3">現場快速記帳（叫料 / 點工 / 機具）</h2>
+      <form onsubmit="addExpense(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2.5">
+        <select id="expCategory" required class="border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white">
+          <option value="假設與土方工程">1. 假設與土方工程</option>
+          <option value="基礎與擋土支撐">2. 基礎與擋土支撐</option>
+          <option value="結構體（鋼筋/模板/混凝土）">3. 結構體（鋼筋/混凝土）</option>
+          <option value="重機具與吊車租賃">4. 重機具與吊車租賃</option>
+          <option value="工地雜支與安衛">5. 工地雜支與安衛</option>
+        </select>
+        <input id="expVendor" type="text" placeholder="廠商名稱（如：國產實業）" required class="border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
+        <input id="expItem" type="text" placeholder="品名/規格（如：3000psi混凝土）" required class="border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
+        <input id="expQty" type="number" placeholder="數量" min="1" value="1" required class="border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
+        <input id="expPrice" type="number" placeholder="單價（未稅）" min="1" required class="border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
+        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-lg px-4 py-2 text-sm transition shadow-sm">
+          + 寫入帳目
+        </button>
+      </form>
+
+      <!-- Pro 專屬功能列：送貨單拍照 & 匯出請款單 -->
+      <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+        <button type="button" onclick="handleProAction('工地送貨單 / 發票拍照雲端存證')" class="text-xs flex items-center gap-1.5 text-slate-600 hover:text-amber-700 font-medium">
+          📷 附加送貨單/簽收單照片 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded">PRO</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium">
+            下載基礎 CSV（免費）
+          </button>
+          <button type="button" onclick="handleProAction('一鍵產出廠商月結請款單與業主估驗計價表')" class="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg font-medium">
+            產出估驗請款單 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded ml-1">PRO</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 採購與請款明細表 -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+        <h2 class="font-bold text-sm text-slate-800">近期叫料與發包明細</h2>
+        <span class="text-xs text-slate-400">自動計算 5% 營業稅與 10% 保留款</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
+              <th class="py-2.5 px-3">日期</th>
+              <th class="py-2.5 px-3">WBS 工項</th>
+              <th class="py-2.5 px-3">廠商 / 品名</th>
+              <th class="py-2.5 px-3 text-right">數量 × 單價</th>
+              <th class="py-2.5 px-3 text-right">含稅總額</th>
+              <th class="py-2.5 px-3 text-center">單據</th>
+            </tr>
+          </thead>
+          <tbody id="expenseTableBody" class="divide-y divide-slate-100 text-xs md:text-sm">
+            <!-- 由 JS 動態生成 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 升級 Pro 商業變現引導彈窗 -->
+  <div id="upgradeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <span class="pro-badge text-white text-xs font-bold px-2.5 py-1 rounded-full">升級 CIVILCOST PRO</span>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900">解鎖「<span id="modalFeatureName" class="text-amber-600">進階功能</span>」</h3>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        專為土木營造老闆與工地主任設計，省下每月 15 小時對帳時間，杜絕材料超叫與漏算追加款：
+      </p>
+      <ul class="text-xs text-slate-700 space-y-2 bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
+        <li>✅ <strong>無限個工地案場</strong>同時管理與跨案場單價比對</li>
+        <li>✅ <strong>工地送貨單拍照上傳</strong>（自動壓縮雲端存證）</li>
+        <li>✅ <strong>變更設計追加減帳</strong>與即時毛利率重算</li>
+        <li>✅ 一鍵匯出<strong>業主估驗計價表</strong>與<strong>廠商保留款明細</strong></li>
+      </ul>
+      <div class="pt-2 flex flex-col gap-2">
+        <button onclick="activateProDemo()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition">
+          立即升級 Pro 版（NT$ 490 / 月）
+        </button>
+        <button onclick="closeModal()" class="w-full text-xs text-slate-400 hover:text-slate-600 py-1">
+          先繼續使用免費版（限單一案場）
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 系統狀態（模擬免費版 vs 付費版）
+    let isPro = false;
+    let chartInstance = null;
+
+    // 預設土木營造工程資料
+    const wbsData = [
+      { name: "1. 假設與土方工程", budget: 6500000, actual: 5980000 },
+      { name: "2. 基礎與擋土支撐", budget: 11000000, actual: 9460000 },
+      { name: "3. 結構體（鋼筋/混凝土）", budget: 18500000, actual: 9850000 },
+      { name: "4. 重機具與吊車租賃", budget: 5500000, actual: 2100000 },
+      { name: "5. 工地雜支與安衛", budget: 3500000, actual: 1060000 }
+    ];
+
+    const expenses = [
+      { date: "2026-11-24", category: "結構體（鋼筋/混凝土）", vendor: "國產建材實業", item: "4000psi 預拌混凝土", qty: 120, price: 2850, hasPhoto: true },
+      { date: "2026-11-22", category: "結構體（鋼筋/混凝土）", vendor: "豐興鋼鐵配合商", item: "SD420W 竹節鋼筋", qty: 35, price: 19200, hasPhoto: true },
+      { date: "2026-11-18", category: "重機具與吊車租賃", vendor: "永大吊車工程行", item: "45噸油壓吊車（含操作手）", qty: 4, price: 16000, hasPhoto: false },
+      { date: "2026-11-15", category: "假設與土方工程", vendor: "宏達土方清運", item: "B2地下室土方外運（車次）", qty: 45, price: 3200, hasPhoto: false }
+    ];
+
+    function renderAll() {
+      renderWBS();
+      renderExpenses();
+      renderChart();
+      updatePlanUI();
+    }
+
+    function updatePlanUI() {
+      const btn = document.getElementById("togglePlanBtn");
+      const proOpt = document.getElementById("proProjectOption");
+      if (isPro) {
+        btn.textContent = "進階付費版 PRO ★";
+        btn.className = "text-xs font-bold px-2.5 py-0.5 rounded-full pro-badge text-white transition shadow";
+        proOpt.textContent = "新竹竹北廠房基礎開挖工程（合約 2,800 萬）";
+      } else {
+        btn.textContent = "免費版 Free";
+        btn.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-600 text-white transition";
+        proOpt.textContent = "🔒 [Pro] 新竹竹北廠房基礎開挖工程（合約 2,800 萬）";
+        document.getElementById("projectSelect").value = "0";
+      }
+    }
+
+    function togglePlan() {
+      isPro = !isPro;
+      renderAll();
+    }
+
+    function switchProject() {
+      const val = document.getElementById("projectSelect").value;
+      if (val === "1" && !isPro) {
+        document.getElementById("projectSelect").value = "0";
+        handleProAction("切換管理多個工地案場");
+      }
+    }
+
+    function handleProAction(featureName) {
+      if (isPro) {
+        alert(`✅ [Pro 權限已開通] 正在開啟「${featureName}」模組！`);
+      } else {
+        document.getElementById("modalFeatureName").textContent = featureName;
+        document.getElementById("upgradeModal").classList.remove("hidden");
+        document.getElementById("upgradeModal").classList.add("flex");
+      }
+    }
+
+    function closeModal() {
+      document.getElementById("upgradeModal").classList.add("hidden");
+      document.getElementById("upgradeModal").classList.remove("flex");
+    }
+
+    function activateProDemo() {
+      isPro = true;
+      closeModal();
+      renderAll();
+      alert("🎉 模擬升級成功！現在你可以體驗所有 Pro 進階功能。");
+    }
+
+    function renderWBS() {
+      const container = document.getElementById("wbsContainer");
+      container.innerHTML = wbsData.map(item => {
+        const pct = Math.round((item.actual / item.budget) * 100);
+        let barColor = "bg-emerald-500";
+        let alertBadge = "";
+        if (pct >= 90) {
+          barColor = "bg-rose-500";
+          alertBadge = `<span class="text-[11px] text-rose-600 font-bold ml-2">⚠️ 接近預算上限</span>`;
+        } else if (pct >= 75) {
+          barColor = "bg-amber-500";
+        }
+        return `
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-semibold text-slate-700">${item.name}${alertBadge}</span>
+              <span class="text-slate-500">NT$ ${(item.actual/10000).toFixed(1)}萬 / ${(item.budget/10000).toFixed(0)}萬 (<strong>${pct}%</strong>)</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+              <div class="${barColor} h-2.5 rounded-full transition-all duration-500" style="width: ${Math.min(pct, 100)}%"></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderExpenses() {
+      const tbody = document.getElementById("expenseTableBody");
+      tbody.innerHTML = expenses.map(e => {
+        const subtotal = e.qty * e.price;
+        const totalWithTax = Math.round(subtotal * 1.05);
+        const photoTag = e.hasPhoto
+          ? `<span class="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] px-2 py-0.5 rounded">已附簽收單</span>`
+          : `<span class="inline-block bg-slate-100 text-slate-400 text-[11px] px-2 py-0.5 rounded">無照片</span>`;
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">${e.date}</td>
+            <td class="py-2.5 px-3 font-medium text-slate-700">${e.category}</td>
+            <td class="py-2.5 px-3">
+              <div class="font-semibold text-slate-800">${e.vendor}</div>
+              <div class="text-xs text-slate-500">${e.item}</div>
+            </td>
+            <td class="py-2.5 px-3 text-right text-slate-600 whitespace-nowrap">${e.qty} × ${e.price.toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">NT$ ${totalWithTax.toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-center whitespace-nowrap">${photoTag}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function addExpense(e) {
+      e.preventDefault();
+      const category = document.getElementById("expCategory").value;
+      const vendor = document.getElementById("expVendor").value;
+      const item = document.getElementById("expItem").value;
+      const qty = Number(document.getElementById("expQty").value);
+      const price = Number(document.getElementById("expPrice").value);
+      const today = new Date().toISOString().split("T")[0];
+
+      expenses.unshift({ date: today, category, vendor, item, qty, price, hasPhoto: false });
+
+      // 更新對應 WBS 支出
+      const target = wbsData.find(w => w.name.includes(category.substring(0, 4)));
+      if (target) target.actual += Math.round(qty * price * 1.05);
+
+      e.target.reset();
+      document.getElementById("expQty").value = 1;
+      renderAll();
+    }
+
+    function exportCSV() {
+      let csv = "\uFEFF日期,WBS工項,廠商,品名,數量,未稅單價,含稅總額\n";
+      expenses.forEach(e => {
+        csv += `${e.date},${e.category},${e.vendor},${e.item},${e.qty},${e.price},${Math.round(e.qty * e.price * 1.05)}\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "土木營造成本明細表.csv";
+      a.click();
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById("costChart").getContext("2d");
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: wbsData.map(w => w.name.split("（")[0]),
+          datasets: [{
+            data: wbsData.map(w => w.actual),
+            backgroundColor: ["#64748b", "#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6"],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
