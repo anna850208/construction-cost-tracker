@@ -20,7 +20,7 @@
         <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center font-bold text-slate-900">工</div>
         <div>
           <h1 class="font-bold text-base leading-tight">工地算盤 CivilCost</h1>
-          <p class="text-xs text-slate-400">土木營造成本、進度與即時盈虧控管</p>
+          <p class="text-xs text-slate-400">土木營造成本、工期與即時盈虧控管</p>
         </div>
       </div>
 
@@ -64,6 +64,9 @@
           <option value="0" id="mainProjectOption">桃園中壢區集合住宅新建工程</option>
           <option value="1" id="proProjectOption">🔒 [Pro] 新竹竹北廠房基礎開挖工程（合約 2,800 萬）</option>
         </select>
+        <button type="button" onclick="openScheduleModal()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
+          📅 設定工期與追加天數
+        </button>
         <button type="button" onclick="openBudgetModal()" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
           ✎ 修改合約與工項預算
         </button>
@@ -74,6 +77,56 @@
       <button type="button" onclick="handleProAction('新增多個工地案場')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition">
         + 新增案場 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded ml-1">PRO</span>
       </button>
+    </section>
+
+    <!-- 【新增】工期與時程控管總覽卡片（開工日 / 預計完工日 / 追加工期 / 已工作天數 / 倒數完工日） -->
+    <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+        <div class="flex items-center gap-2">
+          <h2 class="font-bold text-sm text-slate-800">工期與天數控管看板（日曆天計算）</h2>
+          <span id="totalDurationBadge" class="text-[11px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded">總工期 0 天</span>
+        </div>
+        <button type="button" onclick="openScheduleModal()" class="text-xs text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 font-semibold px-2.5 py-1 rounded-lg transition">
+          ✎ 編輯開工/完工/追加工期
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+        <!-- 1. 開工日期 -->
+        <div onclick="openScheduleModal()" class="bg-slate-50 hover:bg-slate-100/80 p-3 rounded-lg border border-slate-200 cursor-pointer transition">
+          <p class="text-[11px] text-slate-500 font-medium">🚩 正式開工日期</p>
+          <p id="dispStartDate" class="text-sm md:text-base font-bold text-slate-800 mt-1">2026-06-01</p>
+          <span class="text-[10px] text-slate-400">點擊可修改</span>
+        </div>
+
+        <!-- 2. 預計完工日 -->
+        <div onclick="openScheduleModal()" class="bg-slate-50 hover:bg-slate-100/80 p-3 rounded-lg border border-slate-200 cursor-pointer transition">
+          <p class="text-[11px] text-slate-500 font-medium">🏁 最終預計完工日</p>
+          <p id="dispFinalEndDate" class="text-sm md:text-base font-bold text-slate-800 mt-1">2027-06-15</p>
+          <span id="dispBaseEndNote" class="text-[10px] text-slate-500 block truncate">原訂：2027-05-31</span>
+        </div>
+
+        <!-- 3. 追加工期日 -->
+        <div onclick="openScheduleModal()" class="bg-amber-50/70 hover:bg-amber-100/60 p-3 rounded-lg border border-amber-200 cursor-pointer transition">
+          <p class="text-[11px] text-amber-800 font-semibold">➕ 核定追加工期</p>
+          <p id="dispExtraDays" class="text-sm md:text-base font-bold text-amber-700 mt-1">+15 天</p>
+          <span class="text-[10px] text-amber-600/80">自動順延最終完工日</span>
+        </div>
+
+        <!-- 4. 已工作天數 -->
+        <div class="bg-sky-50/70 p-3 rounded-lg border border-sky-200">
+          <p class="text-[11px] text-sky-800 font-semibold">⏱️ 累計已工作天數</p>
+          <p id="dispElapsedDays" class="text-sm md:text-base font-bold text-sky-700 mt-1">0 天</p>
+          <span id="dispTimePctNote" class="text-[10px] text-sky-600">工期已耗用 0%</span>
+        </div>
+
+        <!-- 5. 倒數完工日 -->
+        <div id="countdownCard" class="col-span-2 sm:col-span-1 bg-emerald-50/70 p-3 rounded-lg border border-emerald-200">
+          <p id="countdownLabel" class="text-[11px] text-emerald-800 font-semibold">⏳ 距離完工倒數</p>
+          <p id="dispRemainingDays" class="text-sm md:text-base font-bold text-emerald-700 mt-1">0 天</p>
+          <span id="countdownSubNote" class="text-[10px] text-emerald-600">依最新展延完工日計算</span>
+        </div>
+      </div>
     </section>
 
     <!-- 整體工程「預計進度 vs. 實際進度」雙進度條總覽 -->
@@ -237,6 +290,65 @@
 
   </main>
 
+  <!-- 【新增】視窗 D：編輯開工日期、原始預計完工日與追加工期天數 -->
+  <div id="scheduleModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">工期日期與追加天數設定</h3>
+          <p class="text-xs text-slate-500 mt-0.5">輸入追加工期天數後，系統將自動推算最終展延完工日與倒數天數</p>
+        </div>
+        <button type="button" onclick="closeScheduleModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <form onsubmit="saveScheduleSettings(event)" class="space-y-3.5">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">正式開工日期</label>
+            <input id="inputStartDate" type="date" required oninput="updateSchedulePreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">原始預計完工日</label>
+            <input id="inputBaseEndDate" type="date" required oninput="updateSchedulePreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">追加工期天數（日曆天，可輸入 0 或負數）</label>
+          <div class="flex items-center gap-2">
+            <input id="inputExtraDays" type="number" step="1" required oninput="updateSchedulePreview()" class="flex-1 border border-amber-400 bg-amber-50/40 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:outline-none">
+            <span class="text-xs font-semibold text-slate-500">天</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">例如：因颱風或變更設計核准展延 15 天，請輸入 15</p>
+        </div>
+
+        <div class="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-200 space-y-1.5 text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-600">展延後最終預計完工日：</span>
+            <span id="previewFinalEndDate" class="font-bold text-indigo-800">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-600">核定總工期天數：</span>
+            <span id="previewTotalDays" class="font-semibold text-slate-800">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-600">截至今日已工作 / 倒數：</span>
+            <span id="previewElapsedAndCountdown" class="font-bold text-sky-700">-</span>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm shadow transition">
+            儲存工期設定
+          </button>
+          <button type="button" onclick="closeScheduleModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm">
+            取消
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- 視窗 A：編輯合約金額與新增/管理 WBS 工項 -->
   <div id="budgetModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 my-8">
@@ -296,7 +408,7 @@
     </div>
   </div>
 
-  <!-- 視窗 B：更新各工項「預計進度 %」與「實際進度 %」（支援小數點） -->
+  <!-- 視窗 B：更新各工項「預計進度 %」與「實際進度 %」 -->
   <div id="progressModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -425,6 +537,9 @@
 
     const defaultState = {
       projectName: "桃園中壢區集合住宅新建工程",
+      startDate: "2026-06-01",
+      baseEndDate: "2027-05-31",
+      extraDays: 15,
       baseContract: 43800000,
       extraContract: 1200000,
       wbsBudgets: [
@@ -442,7 +557,6 @@
       ]
     };
 
-    // 格式化百分比小數點（最多保留 2 位，整數則不顯示多餘的 .00）
     function fmtPct(num) {
       return Number(Number(num).toFixed(2));
     }
@@ -450,7 +564,14 @@
     function loadState() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) return JSON.parse(saved);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // 兼容舊版資料自動補上工期預設欄位
+          return {
+            ...JSON.parse(JSON.stringify(defaultState)),
+            ...parsed
+          };
+        }
       } catch (err) {
         console.warn("無法讀取 localStorage，改用記憶體模式:", err);
       }
@@ -468,11 +589,60 @@
     let appState = loadState();
 
     function resetDemoData() {
-      if (confirm("確定要將合約金額、工項、進度與帳目重置為預設範例嗎？")) {
+      if (confirm("確定要將合約金額、工期、工項、進度與帳目重置為預設範例嗎？")) {
         appState = JSON.parse(JSON.stringify(defaultState));
         saveState();
         renderAll();
       }
+    }
+
+    // 【新增】工期天數計算核心函式（純本地日期計算，不受時區偏差影響）
+    function computeScheduleInfo(startStr, baseEndStr, extraDaysVal) {
+      const parseLocal = (str) => {
+        const [y, m, d] = (str || "2026-06-01").split("-").map(Number);
+        return new Date(y, (m || 1) - 1, d || 1);
+      };
+      const formatYMD = (dt) => {
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth() + 1).padStart(2, "0");
+        const d = String(dt.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + d;
+      };
+
+      const startDt = parseLocal(startStr);
+      const baseEndDt = parseLocal(baseEndStr);
+      const extraDays = Number(extraDaysVal) || 0;
+
+      const finalEndDt = new Date(baseEndDt);
+      finalEndDt.setDate(finalEndDt.getDate() + extraDays);
+
+      const now = new Date();
+      const todayDt = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const msPerDay = 86400000;
+
+      // 核定總工期（含開工當日）
+      const totalDays = Math.max(1, Math.round((finalEndDt - startDt) / msPerDay) + 1);
+
+      // 已工作天數
+      let elapsedDays = 0;
+      if (todayDt >= startDt) {
+        elapsedDays = Math.round((todayDt - startDt) / msPerDay) + 1;
+      }
+
+      // 倒數完工日（正數＝尚餘天數，0＝今日完工，負數＝已逾期天數）
+      const remainingDays = Math.round((finalEndDt - todayDt) / msPerDay);
+      const timeUsagePct = Math.min(100, Math.max(0, fmtPct((elapsedDays / totalDays) * 100)));
+
+      return {
+        startDate: formatYMD(startDt),
+        baseEndDate: formatYMD(baseEndDt),
+        finalEndDate: formatYMD(finalEndDt),
+        extraDays,
+        totalDays,
+        elapsedDays,
+        remainingDays,
+        timeUsagePct
+      };
     }
 
     function calculateMetrics() {
@@ -534,7 +704,51 @@
 
     function renderAll() {
       const m = calculateMetrics();
+      const s = computeScheduleInfo(appState.startDate, appState.baseEndDate, appState.extraDays);
 
+      // 渲染工期與時程看板
+      document.getElementById("totalDurationBadge").textContent = "核定總工期 " + s.totalDays.toLocaleString() + " 天";
+      document.getElementById("dispStartDate").textContent = s.startDate;
+      document.getElementById("dispFinalEndDate").textContent = s.finalEndDate;
+      document.getElementById("dispBaseEndNote").textContent = "原訂：" + s.baseEndDate;
+
+      const extraSignStr = s.extraDays >= 0 ? "+" : "";
+      document.getElementById("dispExtraDays").textContent = extraSignStr + s.extraDays + " 天";
+      document.getElementById("dispElapsedDays").textContent = s.elapsedDays.toLocaleString() + " 天";
+      document.getElementById("dispTimePctNote").textContent = "工期已耗用 " + s.timeUsagePct + "%";
+
+      const cdCard = document.getElementById("countdownCard");
+      const cdLabel = document.getElementById("countdownLabel");
+      const cdVal = document.getElementById("dispRemainingDays");
+      const cdNote = document.getElementById("countdownSubNote");
+
+      if (s.remainingDays > 0) {
+        cdCard.className = "col-span-2 sm:col-span-1 bg-emerald-50/70 p-3 rounded-lg border border-emerald-200";
+        cdLabel.className = "text-[11px] text-emerald-800 font-semibold";
+        cdLabel.textContent = "⏳ 距離完工倒數";
+        cdVal.className = "text-sm md:text-base font-bold text-emerald-700 mt-1";
+        cdVal.textContent = "剩餘 " + s.remainingDays.toLocaleString() + " 天";
+        cdNote.className = "text-[10px] text-emerald-600";
+        cdNote.textContent = "依最終預計完工日計算";
+      } else if (s.remainingDays === 0) {
+        cdCard.className = "col-span-2 sm:col-span-1 bg-amber-50 p-3 rounded-lg border border-amber-400";
+        cdLabel.className = "text-[11px] text-amber-800 font-semibold";
+        cdLabel.textContent = "🎯 預計完工日";
+        cdVal.className = "text-sm md:text-base font-bold text-amber-700 mt-1";
+        cdVal.textContent = "就是今天！";
+        cdNote.className = "text-[10px] text-amber-700";
+        cdNote.textContent = "請確認竣工報驗程序";
+      } else {
+        cdCard.className = "col-span-2 sm:col-span-1 bg-rose-50 p-3 rounded-lg border-2 border-rose-400";
+        cdLabel.className = "text-[11px] text-rose-800 font-bold";
+        cdLabel.textContent = "🚨 工期已逾期";
+        cdVal.className = "text-sm md:text-base font-bold text-rose-700 mt-1";
+        cdVal.textContent = "逾期 " + Math.abs(s.remainingDays).toLocaleString() + " 天";
+        cdNote.className = "text-[10px] text-rose-600 font-semibold";
+        cdNote.textContent = "請確認是否需辦理展延";
+      }
+
+      // 延誤預警橫幅
       const alertBanner = document.getElementById("delayAlertBanner");
       if (m.delayedItems.length > 0) {
         alertBanner.classList.remove("hidden");
@@ -610,6 +824,48 @@
       renderExpenses();
       renderChart(m.categoryActuals);
       updatePlanUI();
+    }
+
+    // 【新增】工期設定視窗控制函式
+    function openScheduleModal() {
+      document.getElementById("inputStartDate").value = appState.startDate;
+      document.getElementById("inputBaseEndDate").value = appState.baseEndDate;
+      document.getElementById("inputExtraDays").value = appState.extraDays;
+      updateSchedulePreview();
+
+      document.getElementById("scheduleModal").classList.remove("hidden");
+      document.getElementById("scheduleModal").classList.add("flex");
+    }
+
+    function updateSchedulePreview() {
+      const startVal = document.getElementById("inputStartDate").value;
+      const baseEndVal = document.getElementById("inputBaseEndDate").value;
+      const extraVal = document.getElementById("inputExtraDays").value;
+      if (!startVal || !baseEndVal) return;
+
+      const info = computeScheduleInfo(startVal, baseEndVal, extraVal);
+      document.getElementById("previewFinalEndDate").textContent = info.finalEndDate;
+      document.getElementById("previewTotalDays").textContent = info.totalDays.toLocaleString() + " 天";
+      const remText = info.remainingDays >= 0
+        ? "剩餘 " + info.remainingDays.toLocaleString() + " 天"
+        : "已逾期 " + Math.abs(info.remainingDays).toLocaleString() + " 天";
+      document.getElementById("previewElapsedAndCountdown").textContent = "已工作 " + info.elapsedDays.toLocaleString() + " 天 / " + remText;
+    }
+
+    function closeScheduleModal() {
+      document.getElementById("scheduleModal").classList.add("hidden");
+      document.getElementById("scheduleModal").classList.remove("flex");
+    }
+
+    function saveScheduleSettings(e) {
+      e.preventDefault();
+      appState.startDate = document.getElementById("inputStartDate").value;
+      appState.baseEndDate = document.getElementById("inputBaseEndDate").value;
+      appState.extraDays = parseInt(document.getElementById("inputExtraDays").value, 10) || 0;
+
+      saveState();
+      closeScheduleModal();
+      renderAll();
     }
 
     function renderCategorySelect() {
@@ -765,7 +1021,6 @@
       renderAll();
     }
 
-    // 開啟進度回報視窗（加上 step="0.01" 支援小數點輸入）
     function openProgressModal() {
       const container = document.getElementById("progressInputsContainer");
       container.innerHTML = appState.wbsBudgets.map((w, idx) =>
@@ -954,6 +1209,7 @@
 
     function exportCSV() {
       const m = calculateMetrics();
+      const s = computeScheduleInfo(appState.startDate, appState.baseEndDate, appState.extraDays);
       let totalSubtotal = 0;
       let totalTax = 0;
       let totalWithTax = 0;
@@ -986,8 +1242,14 @@
 
       csv += ",,,,,明細支出總計," + totalSubtotal + "," + totalTax + "," + totalWithTax + "\n\n";
 
-      csv += "【專案合約與目前損益總表】,,,,,,,,\n";
+      csv += "【專案合約、工期與目前損益總表】,,,,,,,,\n";
       csv += "工程案場名稱," + esc(appState.projectName) + ",,,,,,,\n";
+      csv += "正式開工日期," + esc(s.startDate) + ",,,,,,,\n";
+      csv += "原始預計完工日," + esc(s.baseEndDate) + ",,,,,,,\n";
+      csv += "核定追加工期天數," + s.extraDays + " 天,,,,,,,\n";
+      csv += "展延後最終完工日," + esc(s.finalEndDate) + ",,,,,,,\n";
+      csv += "累計已工作天數," + s.elapsedDays + " 天,,,,,,,\n";
+      csv += "距離完工倒數天數," + (s.remainingDays >= 0 ? s.remainingDays + " 天" : "逾期 " + Math.abs(s.remainingDays) + " 天") + ",,,,,,,\n";
       csv += "合約總金額（含追加）," + m.totalContract + ",,,,,,,\n";
       csv += "目前加權預計進度," + m.weightedPlanned + "%,,,,,,,\n";
       csv += "目前加權實際進度," + m.weightedActual + "%,,,,,,,\n";
