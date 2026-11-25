@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>工地算盤 CivilCost｜土木營造成本控制系統</title>
+  <title>工地算盤 CivilCost｜土木營造成本與進度控管系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -20,7 +20,7 @@
         <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center font-bold text-slate-900">工</div>
         <div>
           <h1 class="font-bold text-base leading-tight">工地算盤 CivilCost</h1>
-          <p class="text-xs text-slate-400">土木營造成本與毛利即時監控</p>
+          <p class="text-xs text-slate-400">土木營造成本、進度與即時盈虧控管</p>
         </div>
       </div>
 
@@ -28,7 +28,6 @@
         <button onclick="resetDemoData()" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700 transition">
           重置範例
         </button>
-        <!-- 商業模式模擬切換器 -->
         <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
           <span class="text-xs text-slate-300">目前身份：</span>
           <button id="togglePlanBtn" onclick="togglePlan()" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-600 text-white transition">
@@ -39,18 +38,37 @@
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 pt-5 space-y-5">
+  <main class="max-w-5xl mx-auto px-4 pt-5 space-y-4">
+
+    <!-- 【新增】3. 工項延誤自動預警橫幅（有延誤時自動顯示） -->
+    <section id="delayAlertBanner" class="hidden bg-rose-50 border-l-4 border-rose-600 rounded-r-xl p-4 shadow-sm">
+      <div class="flex flex-wrap items-start justify-between gap-2">
+        <div class="flex items-start gap-2.5">
+          <span class="text-xl leading-none">🚨</span>
+          <div>
+            <h3 class="text-sm font-bold text-rose-800">偵測到工程進度延誤警報！</h3>
+            <p id="delayAlertDetail" class="text-xs text-rose-700 mt-1 leading-relaxed"></p>
+          </div>
+        </div>
+        <button onclick="openProgressModal()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1.5 rounded-lg transition shadow-xs">
+          更新現場進度 %
+        </button>
+      </div>
+    </section>
 
     <!-- 案場選擇器 -->
     <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3 flex-wrap">
-        <label class="text-sm font-semibold text-slate-600">目前工地案場：</label>
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <label class="text-sm font-semibold text-slate-600">工地案場：</label>
         <select id="projectSelect" onchange="switchProject()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-amber-500">
-          <option value="0" id="mainProjectOption">桃園中壢區集合住宅新建工程（合約 4,500 萬）</option>
+          <option value="0" id="mainProjectOption">桃園中壢區集合住宅新建工程</option>
           <option value="1" id="proProjectOption">🔒 [Pro] 新竹竹北廠房基礎開挖工程（合約 2,800 萬）</option>
         </select>
         <button onclick="openBudgetModal()" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
-          ✎ 修改案場與合約金額
+          ✎ 修改合約金額
+        </button>
+        <button onclick="openProgressModal()" class="text-xs bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
+          📊 回報預計/實際進度
         </button>
       </div>
       <button onclick="handleProAction('新增多個工地案場')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition">
@@ -58,59 +76,109 @@
       </button>
     </section>
 
-    <!-- 核心財務儀表板卡片 -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <!-- 可直接點擊修改的合約總預算卡片 -->
-      <div onclick="openBudgetModal()" class="bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-amber-400 cursor-pointer transition group relative">
-        <div class="flex items-center justify-between">
-          <p class="text-xs text-slate-500">合約總預算（含追加）</p>
-          <span class="text-[11px] text-amber-600 font-semibold bg-amber-50 px-1.5 py-0.5 rounded group-hover:bg-amber-500 group-hover:text-white transition">✎ 編輯</span>
+    <!-- 【新增】1. 整體工程「預計進度 vs. 實際進度」雙進度條總覽 -->
+    <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="font-bold text-sm text-slate-800">整體工程總進度對比（加權計算）</h2>
+          <p class="text-[11px] text-slate-400">依各工項預算權重自動加權，即時比較施工進度與時程計畫</p>
         </div>
-        <p id="kpiBudget" class="text-lg md:text-xl font-bold text-slate-800 mt-1">NT$ 45,000,000</p>
-        <span id="kpiExtraNote" class="text-[11px] text-emerald-600 font-medium">含變更追加 +120萬</span>
+        <div id="overallScheduleBadge" class="text-xs font-bold px-3 py-1 rounded-full">
+          <!-- JS 動態填入：進度超前 / 進度落後 -->
+        </div>
       </div>
 
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <p class="text-xs text-slate-500">累計實際支出（含稅）</p>
-        <p id="kpiActual" class="text-lg md:text-xl font-bold text-amber-600 mt-1">NT$ 0</p>
-        <span id="kpiRate" class="text-[11px] text-slate-500">執行率 0%</span>
-      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+        <!-- 預計進度條 -->
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
+          <div class="flex justify-between text-xs mb-1.5">
+            <span class="font-semibold text-slate-600">📅 預計累計進度（合約排程）</span>
+            <span id="overallPlannedText" class="font-bold text-slate-800">0.0%</span>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+            <div id="overallPlannedBar" class="bg-slate-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
 
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <p class="text-xs text-slate-500">預估剩餘毛利</p>
-        <p id="kpiMargin" class="text-lg md:text-xl font-bold text-emerald-600 mt-1">NT$ 0</p>
-        <span id="kpiMarginRate" class="text-[11px] text-slate-500">目前毛利率 0%</span>
-      </div>
-
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <p class="text-xs text-slate-500">協力廠商保留款 (10%)</p>
-        <p id="kpiRetention" class="text-lg md:text-xl font-bold text-indigo-600 mt-1">NT$ 0</p>
-        <span class="text-[11px] text-slate-400">驗收後撥付</span>
+        <!-- 實際進度條 -->
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
+          <div class="flex justify-between text-xs mb-1.5">
+            <span class="font-semibold text-slate-600">🏗️ 實際完工進度（現場核定）</span>
+            <span id="overallActualText" class="font-bold text-sky-700">0.0%</span>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+            <div id="overallActualBar" class="bg-sky-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 中間區塊：WBS 工項預算執行進度條 + 結構圖表 -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <!-- 土木 WBS 工項進度條 -->
-      <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+    <!-- 核心財務與【新增】2. 現況盈虧判斷卡片 -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+      <!-- 卡片 1：合約總預算 -->
+      <div onclick="openBudgetModal()" class="bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-amber-400 cursor-pointer transition group">
         <div class="flex items-center justify-between">
-          <h2 class="font-bold text-sm text-slate-800">土木營造 WBS 工項預算執行率</h2>
-          <button onclick="openBudgetModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">
-            ✎ 調整各工項預算
+          <p class="text-xs text-slate-500">合約總金額（含追加）</p>
+          <span class="text-[11px] text-amber-600 font-semibold bg-amber-50 px-1.5 py-0.5 rounded group-hover:bg-amber-500 group-hover:text-white transition">✎ 編輯</span>
+        </div>
+        <p id="kpiBudget" class="text-lg md:text-xl font-bold text-slate-800 mt-1">NT$ 0</p>
+        <span id="kpiExtraNote" class="text-[11px] text-slate-500 font-medium"></span>
+      </div>
+
+      <!-- 卡片 2：目前實際支出 vs 已完成產值 -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <p class="text-xs text-slate-500">累計實際支出（含稅）</p>
+        <p id="kpiActual" class="text-lg md:text-xl font-bold text-slate-800 mt-1">NT$ 0</p>
+        <span id="kpiEarnedNote" class="text-[11px] text-slate-500">已完成工程產值：NT$ 0</span>
+      </div>
+
+      <!-- 【新增】卡片 3：目前現況是盈利還是虧損（實獲值 EVM 損益） -->
+      <div id="profitStatusCard" class="bg-white p-4 rounded-xl shadow-sm border-2 transition">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-semibold text-slate-600">目前現況損益狀態</p>
+          <span id="profitStatusBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full">計算中</span>
+        </div>
+        <p id="kpiCurrentProfit" class="text-lg md:text-xl font-bold mt-1">NT$ 0</p>
+        <span id="kpiProfitDesc" class="text-[11px] block mt-0.5">已完成產值 − 實際支出</span>
+      </div>
+
+      <!-- 卡片 4：全案預估結算毛利 -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <p class="text-xs text-slate-500">合約剩餘未動支預算</p>
+        <p id="kpiMargin" class="text-lg md:text-xl font-bold text-indigo-600 mt-1">NT$ 0</p>
+        <span id="kpiRetentionNote" class="text-[11px] text-slate-400">含廠商保留款(10%)：NT$ 0</span>
+      </div>
+    </section>
+
+    <!-- 中間區塊：WBS 各工項「雙進度條 + 成本執行率 + 延誤標記」 -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div>
+            <h2 class="font-bold text-sm text-slate-800">各工項進度（預計 vs. 實際）與成本控管</h2>
+            <p class="text-[11px] text-slate-400">點選右側按鈕可隨時更新各工項的現場施工進度百分比</p>
+          </div>
+          <button onclick="openProgressModal()" class="text-xs bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg font-semibold shadow-xs transition">
+            📊 更新工項進度
           </button>
         </div>
-        <div id="wbsContainer" class="space-y-3 pt-1">
-          <!-- 由 JS 動態生成 -->
+
+        <div id="wbsContainer" class="space-y-4">
+          <!-- 由 JS 動態生成各工項雙進度條與延誤狀態 -->
         </div>
       </div>
 
       <!-- 成本結構圓餅圖 -->
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
-        <h2 class="font-bold text-sm text-slate-800 mb-2">五大成本佔比分析</h2>
-        <div class="relative h-48 w-full flex items-center justify-center">
+        <h2 class="font-bold text-sm text-slate-800 mb-2">五大工項實際支出佔比</h2>
+        <div class="relative h-52 w-full flex items-center justify-center">
           <canvas id="costChart"></canvas>
         </div>
-        <p class="text-[11px] text-slate-400 text-center mt-2">大宗材料（鋼筋/混凝土）波動監控中</p>
+        <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-slate-400 inline-block"></span> 灰色條：預計排程進度</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block"></span> 綠色條：實際進度正常/超前</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block"></span> 紅色條：實際進度延誤落後</div>
+        </div>
       </div>
     </section>
 
@@ -177,7 +245,7 @@
 
   </main>
 
-  <!-- 編輯合約金額與各工項預算視窗 -->
+  <!-- 視窗 A：編輯合約金額與各工項預算 -->
   <div id="budgetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -203,13 +271,8 @@
         </div>
 
         <div class="pt-2 border-t border-slate-100">
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-xs font-bold text-slate-700">五大 WBS 工項發包預算分配（元）</label>
-            <span id="wbsSumHint" class="text-[11px] text-slate-500"></span>
-          </div>
-          <div id="wbsInputsContainer" class="space-y-2">
-            <!-- 由 JS 動態生成五個輸入框 -->
-          </div>
+          <label class="block text-xs font-bold text-slate-700 mb-2">五大 WBS 工項發包預算分配（元）</label>
+          <div id="wbsInputsContainer" class="space-y-2"></div>
         </div>
 
         <div class="pt-3 flex gap-2">
@@ -217,6 +280,39 @@
             儲存並更新儀表板
           </button>
           <button type="button" onclick="closeBudgetModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm">
+            取消
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 【新增】視窗 B：更新各工項「預計進度 %」與「實際進度 %」 -->
+  <div id="progressModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 my-8">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">回報工項施工進度（%）</h3>
+          <p class="text-xs text-slate-500 mt-0.5">系統將自動比對預計與實際進度，偵測延誤工項並計算盈虧</p>
+        </div>
+        <button onclick="closeProgressModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <form onsubmit="saveProgressSettings(event)" class="space-y-3">
+        <div class="grid grid-cols-12 text-[11px] font-bold text-slate-500 px-1">
+          <div class="col-span-6">WBS 工程項目</div>
+          <div class="col-span-3 text-center">預計進度 %</div>
+          <div class="col-span-3 text-center text-sky-700">實際進度 %</div>
+        </div>
+        <div id="progressInputsContainer" class="space-y-2.5">
+          <!-- JS 動態生成 -->
+        </div>
+
+        <div class="pt-3 flex gap-2">
+          <button type="submit" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 rounded-xl text-sm shadow transition">
+            確認更新進度與損益
+          </button>
+          <button type="button" onclick="closeProgressModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm">
             取消
           </button>
         </div>
@@ -253,21 +349,21 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "civilcost_data_v2";
+    const STORAGE_KEY = "civilcost_data_v3";
     let isPro = false;
     let chartInstance = null;
 
-    // 預設資料結構
+    // 預設資料結構（新增 plannedPct 預計進度 與 actualPct 實際進度）
     const defaultState = {
       projectName: "桃園中壢區集合住宅新建工程",
       baseContract: 43800000,
       extraContract: 1200000,
       wbsBudgets: [
-        { name: "1. 假設與土方工程", budget: 6500000 },
-        { name: "2. 基礎與擋土支撐", budget: 11000000 },
-        { name: "3. 結構體（鋼筋/混凝土）", budget: 18500000 },
-        { name: "4. 重機具與吊車租賃", budget: 5500000 },
-        { name: "5. 工地雜支與安衛", budget: 3500000 }
+        { name: "1. 假設與土方工程", budget: 6500000, plannedPct: 100, actualPct: 100 },
+        { name: "2. 基礎與擋土支撐", budget: 11000000, plannedPct: 100, actualPct: 82 }, // 預設故意設一個延誤 18% 的工項讓你看效果
+        { name: "3. 結構體（鋼筋/混凝土）", budget: 18500000, plannedPct: 50, actualPct: 55 },
+        { name: "4. 重機具與吊車租賃", budget: 5500000, plannedPct: 45, actualPct: 40 },
+        { name: "5. 工地雜支與安衛", budget: 3500000, plannedPct: 40, actualPct: 40 }
       ],
       expenses: [
         { date: "2026-11-24", category: "3. 結構體（鋼筋/混凝土）", vendor: "國產建材實業", item: "4000psi 預拌混凝土", qty: 120, price: 2850, hasPhoto: true },
@@ -277,7 +373,6 @@
       ]
     };
 
-    // 載入本地儲存或使用預設值
     let appState = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(defaultState));
 
     function saveState() {
@@ -285,65 +380,247 @@
     }
 
     function resetDemoData() {
-      if (confirm("確定要將合約金額與帳目重置為預設範例嗎？")) {
+      if (confirm("確定要將合約金額、進度與帳目重置為預設範例嗎？")) {
         appState = JSON.parse(JSON.stringify(defaultState));
         saveState();
         renderAll();
       }
     }
 
-    // 動態計算各工項與總支出
+    // 核心工程計算（實獲值 EVM + 雙進度加權 + 延誤工項偵測）
     function calculateMetrics() {
       const totalContract = appState.baseContract + appState.extraContract;
       const categoryActuals = {};
       appState.wbsBudgets.forEach(w => categoryActuals[w.name] = 0);
 
-      let totalActual = 0;
+      let totalActualCost = 0;
       appState.expenses.forEach(e => {
         const subWithTax = Math.round(e.qty * e.price * 1.05);
-        totalActual += subWithTax;
+        totalActualCost += subWithTax;
         if (categoryActuals[e.category] !== undefined) {
           categoryActuals[e.category] += subWithTax;
         }
       });
 
-      const margin = totalContract - totalActual;
-      const execRate = totalContract > 0 ? ((totalActual / totalContract) * 100).toFixed(1) : 0;
-      const marginRate = totalContract > 0 ? ((margin / totalContract) * 100).toFixed(1) : 0;
-      const retention = Math.round(totalActual * 0.10);
+      // 計算加權預計進度、加權實際進度、以及依實際進度換算的「已完成工程產值 (Earned Value)」
+      let totalWbsBudget = appState.wbsBudgets.reduce((sum, w) => sum + w.budget, 0);
+      let weightedPlanned = 0;
+      let weightedActual = 0;
+      let earnedContractValue = 0;
+      const delayedItems = [];
 
-      return { totalContract, totalActual, margin, execRate, marginRate, retention, categoryActuals };
+      appState.wbsBudgets.forEach(w => {
+        const weight = totalWbsBudget > 0 ? (w.budget / totalWbsBudget) : 0;
+        weightedPlanned += w.plannedPct * weight;
+        weightedActual += w.actualPct * weight;
+
+        // 依該工項佔總合約的比例 × 實際完工% = 目前已賺取產值
+        earnedContractValue += (totalContract * weight) * (w.actualPct / 100);
+
+        // 判斷是否延誤（實際進度落後預計進度 >= 5%）
+        const diff = w.actualPct - w.plannedPct;
+        if (diff <= -5) {
+          delayedItems.push({ name: w.name, diff: Math.abs(diff), planned: w.plannedPct, actual: w.actualPct });
+        }
+      });
+
+      // 現況盈虧 = 已完成產值 - 實際支出
+      const currentProfit = Math.round(earnedContractValue - totalActualCost);
+      const remainingBudget = totalContract - totalActualCost;
+      const retention = Math.round(totalActualCost * 0.10);
+
+      return {
+        totalContract,
+        totalActualCost,
+        earnedContractValue: Math.round(earnedContractValue),
+        currentProfit,
+        remainingBudget,
+        retention,
+        weightedPlanned: Number(weightedPlanned.toFixed(1)),
+        weightedActual: Number(weightedActual.toFixed(1)),
+        delayedItems,
+        categoryActuals
+      };
     }
 
     function renderAll() {
-      const metrics = calculateMetrics();
+      const m = calculateMetrics();
 
-      // 更新案場選單名稱
-      const totalWan = (metrics.totalContract / 10000).toLocaleString();
+      // 1. 渲染頂部延誤預警橫幅
+      const alertBanner = document.getElementById("delayAlertBanner");
+      if (m.delayedItems.length > 0) {
+        alertBanner.classList.remove("hidden");
+        const listStr = m.delayedItems.map(d =>
+          `<strong class="underline">${d.name}</strong>（預計 ${d.planned}%，目前僅 ${d.actual}%，<strong>落後 ${d.diff}%</strong>）`
+        ).join("；");
+        document.getElementById("delayAlertDetail").innerHTML = `目前共有 <strong>${m.delayedItems.length}</strong> 項工程落後排程：${listStr}`;
+      } else {
+        alertBanner.classList.add("hidden");
+      }
+
+      // 2. 更新案場名稱
+      const totalWan = (m.totalContract / 10000).toLocaleString();
       document.getElementById("mainProjectOption").textContent = `${appState.projectName}（合約 ${totalWan} 萬）`;
 
-      // 更新四大 KPI 卡片
-      document.getElementById("kpiBudget").textContent = `NT$ ${metrics.totalContract.toLocaleString()}`;
+      // 3. 更新整體雙進度條
+      document.getElementById("overallPlannedText").textContent = `${m.weightedPlanned}%`;
+      document.getElementById("overallPlannedBar").style.width = `${Math.min(m.weightedPlanned, 100)}%`;
+
+      document.getElementById("overallActualText").textContent = `${m.weightedActual}%`;
+      const actualBar = document.getElementById("overallActualBar");
+      actualBar.style.width = `${Math.min(m.weightedActual, 100)}%`;
+
+      const scheduleDiff = Number((m.weightedActual - m.weightedPlanned).toFixed(1));
+      const badgeEl = document.getElementById("overallScheduleBadge");
+      if (scheduleDiff < -2) {
+        actualBar.className = "bg-rose-500 h-3 rounded-full transition-all duration-500";
+        badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-700";
+        badgeEl.textContent = `⚠️ 總進度落後 ${Math.abs(scheduleDiff)}%`;
+      } else if (scheduleDiff > 0) {
+        actualBar.className = "bg-emerald-500 h-3 rounded-full transition-all duration-500";
+        badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700";
+        badgeEl.textContent = `🚀 總進度超前 +${scheduleDiff}%`;
+      } else {
+        actualBar.className = "bg-sky-500 h-3 rounded-full transition-all duration-500";
+        badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-700";
+        badgeEl.textContent = `✅ 進度符合排程`;
+      }
+
+      // 4. 更新四大財務與盈虧卡片
+      document.getElementById("kpiBudget").textContent = `NT$ ${m.totalContract.toLocaleString()}`;
       const extraSign = appState.extraContract >= 0 ? "+" : "";
       document.getElementById("kpiExtraNote").textContent = `原始 ${(appState.baseContract/10000).toLocaleString()}萬 ｜ 變更 ${extraSign}${(appState.extraContract/10000).toLocaleString()}萬`;
 
-      document.getElementById("kpiActual").textContent = `NT$ ${metrics.totalActual.toLocaleString()}`;
-      document.getElementById("kpiRate").textContent = `預算執行率 ${metrics.execRate}%`;
+      document.getElementById("kpiActual").textContent = `NT$ ${m.totalActualCost.toLocaleString()}`;
+      document.getElementById("kpiEarnedNote").textContent = `依進度換算產值：NT$ ${m.earnedContractValue.toLocaleString()}`;
 
-      const marginEl = document.getElementById("kpiMargin");
-      marginEl.textContent = `NT$ ${metrics.margin.toLocaleString()}`;
-      marginEl.className = `text-lg md:text-xl font-bold mt-1 ${metrics.margin >= 0 ? "text-emerald-600" : "text-rose-600"}`;
-      document.getElementById("kpiMarginRate").textContent = `預估毛利率 ${metrics.marginRate}%`;
+      // 現況盈利 / 虧損判定卡片
+      const profitCard = document.getElementById("profitStatusCard");
+      const profitBadge = document.getElementById("profitStatusBadge");
+      const profitVal = document.getElementById("kpiCurrentProfit");
+      const profitDesc = document.getElementById("kpiProfitDesc");
 
-      document.getElementById("kpiRetention").textContent = `NT$ ${metrics.retention.toLocaleString()}`;
+      if (m.currentProfit >= 0) {
+        profitCard.className = "bg-emerald-50/60 p-4 rounded-xl shadow-sm border-2 border-emerald-400 transition";
+        profitBadge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white";
+        profitBadge.textContent = "🟢 目前盈利中";
+        profitVal.className = "text-lg md:text-xl font-bold text-emerald-700 mt-1";
+        profitVal.textContent = `+NT$ ${m.currentProfit.toLocaleString()}`;
+        profitDesc.className = "text-[11px] text-emerald-700 block mt-0.5";
+        profitDesc.textContent = "已完成產值大於實際支出，成本控管良好";
+      } else {
+        profitCard.className = "bg-rose-50/70 p-4 rounded-xl shadow-sm border-2 border-rose-500 transition";
+        profitBadge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-600 text-white";
+        profitBadge.textContent = "🔴 目前虧損中";
+        profitVal.className = "text-lg md:text-xl font-bold text-rose-700 mt-1";
+        profitVal.textContent = `-NT$ ${Math.abs(m.currentProfit).toLocaleString()}`;
+        profitDesc.className = "text-[11px] text-rose-700 block mt-0.5";
+        profitDesc.textContent = "實際支出已超過目前完工進度產值";
+      }
 
-      renderWBS(metrics.categoryActuals);
+      document.getElementById("kpiMargin").textContent = `NT$ ${m.remainingBudget.toLocaleString()}`;
+      document.getElementById("kpiRetentionNote").textContent = `廠商保留款(10%)：NT$ ${m.retention.toLocaleString()}`;
+
+      renderWBS(m.categoryActuals);
       renderExpenses();
-      renderChart(metrics.categoryActuals);
+      renderChart(m.categoryActuals);
       updatePlanUI();
     }
 
-    // 開啟合約金額與預算編輯視窗
+    // 渲染各工項「預計進度條 vs 實際進度條 + 延誤判斷」
+    function renderWBS(categoryActuals) {
+      const container = document.getElementById("wbsContainer");
+      container.innerHTML = appState.wbsBudgets.map(item => {
+        const actualCost = categoryActuals[item.name] || 0;
+        const costPct = item.budget > 0 ? Math.round((actualCost / item.budget) * 100) : 0;
+        const diff = item.actualPct - item.plannedPct;
+
+        let statusTag = `<span class="text-[11px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded">進度正常</span>`;
+        let actualBarColor = "bg-emerald-500";
+        let cardBorder = "border-slate-200 bg-slate-50/50";
+
+        if (diff <= -5) {
+          statusTag = `<span class="text-[11px] bg-rose-600 text-white font-bold px-2 py-0.5 rounded animate-pulse">⚠️ 延誤落後 ${Math.abs(diff)}%</span>`;
+          actualBarColor = "bg-rose-500";
+          cardBorder = "border-rose-300 bg-rose-50/40";
+        } else if (diff > 0) {
+          statusTag = `<span class="text-[11px] bg-sky-100 text-sky-700 font-bold px-2 py-0.5 rounded">超前 +${diff}%</span>`;
+        }
+
+        return `
+          <div class="p-3 rounded-xl border ${cardBorder} space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-1">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-xs md:text-sm text-slate-800">${item.name}</span>
+                ${statusTag}
+              </div>
+              <span class="text-[11px] text-slate-500">
+                已支 NT$ ${(actualCost/10000).toFixed(1)}萬 / 預算 ${(item.budget/10000).toFixed(1)}萬 (成本動支 ${costPct}%)
+              </span>
+            </div>
+
+            <!-- 雙進度條對比 -->
+            <div class="space-y-1.5">
+              <!-- 預計進度 -->
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] text-slate-500 w-14 shrink-0">預計進度</span>
+                <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
+                  <div class="bg-slate-400 h-2 rounded-full transition-all duration-500" style="width: ${item.plannedPct}%"></div>
+                </div>
+                <span class="text-[11px] font-semibold text-slate-600 w-9 text-right">${item.plannedPct}%</span>
+              </div>
+              <!-- 實際進度 -->
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-semibold text-slate-700 w-14 shrink-0">實際進度</span>
+                <div class="flex-1 bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                  <div class="${actualBarColor} h-2.5 rounded-full transition-all duration-500" style="width: ${item.actualPct}%"></div>
+                </div>
+                <span class="text-[11px] font-bold text-slate-800 w-9 text-right">${item.actualPct}%</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // 視窗 B：開啟與儲存工項進度
+    function openProgressModal() {
+      const container = document.getElementById("progressInputsContainer");
+      container.innerHTML = appState.wbsBudgets.map((w, idx) => `
+        <div class="grid grid-cols-12 items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+          <div class="col-span-6 text-xs font-semibold text-slate-700">${w.name}</div>
+          <div class="col-span-3">
+            <input type="number" id="plannedInput_${idx}" value="${w.plannedPct}" min="0" max="100" required
+              class="w-full border border-slate-300 rounded px-2 py-1 text-xs text-center bg-white">
+          </div>
+          <div class="col-span-3">
+            <input type="number" id="actualInput_${idx}" value="${w.actualPct}" min="0" max="100" required
+              class="w-full border border-sky-400 rounded px-2 py-1 text-xs text-center font-bold text-sky-800 bg-white">
+          </div>
+        </div>
+      `).join("");
+
+      document.getElementById("progressModal").classList.remove("hidden");
+      document.getElementById("progressModal").classList.add("flex");
+    }
+
+    function closeProgressModal() {
+      document.getElementById("progressModal").classList.add("hidden");
+      document.getElementById("progressModal").classList.remove("flex");
+    }
+
+    function saveProgressSettings(e) {
+      e.preventDefault();
+      appState.wbsBudgets.forEach((w, idx) => {
+        w.plannedPct = Math.min(100, Math.max(0, Number(document.getElementById(`plannedInput_${idx}`).value) || 0));
+        w.actualPct = Math.min(100, Math.max(0, Number(document.getElementById(`actualInput_${idx}`).value) || 0));
+      });
+      saveState();
+      closeProgressModal();
+      renderAll();
+    }
+
+    // 視窗 A：開啟與儲存合約金額
     function openBudgetModal() {
       document.getElementById("inputProjectName").value = appState.projectName;
       document.getElementById("inputBaseContract").value = appState.baseContract;
@@ -380,34 +657,6 @@
       saveState();
       closeBudgetModal();
       renderAll();
-    }
-
-    function renderWBS(categoryActuals) {
-      const container = document.getElementById("wbsContainer");
-      container.innerHTML = appState.wbsBudgets.map(item => {
-        const actual = categoryActuals[item.name] || 0;
-        const pct = item.budget > 0 ? Math.round((actual / item.budget) * 100) : 0;
-        let barColor = "bg-emerald-500";
-        let alertBadge = "";
-        if (pct >= 100) {
-          barColor = "bg-rose-600";
-          alertBadge = `<span class="text-[11px] text-rose-600 font-bold ml-2">🚨 已超支</span>`;
-        } else if (pct >= 85) {
-          barColor = "bg-amber-500";
-          alertBadge = `<span class="text-[11px] text-amber-600 font-bold ml-2">⚠️ 接近上限</span>`;
-        }
-        return `
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="font-semibold text-slate-700">${item.name}${alertBadge}</span>
-              <span class="text-slate-500">NT$ ${(actual/10000).toFixed(1)}萬 / ${(item.budget/10000).toFixed(1)}萬 (<strong>${pct}%</strong>)</span>
-            </div>
-            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-              <div class="${barColor} h-2.5 rounded-full transition-all duration-500" style="width: ${Math.min(pct, 100)}%"></div>
-            </div>
-          </div>
-        `;
-      }).join("");
     }
 
     function renderExpenses() {
@@ -514,7 +763,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${appState.projectName}_成本明細表.csv`;
+      a.download = `${appState.projectName}_成本與進度明細表.csv`;
       a.click();
     }
 
