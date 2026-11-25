@@ -24,26 +24,34 @@
         </div>
       </div>
 
-      <!-- 商業模式模擬切換器（開發測試用） -->
-      <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
-        <span class="text-xs text-slate-300">目前身份：</span>
-        <button id="togglePlanBtn" onclick="togglePlan()" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-600 text-white transition">
-          免費版 Free
+      <div class="flex items-center gap-2">
+        <button onclick="resetDemoData()" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700 transition">
+          重置範例
         </button>
+        <!-- 商業模式模擬切換器 -->
+        <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
+          <span class="text-xs text-slate-300">目前身份：</span>
+          <button id="togglePlanBtn" onclick="togglePlan()" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-600 text-white transition">
+            免費版 Free
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
   <main class="max-w-5xl mx-auto px-4 pt-5 space-y-5">
 
-    <!-- 案場選擇器（展現 Free 限 1 案場 vs Pro 無限案場） -->
+    <!-- 案場選擇器 -->
     <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 flex-wrap">
         <label class="text-sm font-semibold text-slate-600">目前工地案場：</label>
         <select id="projectSelect" onchange="switchProject()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-amber-500">
-          <option value="0">桃園中壢區集合住宅新建工程（合約 4,500 萬）</option>
+          <option value="0" id="mainProjectOption">桃園中壢區集合住宅新建工程（合約 4,500 萬）</option>
           <option value="1" id="proProjectOption">🔒 [Pro] 新竹竹北廠房基礎開挖工程（合約 2,800 萬）</option>
         </select>
+        <button onclick="openBudgetModal()" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
+          ✎ 修改案場與合約金額
+        </button>
       </div>
       <button onclick="handleProAction('新增多個工地案場')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition">
         + 新增案場 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded ml-1">PRO</span>
@@ -52,24 +60,31 @@
 
     <!-- 核心財務儀表板卡片 -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <p class="text-xs text-slate-500">合約總預算（含追加）</p>
+      <!-- 可直接點擊修改的合約總預算卡片 -->
+      <div onclick="openBudgetModal()" class="bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-amber-400 cursor-pointer transition group relative">
+        <div class="flex items-center justify-between">
+          <p class="text-xs text-slate-500">合約總預算（含追加）</p>
+          <span class="text-[11px] text-amber-600 font-semibold bg-amber-50 px-1.5 py-0.5 rounded group-hover:bg-amber-500 group-hover:text-white transition">✎ 編輯</span>
+        </div>
         <p id="kpiBudget" class="text-lg md:text-xl font-bold text-slate-800 mt-1">NT$ 45,000,000</p>
-        <span class="text-[11px] text-emerald-600 font-medium">含變更追加 +120萬</span>
+        <span id="kpiExtraNote" class="text-[11px] text-emerald-600 font-medium">含變更追加 +120萬</span>
       </div>
+
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <p class="text-xs text-slate-500">累計實際支出</p>
-        <p id="kpiActual" class="text-lg md:text-xl font-bold text-amber-600 mt-1">NT$ 28,450,000</p>
-        <span id="kpiRate" class="text-[11px] text-slate-500">執行率 63.2%</span>
+        <p class="text-xs text-slate-500">累計實際支出（含稅）</p>
+        <p id="kpiActual" class="text-lg md:text-xl font-bold text-amber-600 mt-1">NT$ 0</p>
+        <span id="kpiRate" class="text-[11px] text-slate-500">執行率 0%</span>
       </div>
+
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
         <p class="text-xs text-slate-500">預估剩餘毛利</p>
-        <p id="kpiMargin" class="text-lg md:text-xl font-bold text-emerald-600 mt-1">NT$ 16,550,000</p>
-        <span class="text-[11px] text-slate-500">目前毛利率 36.8%</span>
+        <p id="kpiMargin" class="text-lg md:text-xl font-bold text-emerald-600 mt-1">NT$ 0</p>
+        <span id="kpiMarginRate" class="text-[11px] text-slate-500">目前毛利率 0%</span>
       </div>
+
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
         <p class="text-xs text-slate-500">協力廠商保留款 (10%)</p>
-        <p id="kpiRetention" class="text-lg md:text-xl font-bold text-indigo-600 mt-1">NT$ 2,845,000</p>
+        <p id="kpiRetention" class="text-lg md:text-xl font-bold text-indigo-600 mt-1">NT$ 0</p>
         <span class="text-[11px] text-slate-400">驗收後撥付</span>
       </div>
     </section>
@@ -80,8 +95,8 @@
       <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
         <div class="flex items-center justify-between">
           <h2 class="font-bold text-sm text-slate-800">土木營造 WBS 工項預算執行率</h2>
-          <button onclick="handleProAction('變更設計追加減帳管理')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">
-            + 追加減帳 <span class="pro-badge text-white text-[10px] px-1 rounded">PRO</span>
+          <button onclick="openBudgetModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+            ✎ 調整各工項預算
           </button>
         </div>
         <div id="wbsContainer" class="space-y-3 pt-1">
@@ -99,16 +114,16 @@
       </div>
     </section>
 
-    <!-- 快速記帳表單（工地現場手機優化） -->
+    <!-- 快速記帳表單 -->
     <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
       <h2 class="font-bold text-sm text-slate-800 mb-3">現場快速記帳（叫料 / 點工 / 機具）</h2>
       <form onsubmit="addExpense(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2.5">
         <select id="expCategory" required class="border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white">
-          <option value="假設與土方工程">1. 假設與土方工程</option>
-          <option value="基礎與擋土支撐">2. 基礎與擋土支撐</option>
-          <option value="結構體（鋼筋/模板/混凝土）">3. 結構體（鋼筋/混凝土）</option>
-          <option value="重機具與吊車租賃">4. 重機具與吊車租賃</option>
-          <option value="工地雜支與安衛">5. 工地雜支與安衛</option>
+          <option value="1. 假設與土方工程">1. 假設與土方工程</option>
+          <option value="2. 基礎與擋土支撐">2. 基礎與擋土支撐</option>
+          <option value="3. 結構體（鋼筋/混凝土）">3. 結構體（鋼筋/混凝土）</option>
+          <option value="4. 重機具與吊車租賃">4. 重機具與吊車租賃</option>
+          <option value="5. 工地雜支與安衛">5. 工地雜支與安衛</option>
         </select>
         <input id="expVendor" type="text" placeholder="廠商名稱（如：國產實業）" required class="border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
         <input id="expItem" type="text" placeholder="品名/規格（如：3000psi混凝土）" required class="border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
@@ -119,7 +134,7 @@
         </button>
       </form>
 
-      <!-- Pro 專屬功能列：送貨單拍照 & 匯出請款單 -->
+      <!-- Pro 專屬功能列 -->
       <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
         <button type="button" onclick="handleProAction('工地送貨單 / 發票拍照雲端存證')" class="text-xs flex items-center gap-1.5 text-slate-600 hover:text-amber-700 font-medium">
           📷 附加送貨單/簽收單照片 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded">PRO</span>
@@ -150,7 +165,7 @@
               <th class="py-2.5 px-3">廠商 / 品名</th>
               <th class="py-2.5 px-3 text-right">數量 × 單價</th>
               <th class="py-2.5 px-3 text-right">含稅總額</th>
-              <th class="py-2.5 px-3 text-center">單據</th>
+              <th class="py-2.5 px-3 text-center">操作</th>
             </tr>
           </thead>
           <tbody id="expenseTableBody" class="divide-y divide-slate-100 text-xs md:text-sm">
@@ -162,12 +177,59 @@
 
   </main>
 
+  <!-- 編輯合約金額與各工項預算視窗 -->
+  <div id="budgetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 my-8">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-lg font-bold text-slate-900">編輯案場合約與預算設定</h3>
+        <button onclick="closeBudgetModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <form onsubmit="saveBudgetSettings(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">工程案場名稱</label>
+          <input id="inputProjectName" type="text" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">原始合約總金額（元）</label>
+            <input id="inputBaseContract" type="number" min="0" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">變更追加減金額（元，可負數）</label>
+            <input id="inputExtraContract" type="number" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-bold text-slate-700">五大 WBS 工項發包預算分配（元）</label>
+            <span id="wbsSumHint" class="text-[11px] text-slate-500"></span>
+          </div>
+          <div id="wbsInputsContainer" class="space-y-2">
+            <!-- 由 JS 動態生成五個輸入框 -->
+          </div>
+        </div>
+
+        <div class="pt-3 flex gap-2">
+          <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition">
+            儲存並更新儀表板
+          </button>
+          <button type="button" onclick="closeBudgetModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm">
+            取消
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- 升級 Pro 商業變現引導彈窗 -->
   <div id="upgradeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
         <span class="pro-badge text-white text-xs font-bold px-2.5 py-1 rounded-full">升級 CIVILCOST PRO</span>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+        <button onclick="closeUpgradeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
       <h3 class="text-lg font-bold text-slate-900">解鎖「<span id="modalFeatureName" class="text-amber-600">進階功能</span>」</h3>
       <p class="text-sm text-slate-600 leading-relaxed">
@@ -183,7 +245,7 @@
         <button onclick="activateProDemo()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition">
           立即升級 Pro 版（NT$ 490 / 月）
         </button>
-        <button onclick="closeModal()" class="w-full text-xs text-slate-400 hover:text-slate-600 py-1">
+        <button onclick="closeUpgradeModal()" class="w-full text-xs text-slate-400 hover:text-slate-600 py-1">
           先繼續使用免費版（限單一案場）
         </button>
       </div>
@@ -191,31 +253,207 @@
   </div>
 
   <script>
-    // 系統狀態（模擬免費版 vs 付費版）
+    const STORAGE_KEY = "civilcost_data_v2";
     let isPro = false;
     let chartInstance = null;
 
-    // 預設土木營造工程資料
-    const wbsData = [
-      { name: "1. 假設與土方工程", budget: 6500000, actual: 5980000 },
-      { name: "2. 基礎與擋土支撐", budget: 11000000, actual: 9460000 },
-      { name: "3. 結構體（鋼筋/混凝土）", budget: 18500000, actual: 9850000 },
-      { name: "4. 重機具與吊車租賃", budget: 5500000, actual: 2100000 },
-      { name: "5. 工地雜支與安衛", budget: 3500000, actual: 1060000 }
-    ];
+    // 預設資料結構
+    const defaultState = {
+      projectName: "桃園中壢區集合住宅新建工程",
+      baseContract: 43800000,
+      extraContract: 1200000,
+      wbsBudgets: [
+        { name: "1. 假設與土方工程", budget: 6500000 },
+        { name: "2. 基礎與擋土支撐", budget: 11000000 },
+        { name: "3. 結構體（鋼筋/混凝土）", budget: 18500000 },
+        { name: "4. 重機具與吊車租賃", budget: 5500000 },
+        { name: "5. 工地雜支與安衛", budget: 3500000 }
+      ],
+      expenses: [
+        { date: "2026-11-24", category: "3. 結構體（鋼筋/混凝土）", vendor: "國產建材實業", item: "4000psi 預拌混凝土", qty: 120, price: 2850, hasPhoto: true },
+        { date: "2026-11-22", category: "3. 結構體（鋼筋/混凝土）", vendor: "豐興鋼鐵配合商", item: "SD420W 竹節鋼筋", qty: 35, price: 19200, hasPhoto: true },
+        { date: "2026-11-18", category: "4. 重機具與吊車租賃", vendor: "永大吊車工程行", item: "45噸油壓吊車（含操作手）", qty: 4, price: 16000, hasPhoto: false },
+        { date: "2026-11-15", category: "1. 假設與土方工程", vendor: "宏達土方清運", item: "B2地下室土方外運（車次）", qty: 45, price: 3200, hasPhoto: false }
+      ]
+    };
 
-    const expenses = [
-      { date: "2026-11-24", category: "結構體（鋼筋/混凝土）", vendor: "國產建材實業", item: "4000psi 預拌混凝土", qty: 120, price: 2850, hasPhoto: true },
-      { date: "2026-11-22", category: "結構體（鋼筋/混凝土）", vendor: "豐興鋼鐵配合商", item: "SD420W 竹節鋼筋", qty: 35, price: 19200, hasPhoto: true },
-      { date: "2026-11-18", category: "重機具與吊車租賃", vendor: "永大吊車工程行", item: "45噸油壓吊車（含操作手）", qty: 4, price: 16000, hasPhoto: false },
-      { date: "2026-11-15", category: "假設與土方工程", vendor: "宏達土方清運", item: "B2地下室土方外運（車次）", qty: 45, price: 3200, hasPhoto: false }
-    ];
+    // 載入本地儲存或使用預設值
+    let appState = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(defaultState));
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+
+    function resetDemoData() {
+      if (confirm("確定要將合約金額與帳目重置為預設範例嗎？")) {
+        appState = JSON.parse(JSON.stringify(defaultState));
+        saveState();
+        renderAll();
+      }
+    }
+
+    // 動態計算各工項與總支出
+    function calculateMetrics() {
+      const totalContract = appState.baseContract + appState.extraContract;
+      const categoryActuals = {};
+      appState.wbsBudgets.forEach(w => categoryActuals[w.name] = 0);
+
+      let totalActual = 0;
+      appState.expenses.forEach(e => {
+        const subWithTax = Math.round(e.qty * e.price * 1.05);
+        totalActual += subWithTax;
+        if (categoryActuals[e.category] !== undefined) {
+          categoryActuals[e.category] += subWithTax;
+        }
+      });
+
+      const margin = totalContract - totalActual;
+      const execRate = totalContract > 0 ? ((totalActual / totalContract) * 100).toFixed(1) : 0;
+      const marginRate = totalContract > 0 ? ((margin / totalContract) * 100).toFixed(1) : 0;
+      const retention = Math.round(totalActual * 0.10);
+
+      return { totalContract, totalActual, margin, execRate, marginRate, retention, categoryActuals };
+    }
 
     function renderAll() {
-      renderWBS();
+      const metrics = calculateMetrics();
+
+      // 更新案場選單名稱
+      const totalWan = (metrics.totalContract / 10000).toLocaleString();
+      document.getElementById("mainProjectOption").textContent = `${appState.projectName}（合約 ${totalWan} 萬）`;
+
+      // 更新四大 KPI 卡片
+      document.getElementById("kpiBudget").textContent = `NT$ ${metrics.totalContract.toLocaleString()}`;
+      const extraSign = appState.extraContract >= 0 ? "+" : "";
+      document.getElementById("kpiExtraNote").textContent = `原始 ${(appState.baseContract/10000).toLocaleString()}萬 ｜ 變更 ${extraSign}${(appState.extraContract/10000).toLocaleString()}萬`;
+
+      document.getElementById("kpiActual").textContent = `NT$ ${metrics.totalActual.toLocaleString()}`;
+      document.getElementById("kpiRate").textContent = `預算執行率 ${metrics.execRate}%`;
+
+      const marginEl = document.getElementById("kpiMargin");
+      marginEl.textContent = `NT$ ${metrics.margin.toLocaleString()}`;
+      marginEl.className = `text-lg md:text-xl font-bold mt-1 ${metrics.margin >= 0 ? "text-emerald-600" : "text-rose-600"}`;
+      document.getElementById("kpiMarginRate").textContent = `預估毛利率 ${metrics.marginRate}%`;
+
+      document.getElementById("kpiRetention").textContent = `NT$ ${metrics.retention.toLocaleString()}`;
+
+      renderWBS(metrics.categoryActuals);
       renderExpenses();
-      renderChart();
+      renderChart(metrics.categoryActuals);
       updatePlanUI();
+    }
+
+    // 開啟合約金額與預算編輯視窗
+    function openBudgetModal() {
+      document.getElementById("inputProjectName").value = appState.projectName;
+      document.getElementById("inputBaseContract").value = appState.baseContract;
+      document.getElementById("inputExtraContract").value = appState.extraContract;
+
+      const container = document.getElementById("wbsInputsContainer");
+      container.innerHTML = appState.wbsBudgets.map((w, idx) => `
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs text-slate-600 flex-1">${w.name}</span>
+          <input type="number" id="wbsBudgetInput_${idx}" value="${w.budget}" min="0" required
+            class="w-36 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-right font-semibold focus:border-amber-500 focus:outline-none">
+        </div>
+      `).join("");
+
+      document.getElementById("budgetModal").classList.remove("hidden");
+      document.getElementById("budgetModal").classList.add("flex");
+    }
+
+    function closeBudgetModal() {
+      document.getElementById("budgetModal").classList.add("hidden");
+      document.getElementById("budgetModal").classList.remove("flex");
+    }
+
+    function saveBudgetSettings(e) {
+      e.preventDefault();
+      appState.projectName = document.getElementById("inputProjectName").value.trim();
+      appState.baseContract = Number(document.getElementById("inputBaseContract").value) || 0;
+      appState.extraContract = Number(document.getElementById("inputExtraContract").value) || 0;
+
+      appState.wbsBudgets.forEach((w, idx) => {
+        w.budget = Number(document.getElementById(`wbsBudgetInput_${idx}`).value) || 0;
+      });
+
+      saveState();
+      closeBudgetModal();
+      renderAll();
+    }
+
+    function renderWBS(categoryActuals) {
+      const container = document.getElementById("wbsContainer");
+      container.innerHTML = appState.wbsBudgets.map(item => {
+        const actual = categoryActuals[item.name] || 0;
+        const pct = item.budget > 0 ? Math.round((actual / item.budget) * 100) : 0;
+        let barColor = "bg-emerald-500";
+        let alertBadge = "";
+        if (pct >= 100) {
+          barColor = "bg-rose-600";
+          alertBadge = `<span class="text-[11px] text-rose-600 font-bold ml-2">🚨 已超支</span>`;
+        } else if (pct >= 85) {
+          barColor = "bg-amber-500";
+          alertBadge = `<span class="text-[11px] text-amber-600 font-bold ml-2">⚠️ 接近上限</span>`;
+        }
+        return `
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-semibold text-slate-700">${item.name}${alertBadge}</span>
+              <span class="text-slate-500">NT$ ${(actual/10000).toFixed(1)}萬 / ${(item.budget/10000).toFixed(1)}萬 (<strong>${pct}%</strong>)</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+              <div class="${barColor} h-2.5 rounded-full transition-all duration-500" style="width: ${Math.min(pct, 100)}%"></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderExpenses() {
+      const tbody = document.getElementById("expenseTableBody");
+      tbody.innerHTML = appState.expenses.map((e, idx) => {
+        const subtotal = e.qty * e.price;
+        const totalWithTax = Math.round(subtotal * 1.05);
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">${e.date}</td>
+            <td class="py-2.5 px-3 font-medium text-slate-700">${e.category}</td>
+            <td class="py-2.5 px-3">
+              <div class="font-semibold text-slate-800">${e.vendor}</div>
+              <div class="text-xs text-slate-500">${e.item}</div>
+            </td>
+            <td class="py-2.5 px-3 text-right text-slate-600 whitespace-nowrap">${e.qty} × ${e.price.toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">NT$ ${totalWithTax.toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-center whitespace-nowrap">
+              <button onclick="deleteExpense(${idx})" class="text-xs text-rose-500 hover:text-rose-700 font-medium">刪除</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function addExpense(e) {
+      e.preventDefault();
+      const category = document.getElementById("expCategory").value;
+      const vendor = document.getElementById("expVendor").value;
+      const item = document.getElementById("expItem").value;
+      const qty = Number(document.getElementById("expQty").value);
+      const price = Number(document.getElementById("expPrice").value);
+      const today = new Date().toISOString().split("T")[0];
+
+      appState.expenses.unshift({ date: today, category, vendor, item, qty, price, hasPhoto: false });
+      saveState();
+
+      e.target.reset();
+      document.getElementById("expQty").value = 1;
+      renderAll();
+    }
+
+    function deleteExpense(idx) {
+      appState.expenses.splice(idx, 1);
+      saveState();
+      renderAll();
     }
 
     function updatePlanUI() {
@@ -256,110 +494,39 @@
       }
     }
 
-    function closeModal() {
+    function closeUpgradeModal() {
       document.getElementById("upgradeModal").classList.add("hidden");
       document.getElementById("upgradeModal").classList.remove("flex");
     }
 
     function activateProDemo() {
       isPro = true;
-      closeModal();
-      renderAll();
-      alert("🎉 模擬升級成功！現在你可以體驗所有 Pro 進階功能。");
-    }
-
-    function renderWBS() {
-      const container = document.getElementById("wbsContainer");
-      container.innerHTML = wbsData.map(item => {
-        const pct = Math.round((item.actual / item.budget) * 100);
-        let barColor = "bg-emerald-500";
-        let alertBadge = "";
-        if (pct >= 90) {
-          barColor = "bg-rose-500";
-          alertBadge = `<span class="text-[11px] text-rose-600 font-bold ml-2">⚠️ 接近預算上限</span>`;
-        } else if (pct >= 75) {
-          barColor = "bg-amber-500";
-        }
-        return `
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="font-semibold text-slate-700">${item.name}${alertBadge}</span>
-              <span class="text-slate-500">NT$ ${(item.actual/10000).toFixed(1)}萬 / ${(item.budget/10000).toFixed(0)}萬 (<strong>${pct}%</strong>)</span>
-            </div>
-            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-              <div class="${barColor} h-2.5 rounded-full transition-all duration-500" style="width: ${Math.min(pct, 100)}%"></div>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderExpenses() {
-      const tbody = document.getElementById("expenseTableBody");
-      tbody.innerHTML = expenses.map(e => {
-        const subtotal = e.qty * e.price;
-        const totalWithTax = Math.round(subtotal * 1.05);
-        const photoTag = e.hasPhoto
-          ? `<span class="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] px-2 py-0.5 rounded">已附簽收單</span>`
-          : `<span class="inline-block bg-slate-100 text-slate-400 text-[11px] px-2 py-0.5 rounded">無照片</span>`;
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">${e.date}</td>
-            <td class="py-2.5 px-3 font-medium text-slate-700">${e.category}</td>
-            <td class="py-2.5 px-3">
-              <div class="font-semibold text-slate-800">${e.vendor}</div>
-              <div class="text-xs text-slate-500">${e.item}</div>
-            </td>
-            <td class="py-2.5 px-3 text-right text-slate-600 whitespace-nowrap">${e.qty} × ${e.price.toLocaleString()}</td>
-            <td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">NT$ ${totalWithTax.toLocaleString()}</td>
-            <td class="py-2.5 px-3 text-center whitespace-nowrap">${photoTag}</td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    function addExpense(e) {
-      e.preventDefault();
-      const category = document.getElementById("expCategory").value;
-      const vendor = document.getElementById("expVendor").value;
-      const item = document.getElementById("expItem").value;
-      const qty = Number(document.getElementById("expQty").value);
-      const price = Number(document.getElementById("expPrice").value);
-      const today = new Date().toISOString().split("T")[0];
-
-      expenses.unshift({ date: today, category, vendor, item, qty, price, hasPhoto: false });
-
-      // 更新對應 WBS 支出
-      const target = wbsData.find(w => w.name.includes(category.substring(0, 4)));
-      if (target) target.actual += Math.round(qty * price * 1.05);
-
-      e.target.reset();
-      document.getElementById("expQty").value = 1;
+      closeUpgradeModal();
       renderAll();
     }
 
     function exportCSV() {
       let csv = "\uFEFF日期,WBS工項,廠商,品名,數量,未稅單價,含稅總額\n";
-      expenses.forEach(e => {
+      appState.expenses.forEach(e => {
         csv += `${e.date},${e.category},${e.vendor},${e.item},${e.qty},${e.price},${Math.round(e.qty * e.price * 1.05)}\n`;
       });
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "土木營造成本明細表.csv";
+      a.download = `${appState.projectName}_成本明細表.csv`;
       a.click();
     }
 
-    function renderChart() {
+    function renderChart(categoryActuals) {
       const ctx = document.getElementById("costChart").getContext("2d");
       if (chartInstance) chartInstance.destroy();
       chartInstance = new Chart(ctx, {
         type: "doughnut",
         data: {
-          labels: wbsData.map(w => w.name.split("（")[0]),
+          labels: appState.wbsBudgets.map(w => w.name.split("（")[0]),
           datasets: [{
-            data: wbsData.map(w => w.actual),
+            data: appState.wbsBudgets.map(w => categoryActuals[w.name] || 0),
             backgroundColor: ["#64748b", "#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6"],
             borderWidth: 0
           }]
