@@ -203,7 +203,7 @@
         </button>
         <div class="flex items-center gap-2">
           <button type="button" onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium">
-            下載基礎 CSV（免費）
+            下載含總金額 CSV（免費）
           </button>
           <button type="button" onclick="handleProAction('一鍵產出廠商月結請款單與業主估驗計價表')" class="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg font-medium">
             產出估驗請款單 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded ml-1">PRO</span>
@@ -212,7 +212,7 @@
       </div>
     </section>
 
-    <!-- 採購與請款明細表（已加入「編輯」與「刪除」雙按鈕） -->
+    <!-- 採購與請款明細表 -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
         <h2 class="font-bold text-sm text-slate-800">近期叫料與發包明細</h2>
@@ -327,7 +327,7 @@
     </div>
   </div>
 
-  <!-- 【新增】視窗 C：編輯單筆叫料與發包明細 -->
+  <!-- 視窗 C：編輯單筆叫料與發包明細 -->
   <div id="editExpenseModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -783,7 +783,6 @@
       renderAll();
     }
 
-    // 渲染近期叫料與發包明細（新增「編輯」按鈕）
     function renderExpenses() {
       const tbody = document.getElementById("expenseTableBody");
       tbody.innerHTML = appState.expenses.map((e, idx) => {
@@ -803,7 +802,6 @@
       }).join("");
     }
 
-    // 【新增】開啟單筆明細編輯視窗
     function openEditExpenseModal(idx) {
       const exp = appState.expenses[idx];
       if (!exp) return;
@@ -811,14 +809,12 @@
       document.getElementById("editExpIndex").value = idx;
       document.getElementById("editExpDate").value = exp.date;
 
-      // 填充最新的 WBS 工項選項
       const catSelect = document.getElementById("editExpCategory");
       const optionsHtml = appState.wbsBudgets.map(w =>
         '<option value="' + w.name + '">' + w.name + '</option>'
       ).join("");
       catSelect.innerHTML = optionsHtml;
 
-      // 若原工項已被刪除，暫時保留該選項以免資料遺失
       if (!appState.wbsBudgets.some(w => w.name === exp.category)) {
         catSelect.innerHTML += '<option value="' + exp.category + '">' + exp.category + '（已移除工項）</option>';
       }
@@ -941,11 +937,55 @@
       renderAll();
     }
 
+    // 【升級版】CSV 匯出：包含明細加總與專案財務總表
     function exportCSV() {
-      let csv = "\uFEFF日期,WBS工項,廠商,品名,數量,未稅單價,含稅總額\n";
+      const m = calculateMetrics();
+      let totalSubtotal = 0;
+      let totalTax = 0;
+      let totalWithTax = 0;
+
+      // 輔助函式：安全處理含逗號的文字
+      const esc = (str) => '"' + String(str).replace(/"/g, '""') + '"';
+
+      let csv = "\uFEFF";
+      csv += "日期,WBS工項,廠商,品名,數量,未稅單價,未稅小計,營業稅(5%),含稅總額\n";
+
       appState.expenses.forEach(e => {
-        csv += e.date + "," + e.category + "," + e.vendor + "," + e.item + "," + e.qty + "," + e.price + "," + Math.round(e.qty * e.price * 1.05) + "\n";
+        const sub = Math.round(e.qty * e.price);
+        const withTax = Math.round(sub * 1.05);
+        const tax = withTax - sub;
+        totalSubtotal += sub;
+        totalTax += tax;
+        totalWithTax += withTax;
+
+        csv += [
+          esc(e.date),
+          esc(e.category),
+          esc(e.vendor),
+          esc(e.item),
+          e.qty,
+          e.price,
+          sub,
+          tax,
+          withTax
+        ].join(",") + "\n";
       });
+
+      // 明細表底部加總列
+      csv += ",,,,,明細支出總計," + totalSubtotal + "," + totalTax + "," + totalWithTax + "\n\n";
+
+      // 專案財務與進度總覽區塊
+      csv += "【專案合約與目前損益總表】,,,,,,,,\n";
+      csv += "工程案場名稱," + esc(appState.projectName) + ",,,,,,,\n";
+      csv += "合約總金額（含追加）," + m.totalContract + ",,,,,,,\n";
+      csv += "目前加權預計進度," + m.weightedPlanned + "%,,,,,,,\n";
+      csv += "目前加權實際進度," + m.weightedActual + "%,,,,,,,\n";
+      csv += "依進度換算已完成產值," + m.earnedContractValue + ",,,,,,,\n";
+      csv += "累計實際支出總金額（含稅）," + m.totalActualCost + ",,,,,,,\n";
+      csv += "目前現況損益（正數為盈利/負數為虧損）," + m.currentProfit + ",,,,,,,\n";
+      csv += "合約剩餘未動支預算," + m.remainingBudget + ",,,,,,,\n";
+      csv += "協力廠商保留款 (10%)," + m.retention + ",,,,,,,\n";
+
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
