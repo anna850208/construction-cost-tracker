@@ -13,7 +13,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 pb-20">
 
-  <!-- 頂部導覽列 & 方案切換測試器 -->
+  <!-- 頂部導覽列 & 雲端帳號狀態 -->
   <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
     <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-2">
@@ -24,13 +24,31 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
+        <!-- 雲端同步狀態指示燈 -->
+        <span id="syncStatusBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+          💻 單機模式（未登入）
+        </span>
+
+        <!-- 未登入時顯示「登入 / 註冊」按鈕 -->
+        <button type="button" id="openAuthBtn" onclick="openAuthModal()" class="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-900 px-3 py-1.5 rounded-lg transition shadow-xs">
+          ☁️ 登入 / 註冊同步
+        </button>
+
+        <!-- 已登入時顯示帳號資訊與登出按鈕 -->
+        <div id="userAccountBar" class="hidden items-center gap-2 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
+          <span id="userEmailDisplay" class="text-xs text-amber-300 font-semibold max-w-[130px] truncate"></span>
+          <button type="button" onclick="handleLogout()" class="text-[11px] text-slate-400 hover:text-white underline">
+            登出
+          </button>
+        </div>
+
         <button type="button" onclick="resetDemoData()" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700 transition">
           重置範例
         </button>
-        <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
-          <span class="text-xs text-slate-300">目前身份：</span>
-          <button type="button" id="togglePlanBtn" onclick="togglePlan()" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-600 text-white transition">
+
+        <div class="hidden sm:flex items-center gap-1.5 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">
+          <button type="button" id="togglePlanBtn" onclick="togglePlan()" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-600 text-white transition">
             免費版 Free
           </button>
         </div>
@@ -39,6 +57,17 @@
   </header>
 
   <main class="max-w-5xl mx-auto px-4 pt-5 space-y-4">
+
+    <!-- 未登入提醒横幅 -->
+    <section id="guestTipBanner" class="bg-amber-50 border border-amber-300 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+      <div class="flex items-center gap-2 text-xs text-amber-900">
+        <span class="text-base">☁️</span>
+        <span>目前資料僅暫存於此裝置。<strong>登入帳號後即可自動備份至雲端</strong>，在手機與電腦之間即時同步！</span>
+      </div>
+      <button type="button" onclick="openAuthModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-1.5 rounded-lg transition">
+        立即登入 / 註冊
+      </button>
+    </section>
 
     <!-- 工項延誤自動預警橫幅 -->
     <section id="delayAlertBanner" class="hidden bg-rose-50 border-l-4 border-rose-600 rounded-r-xl p-4 shadow-sm">
@@ -79,7 +108,7 @@
       </button>
     </section>
 
-    <!-- 【新增】工期與時程控管總覽卡片（開工日 / 預計完工日 / 追加工期 / 已工作天數 / 倒數完工日） -->
+    <!-- 工期與時程控管總覽卡片 -->
     <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
         <div class="flex items-center gap-2">
@@ -92,35 +121,30 @@
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-        <!-- 1. 開工日期 -->
         <div onclick="openScheduleModal()" class="bg-slate-50 hover:bg-slate-100/80 p-3 rounded-lg border border-slate-200 cursor-pointer transition">
           <p class="text-[11px] text-slate-500 font-medium">🚩 正式開工日期</p>
           <p id="dispStartDate" class="text-sm md:text-base font-bold text-slate-800 mt-1">2026-06-01</p>
           <span class="text-[10px] text-slate-400">點擊可修改</span>
         </div>
 
-        <!-- 2. 預計完工日 -->
         <div onclick="openScheduleModal()" class="bg-slate-50 hover:bg-slate-100/80 p-3 rounded-lg border border-slate-200 cursor-pointer transition">
           <p class="text-[11px] text-slate-500 font-medium">🏁 最終預計完工日</p>
           <p id="dispFinalEndDate" class="text-sm md:text-base font-bold text-slate-800 mt-1">2027-06-15</p>
           <span id="dispBaseEndNote" class="text-[10px] text-slate-500 block truncate">原訂：2027-05-31</span>
         </div>
 
-        <!-- 3. 追加工期日 -->
         <div onclick="openScheduleModal()" class="bg-amber-50/70 hover:bg-amber-100/60 p-3 rounded-lg border border-amber-200 cursor-pointer transition">
           <p class="text-[11px] text-amber-800 font-semibold">➕ 核定追加工期</p>
           <p id="dispExtraDays" class="text-sm md:text-base font-bold text-amber-700 mt-1">+15 天</p>
           <span class="text-[10px] text-amber-600/80">自動順延最終完工日</span>
         </div>
 
-        <!-- 4. 已工作天數 -->
         <div class="bg-sky-50/70 p-3 rounded-lg border border-sky-200">
           <p class="text-[11px] text-sky-800 font-semibold">⏱️ 累計已工作天數</p>
           <p id="dispElapsedDays" class="text-sm md:text-base font-bold text-sky-700 mt-1">0 天</p>
           <span id="dispTimePctNote" class="text-[10px] text-sky-600">工期已耗用 0%</span>
         </div>
 
-        <!-- 5. 倒數完工日 -->
         <div id="countdownCard" class="col-span-2 sm:col-span-1 bg-emerald-50/70 p-3 rounded-lg border border-emerald-200">
           <p id="countdownLabel" class="text-[11px] text-emerald-800 font-semibold">⏳ 距離完工倒數</p>
           <p id="dispRemainingDays" class="text-sm md:text-base font-bold text-emerald-700 mt-1">0 天</p>
@@ -290,7 +314,69 @@
 
   </main>
 
-  <!-- 【新增】視窗 D：編輯開工日期、原始預計完工日與追加工期天數 -->
+  <!-- 【新增】視窗 E：雲端帳號登入 / 註冊視窗（支援 Google 一鍵登入與 Email/密碼） -->
+  <div id="authModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">雲端帳號登入與同步</h3>
+          <p class="text-xs text-slate-500 mt-0.5">登入後可跨手機、平板、電腦即時同步所有工地帳本</p>
+        </div>
+        <button type="button" onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <!-- Google 一鍵登入按鈕 -->
+      <button type="button" onclick="handleGoogleLogin()" class="w-full flex items-center justify-center gap-2.5 bg-white hover:bg-slate-50 text-slate-800 font-bold py-2.5 px-4 rounded-xl border-2 border-slate-200 transition shadow-xs text-sm">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        使用 Google 帳號一鍵登入（推薦）
+      </button>
+
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-slate-200"></div>
+        <span class="flex-shrink mx-3 text-xs text-slate-400">或使用 Email 信箱登入 / 註冊</span>
+        <div class="flex-grow border-t border-slate-200"></div>
+      </div>
+
+      <!-- 登入 / 註冊分頁切換 -->
+      <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+        <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition">
+          帳號登入
+        </button>
+        <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+          註冊新帳號
+        </button>
+      </div>
+
+      <form onsubmit="handleEmailAuth(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">電子信箱（Email）</label>
+          <input id="authEmail" type="email" placeholder="example@gmail.com" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+        </div>
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-xs font-bold text-slate-700">密碼（至少 6 位數）</label>
+            <button type="button" id="forgotPwdBtn" onclick="handleResetPassword()" class="text-[11px] text-sky-600 hover:underline">
+              忘記密碼？
+            </button>
+          </div>
+          <input id="authPassword" type="password" minlength="6" placeholder="請輸入至少 6 位英數字密碼" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+        </div>
+
+        <p id="authErrorMsg" class="hidden text-xs text-rose-600 bg-rose-50 p-2 rounded-lg border border-rose-200"></p>
+
+        <button type="submit" id="authSubmitBtn" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition">
+          登入並同步雲端資料
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 視窗 D：編輯開工日期、原始預計完工日與追加工期天數 -->
   <div id="scheduleModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -529,6 +615,240 @@
     </div>
   </div>
 
+  <!-- Firebase SDK 與即時雲端同步邏輯 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDKy6661qvKiS3e99cYTdQqnxvP7gTvpeY",
+      authDomain: "civilcost-10336.firebaseapp.com",
+      projectId: "civilcost-10336",
+      storageBucket: "civilcost-10336.firebasestorage.app",
+      messagingSenderId: "706569501206",
+      appId: "1:706569501206:web:9e1a30a2ce343e5c701337",
+      measurementId: "G-07EHNS6WLB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    let currentUser = null;
+    let unsubscribeSnapshot = null;
+    let authMode = "login"; // 'login' or 'register'
+
+    function updateSyncBadge(status, text) {
+      const badge = document.getElementById("syncStatusBadge");
+      if (!badge) return;
+      if (status === "synced") {
+        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700 font-semibold";
+        badge.textContent = text || "☁️ 雲端已同步";
+      } else if (status === "syncing") {
+        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-amber-900/80 text-amber-300 border border-amber-700 font-semibold";
+        badge.textContent = text || "🔄 同步中...";
+      } else if (status === "error") {
+        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-rose-900/80 text-rose-300 border border-rose-700 font-semibold";
+        badge.textContent = text || "⚠️ 同步異常";
+      } else {
+        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700";
+        badge.textContent = text || "💻 單機模式（未登入）";
+      }
+    }
+
+    // 監聽登入狀態並建立跨裝置即時監聽
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      const openBtn = document.getElementById("openAuthBtn");
+      const userBar = document.getElementById("userAccountBar");
+      const guestBanner = document.getElementById("guestTipBanner");
+
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = null;
+      }
+
+      if (user) {
+        openBtn.classList.add("hidden");
+        userBar.classList.remove("hidden");
+        userBar.classList.add("flex");
+        guestBanner.classList.add("hidden");
+        document.getElementById("userEmailDisplay").textContent = user.displayName || user.email;
+
+        updateSyncBadge("syncing", "🔄 載入雲端帳本...");
+        const docRef = doc(db, "users", user.uid, "projects", "default_project");
+
+        try {
+          const snap = await getDoc(docRef);
+          if (!snap.exists()) {
+            // 首次登入雲端：自動將目前瀏覽器中的測試資料無縫上傳至雲端
+            await setDoc(docRef, {
+              ...window.appState,
+              updatedAt: new Date().toISOString()
+            });
+          }
+
+          // 啟動即時雙向同步監聽（手機一改，電腦立刻自動更新）
+          unsubscribeSnapshot = onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+              const cloudData = docSnap.data();
+              window.applyCloudState(cloudData);
+              updateSyncBadge("synced", "☁️ 雲端即時同步中");
+            }
+          }, (err) => {
+            console.error("Firestore 監聽錯誤:", err);
+            updateSyncBadge("error", "⚠️ 雲端連線中斷");
+          });
+        } catch (err) {
+          console.error("雲端初始化錯誤:", err);
+          updateSyncBadge("error", "⚠️ 無法讀取雲端");
+        }
+      } else {
+        openBtn.classList.remove("hidden");
+        userBar.classList.add("hidden");
+        userBar.classList.remove("flex");
+        guestBanner.classList.remove("hidden");
+        updateSyncBadge("offline", "💻 單機模式（未登入）");
+      }
+    });
+
+    // 提供給全域 saveState 呼叫的雲端寫入函式
+    window.syncToCloud = async function(stateData) {
+      if (!currentUser) return;
+      updateSyncBadge("syncing", "🔄 儲存至雲端...");
+      try {
+        const docRef = doc(db, "users", currentUser.uid, "projects", "default_project");
+        await setDoc(docRef, {
+          ...stateData,
+          updatedAt: new Date().toISOString()
+        });
+        updateSyncBadge("synced", "☁️ 雲端即時同步中");
+      } catch (err) {
+        console.error("寫入雲端失敗:", err);
+        updateSyncBadge("error", "⚠️ 雲端儲存失敗");
+      }
+    };
+
+    window.openAuthModal = function() {
+      document.getElementById("authErrorMsg").classList.add("hidden");
+      document.getElementById("authModal").classList.remove("hidden");
+      document.getElementById("authModal").classList.add("flex");
+    };
+
+    window.closeAuthModal = function() {
+      document.getElementById("authModal").classList.add("hidden");
+      document.getElementById("authModal").classList.remove("flex");
+    };
+
+    window.switchAuthTab = function(mode) {
+      authMode = mode;
+      const loginBtn = document.getElementById("tabLoginBtn");
+      const regBtn = document.getElementById("tabRegisterBtn");
+      const submitBtn = document.getElementById("authSubmitBtn");
+      const forgotBtn = document.getElementById("forgotPwdBtn");
+      document.getElementById("authErrorMsg").classList.add("hidden");
+
+      if (mode === "login") {
+        loginBtn.className = "py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition";
+        regBtn.className = "py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+        submitBtn.textContent = "登入並同步雲端資料";
+        forgotBtn.classList.remove("hidden");
+      } else {
+        regBtn.className = "py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition";
+        loginBtn.className = "py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition";
+        submitBtn.textContent = "建立新帳號並上傳目前資料";
+        forgotBtn.classList.add("hidden");
+      }
+    };
+
+    function showAuthError(msg) {
+      const errEl = document.getElementById("authErrorMsg");
+      errEl.textContent = msg;
+      errEl.classList.remove("hidden");
+    }
+
+    function translateFirebaseError(code) {
+      const map = {
+        "auth/invalid-credential": "信箱或密碼錯誤，請重新確認。",
+        "auth/user-not-found": "找不到此信箱帳號，請先點上方「註冊新帳號」。",
+        "auth/wrong-password": "密碼錯誤，請再試一次。",
+        "auth/email-already-in-use": "此信箱已經註冊過了，請直接切換到「帳號登入」。",
+        "auth/weak-password": "密碼強度不足，請設定至少 6 位英數字。",
+        "auth/invalid-email": "Email 格式不正確，請檢查是否有多餘空白。",
+        "auth/popup-closed-by-user": "Google 登入視窗已關閉，請再點一次按鈕。"
+      };
+      return map[code] || ("登入發生錯誤（" + code + "）");
+    }
+
+    window.handleGoogleLogin = async function() {
+      document.getElementById("authErrorMsg").classList.add("hidden");
+      try {
+        await signInWithPopup(auth, googleProvider);
+        window.closeAuthModal();
+      } catch (err) {
+        console.error(err);
+        showAuthError(translateFirebaseError(err.code));
+      }
+    };
+
+    window.handleEmailAuth = async function(e) {
+      e.preventDefault();
+      const email = document.getElementById("authEmail").value.trim();
+      const pwd = document.getElementById("authPassword").value;
+      document.getElementById("authErrorMsg").classList.add("hidden");
+
+      try {
+        if (authMode === "register") {
+          await createUserWithEmailAndPassword(auth, email, pwd);
+        } else {
+          await signInWithEmailAndPassword(auth, email, pwd);
+        }
+        window.closeAuthModal();
+      } catch (err) {
+        console.error(err);
+        showAuthError(translateFirebaseError(err.code));
+      }
+    };
+
+    window.handleResetPassword = async function() {
+      const email = document.getElementById("authEmail").value.trim();
+      if (!email) {
+        showAuthError("請先在上方輸入您的 Email 信箱，再點選忘記密碼。");
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("📩 密碼重設信已寄出至 " + email + "，請至信箱收信並設定新密碼！");
+      } catch (err) {
+        showAuthError(translateFirebaseError(err.code));
+      }
+    };
+
+    window.handleLogout = async function() {
+      if (confirm("確定要登出雲端帳號嗎？（雲端資料皆已安全保存）")) {
+        await signOut(auth);
+      }
+    };
+  </script>
+
+  <!-- 核心業務邏輯（與雲端雙向連動） -->
   <script>
     const STORAGE_KEY = "civilcost_data_v6";
     let isPro = false;
@@ -566,7 +886,6 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          // 兼容舊版資料自動補上工期預設欄位
           return {
             ...JSON.parse(JSON.stringify(defaultState)),
             ...parsed
@@ -578,25 +897,40 @@
       return JSON.parse(JSON.stringify(defaultState));
     }
 
+    window.appState = loadState();
+
+    // 套用從雲端同步下來的最新資料
+    window.applyCloudState = function(cloudData) {
+      window.appState = {
+        ...JSON.parse(JSON.stringify(defaultState)),
+        ...cloudData
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
+      } catch (e) {}
+      renderAll();
+    };
+
     function saveState() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
       } catch (err) {
         console.warn("無法寫入 localStorage:", err);
       }
+      // 若已登入雲端帳號，同步寫入 Firestore
+      if (typeof window.syncToCloud === "function") {
+        window.syncToCloud(window.appState);
+      }
     }
-
-    let appState = loadState();
 
     function resetDemoData() {
       if (confirm("確定要將合約金額、工期、工項、進度與帳目重置為預設範例嗎？")) {
-        appState = JSON.parse(JSON.stringify(defaultState));
+        window.appState = JSON.parse(JSON.stringify(defaultState));
         saveState();
         renderAll();
       }
     }
 
-    // 【新增】工期天數計算核心函式（純本地日期計算，不受時區偏差影響）
     function computeScheduleInfo(startStr, baseEndStr, extraDaysVal) {
       const parseLocal = (str) => {
         const [y, m, d] = (str || "2026-06-01").split("-").map(Number);
@@ -620,16 +954,13 @@
       const todayDt = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const msPerDay = 86400000;
 
-      // 核定總工期（含開工當日）
       const totalDays = Math.max(1, Math.round((finalEndDt - startDt) / msPerDay) + 1);
 
-      // 已工作天數
       let elapsedDays = 0;
       if (todayDt >= startDt) {
         elapsedDays = Math.round((todayDt - startDt) / msPerDay) + 1;
       }
 
-      // 倒數完工日（正數＝尚餘天數，0＝今日完工，負數＝已逾期天數）
       const remainingDays = Math.round((finalEndDt - todayDt) / msPerDay);
       const timeUsagePct = Math.min(100, Math.max(0, fmtPct((elapsedDays / totalDays) * 100)));
 
@@ -646,12 +977,13 @@
     }
 
     function calculateMetrics() {
-      const totalContract = appState.baseContract + appState.extraContract;
+      const sState = window.appState;
+      const totalContract = sState.baseContract + sState.extraContract;
       const categoryActuals = {};
-      appState.wbsBudgets.forEach(w => { categoryActuals[w.name] = 0; });
+      sState.wbsBudgets.forEach(w => { categoryActuals[w.name] = 0; });
 
       let totalActualCost = 0;
-      appState.expenses.forEach(e => {
+      sState.expenses.forEach(e => {
         const subWithTax = Math.round(e.qty * e.price * 1.05);
         totalActualCost += subWithTax;
         if (categoryActuals[e.category] !== undefined) {
@@ -661,13 +993,13 @@
         }
       });
 
-      let totalWbsBudget = appState.wbsBudgets.reduce((sum, w) => sum + w.budget, 0);
+      let totalWbsBudget = sState.wbsBudgets.reduce((sum, w) => sum + w.budget, 0);
       let weightedPlanned = 0;
       let weightedActual = 0;
       let earnedContractValue = 0;
       const delayedItems = [];
 
-      appState.wbsBudgets.forEach(w => {
+      sState.wbsBudgets.forEach(w => {
         const weight = totalWbsBudget > 0 ? (w.budget / totalWbsBudget) : 0;
         weightedPlanned += w.plannedPct * weight;
         weightedActual += w.actualPct * weight;
@@ -703,10 +1035,10 @@
     }
 
     function renderAll() {
+      const sState = window.appState;
       const m = calculateMetrics();
-      const s = computeScheduleInfo(appState.startDate, appState.baseEndDate, appState.extraDays);
+      const s = computeScheduleInfo(sState.startDate, sState.baseEndDate, sState.extraDays);
 
-      // 渲染工期與時程看板
       document.getElementById("totalDurationBadge").textContent = "核定總工期 " + s.totalDays.toLocaleString() + " 天";
       document.getElementById("dispStartDate").textContent = s.startDate;
       document.getElementById("dispFinalEndDate").textContent = s.finalEndDate;
@@ -748,7 +1080,6 @@
         cdNote.textContent = "請確認是否需辦理展延";
       }
 
-      // 延誤預警橫幅
       const alertBanner = document.getElementById("delayAlertBanner");
       if (m.delayedItems.length > 0) {
         alertBanner.classList.remove("hidden");
@@ -761,7 +1092,7 @@
       }
 
       const totalWan = (m.totalContract / 10000).toLocaleString();
-      document.getElementById("mainProjectOption").textContent = appState.projectName + "（合約 " + totalWan + " 萬）";
+      document.getElementById("mainProjectOption").textContent = sState.projectName + "（合約 " + totalWan + " 萬）";
       renderCategorySelect();
 
       document.getElementById("overallPlannedText").textContent = m.weightedPlanned + "%";
@@ -788,8 +1119,8 @@
       }
 
       document.getElementById("kpiBudget").textContent = "NT$ " + m.totalContract.toLocaleString();
-      const extraSign = appState.extraContract >= 0 ? "+" : "";
-      document.getElementById("kpiExtraNote").textContent = "原始 " + (appState.baseContract / 10000).toLocaleString() + "萬 ｜ 變更 " + extraSign + (appState.extraContract / 10000).toLocaleString() + "萬";
+      const extraSign = sState.extraContract >= 0 ? "+" : "";
+      document.getElementById("kpiExtraNote").textContent = "原始 " + (sState.baseContract / 10000).toLocaleString() + "萬 ｜ 變更 " + extraSign + (sState.extraContract / 10000).toLocaleString() + "萬";
 
       document.getElementById("kpiActual").textContent = "NT$ " + m.totalActualCost.toLocaleString();
       document.getElementById("kpiEarnedNote").textContent = "依進度換算產值：NT$ " + m.earnedContractValue.toLocaleString();
@@ -826,11 +1157,10 @@
       updatePlanUI();
     }
 
-    // 【新增】工期設定視窗控制函式
     function openScheduleModal() {
-      document.getElementById("inputStartDate").value = appState.startDate;
-      document.getElementById("inputBaseEndDate").value = appState.baseEndDate;
-      document.getElementById("inputExtraDays").value = appState.extraDays;
+      document.getElementById("inputStartDate").value = window.appState.startDate;
+      document.getElementById("inputBaseEndDate").value = window.appState.baseEndDate;
+      document.getElementById("inputExtraDays").value = window.appState.extraDays;
       updateSchedulePreview();
 
       document.getElementById("scheduleModal").classList.remove("hidden");
@@ -859,9 +1189,9 @@
 
     function saveScheduleSettings(e) {
       e.preventDefault();
-      appState.startDate = document.getElementById("inputStartDate").value;
-      appState.baseEndDate = document.getElementById("inputBaseEndDate").value;
-      appState.extraDays = parseInt(document.getElementById("inputExtraDays").value, 10) || 0;
+      window.appState.startDate = document.getElementById("inputStartDate").value;
+      window.appState.baseEndDate = document.getElementById("inputBaseEndDate").value;
+      window.appState.extraDays = parseInt(document.getElementById("inputExtraDays").value, 10) || 0;
 
       saveState();
       closeScheduleModal();
@@ -871,17 +1201,17 @@
     function renderCategorySelect() {
       const select = document.getElementById("expCategory");
       const currentVal = select.value;
-      select.innerHTML = appState.wbsBudgets.map(w =>
+      select.innerHTML = window.appState.wbsBudgets.map(w =>
         '<option value="' + w.name + '">' + w.name + '</option>'
       ).join("");
-      if (appState.wbsBudgets.some(w => w.name === currentVal)) {
+      if (window.appState.wbsBudgets.some(w => w.name === currentVal)) {
         select.value = currentVal;
       }
     }
 
     function renderWBS(categoryActuals) {
       const container = document.getElementById("wbsContainer");
-      container.innerHTML = appState.wbsBudgets.map(item => {
+      container.innerHTML = window.appState.wbsBudgets.map(item => {
         const actualCost = categoryActuals[item.name] || 0;
         const costPct = item.budget > 0 ? Math.round((actualCost / item.budget) * 100) : 0;
         const plannedVal = fmtPct(item.plannedPct);
@@ -929,11 +1259,11 @@
     }
 
     function openBudgetModal(focusNewInput = false) {
-      document.getElementById("inputProjectName").value = appState.projectName;
-      document.getElementById("inputBaseContract").value = appState.baseContract;
-      document.getElementById("inputExtraContract").value = appState.extraContract;
+      document.getElementById("inputProjectName").value = window.appState.projectName;
+      document.getElementById("inputBaseContract").value = window.appState.baseContract;
+      document.getElementById("inputExtraContract").value = window.appState.extraContract;
 
-      tempWbsList = JSON.parse(JSON.stringify(appState.wbsBudgets));
+      tempWbsList = JSON.parse(JSON.stringify(window.appState.wbsBudgets));
       renderTempWbsRows();
 
       document.getElementById("budgetModal").classList.remove("hidden");
@@ -1011,10 +1341,10 @@
 
     function saveBudgetSettings(e) {
       e.preventDefault();
-      appState.projectName = document.getElementById("inputProjectName").value.trim();
-      appState.baseContract = Number(document.getElementById("inputBaseContract").value) || 0;
-      appState.extraContract = Number(document.getElementById("inputExtraContract").value) || 0;
-      appState.wbsBudgets = tempWbsList;
+      window.appState.projectName = document.getElementById("inputProjectName").value.trim();
+      window.appState.baseContract = Number(document.getElementById("inputBaseContract").value) || 0;
+      window.appState.extraContract = Number(document.getElementById("inputExtraContract").value) || 0;
+      window.appState.wbsBudgets = tempWbsList;
 
       saveState();
       closeBudgetModal();
@@ -1023,7 +1353,7 @@
 
     function openProgressModal() {
       const container = document.getElementById("progressInputsContainer");
-      container.innerHTML = appState.wbsBudgets.map((w, idx) =>
+      container.innerHTML = window.appState.wbsBudgets.map((w, idx) =>
         '<div class="grid grid-cols-12 items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">' +
           '<div class="col-span-6 text-xs font-semibold text-slate-700">' + w.name + '</div>' +
           '<div class="col-span-3"><input type="number" id="plannedInput_' + idx + '" value="' + fmtPct(w.plannedPct) + '" min="0" max="100" step="0.01" required class="w-full border border-slate-300 rounded px-2 py-1 text-xs text-center bg-white"></div>' +
@@ -1042,7 +1372,7 @@
 
     function saveProgressSettings(e) {
       e.preventDefault();
-      appState.wbsBudgets.forEach((w, idx) => {
+      window.appState.wbsBudgets.forEach((w, idx) => {
         const rawPlanned = parseFloat(document.getElementById("plannedInput_" + idx).value);
         const rawActual = parseFloat(document.getElementById("actualInput_" + idx).value);
         w.plannedPct = fmtPct(Math.min(100, Math.max(0, isNaN(rawPlanned) ? 0 : rawPlanned)));
@@ -1055,7 +1385,7 @@
 
     function renderExpenses() {
       const tbody = document.getElementById("expenseTableBody");
-      tbody.innerHTML = appState.expenses.map((e, idx) => {
+      tbody.innerHTML = window.appState.expenses.map((e, idx) => {
         const subtotal = e.qty * e.price;
         const totalWithTax = Math.round(subtotal * 1.05);
         return '<tr class="hover:bg-slate-50">' +
@@ -1073,19 +1403,19 @@
     }
 
     function openEditExpenseModal(idx) {
-      const exp = appState.expenses[idx];
+      const exp = window.appState.expenses[idx];
       if (!exp) return;
 
       document.getElementById("editExpIndex").value = idx;
       document.getElementById("editExpDate").value = exp.date;
 
       const catSelect = document.getElementById("editExpCategory");
-      const optionsHtml = appState.wbsBudgets.map(w =>
+      const optionsHtml = window.appState.wbsBudgets.map(w =>
         '<option value="' + w.name + '">' + w.name + '</option>'
       ).join("");
       catSelect.innerHTML = optionsHtml;
 
-      if (!appState.wbsBudgets.some(w => w.name === exp.category)) {
+      if (!window.appState.wbsBudgets.some(w => w.name === exp.category)) {
         catSelect.innerHTML += '<option value="' + exp.category + '">' + exp.category + '（已移除工項）</option>';
       }
       catSelect.value = exp.category;
@@ -1116,10 +1446,10 @@
     function saveEditedExpense(e) {
       e.preventDefault();
       const idx = Number(document.getElementById("editExpIndex").value);
-      if (!appState.expenses[idx]) return;
+      if (!window.appState.expenses[idx]) return;
 
-      appState.expenses[idx] = {
-        ...appState.expenses[idx],
+      window.appState.expenses[idx] = {
+        ...window.appState.expenses[idx],
         date: document.getElementById("editExpDate").value,
         category: document.getElementById("editExpCategory").value,
         vendor: document.getElementById("editExpVendor").value.trim(),
@@ -1142,7 +1472,7 @@
       const price = Number(document.getElementById("expPrice").value);
       const today = new Date().toISOString().split("T")[0];
 
-      appState.expenses.unshift({ date: today, category, vendor, item, qty, price, hasPhoto: false });
+      window.appState.expenses.unshift({ date: today, category, vendor, item, qty, price, hasPhoto: false });
       saveState();
 
       e.target.reset();
@@ -1152,7 +1482,7 @@
 
     function deleteExpense(idx) {
       if (confirm("確定要刪除這筆叫料/發包紀錄嗎？")) {
-        appState.expenses.splice(idx, 1);
+        window.appState.expenses.splice(idx, 1);
         saveState();
         renderAll();
       }
@@ -1161,6 +1491,7 @@
     function updatePlanUI() {
       const btn = document.getElementById("togglePlanBtn");
       const proOpt = document.getElementById("proProjectOption");
+      if (!btn || !proOpt) return;
       if (isPro) {
         btn.textContent = "進階付費版 PRO ★";
         btn.className = "text-xs font-bold px-2.5 py-0.5 rounded-full pro-badge text-white transition shadow";
@@ -1208,8 +1539,9 @@
     }
 
     function exportCSV() {
+      const sState = window.appState;
       const m = calculateMetrics();
-      const s = computeScheduleInfo(appState.startDate, appState.baseEndDate, appState.extraDays);
+      const s = computeScheduleInfo(sState.startDate, sState.baseEndDate, sState.extraDays);
       let totalSubtotal = 0;
       let totalTax = 0;
       let totalWithTax = 0;
@@ -1219,7 +1551,7 @@
       let csv = "\uFEFF";
       csv += "日期,WBS工項,廠商,品名,數量,未稅單價,未稅小計,營業稅(5%),含稅總額\n";
 
-      appState.expenses.forEach(e => {
+      sState.expenses.forEach(e => {
         const sub = Math.round(e.qty * e.price);
         const withTax = Math.round(sub * 1.05);
         const tax = withTax - sub;
@@ -1243,7 +1575,7 @@
       csv += ",,,,,明細支出總計," + totalSubtotal + "," + totalTax + "," + totalWithTax + "\n\n";
 
       csv += "【專案合約、工期與目前損益總表】,,,,,,,,\n";
-      csv += "工程案場名稱," + esc(appState.projectName) + ",,,,,,,\n";
+      csv += "工程案場名稱," + esc(sState.projectName) + ",,,,,,,\n";
       csv += "正式開工日期," + esc(s.startDate) + ",,,,,,,\n";
       csv += "原始預計完工日," + esc(s.baseEndDate) + ",,,,,,,\n";
       csv += "核定追加工期天數," + s.extraDays + " 天,,,,,,,\n";
@@ -1263,7 +1595,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = appState.projectName + "_成本與進度明細表.csv";
+      a.download = sState.projectName + "_成本與進度明細表.csv";
       a.click();
     }
 
@@ -1275,10 +1607,10 @@
       chartInstance = new Chart(ctx, {
         type: "doughnut",
         data: {
-          labels: appState.wbsBudgets.map(w => w.name.split("（")[0]),
+          labels: window.appState.wbsBudgets.map(w => w.name.split("（")[0]),
           datasets: [{
-            data: appState.wbsBudgets.map(w => categoryActuals[w.name] || 0),
-            backgroundColor: appState.wbsBudgets.map((_, i) => palette[i % palette.length]),
+            data: window.appState.wbsBudgets.map(w => categoryActuals[w.name] || 0),
+            backgroundColor: window.appState.wbsBudgets.map((_, i) => palette[i % palette.length]),
             borderWidth: 0
           }]
         },
