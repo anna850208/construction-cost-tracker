@@ -322,7 +322,7 @@
         </button>
       </div>
 
-      <!-- Pro 專屬功能列 -->
+      <!-- 附加照片與 CSV 匯出功能列 -->
       <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
         <button type="button" id="attachPhotoBtn" onclick="triggerReceiptUpload('add')" class="text-xs flex items-center gap-1.5 text-slate-700 hover:text-amber-700 bg-amber-50/60 hover:bg-amber-100/70 border border-amber-200 px-3 py-1.5 rounded-lg font-semibold transition">
           📷 附加送貨單/簽收單照片 <span id="photoProTag" class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded">PRO</span>
@@ -330,9 +330,6 @@
         <div class="flex items-center gap-2">
           <button type="button" onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium">
             下載進料明細與進度 CSV（免費）
-          </button>
-          <button type="button" onclick="handleProAction('一鍵產出廠商月結請款單與業主估驗計價表')" class="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg font-medium">
-            產出估驗請款單 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded ml-1">PRO</span>
           </button>
         </div>
       </div>
@@ -767,7 +764,6 @@
         <li>✅ <strong>無限個工地案場</strong>同時管理與跨案場數量統計</li>
         <li>✅ <strong>工地送貨單拍照上傳＋多張 ZIP 批次下載</strong></li>
         <li>✅ <strong>變更設計追加減帳</strong>與即時工期控管</li>
-        <li>✅ 一鍵匯出<strong>業主估驗計價表</strong>與<strong>廠商保留款明細</strong></li>
       </ul>
       <div class="pt-2 flex flex-col gap-2">
         <button type="button" onclick="activateProDemo()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition">
@@ -1147,7 +1143,6 @@
         .map((e, idx) => ({ e, idx }))
         .filter(item => Boolean(item.e.photo));
 
-      // 清理無效的 index
       const validSet = new Set(photoEntries.map(item => item.idx));
       selectedPhotoIndices.forEach(idx => {
         if (!validSet.has(idx)) selectedPhotoIndices.delete(idx);
@@ -1159,7 +1154,6 @@
       const totalBadge = document.getElementById("photoTotalBadge");
       if (totalBadge) totalBadge.textContent = totalPhotos + " 張單據";
 
-      // 同步明細表上的全選框狀態
       const headerCb = document.getElementById("selectAllPhotosCheckbox");
       if (headerCb) {
         headerCb.disabled = totalPhotos === 0;
@@ -1167,13 +1161,11 @@
         headerCb.indeterminate = selectedCount > 0 && selectedCount < totalPhotos;
       }
 
-      // 同步明細表上的單筆勾選框
       photoEntries.forEach(({ idx }) => {
         const rowCb = document.getElementById("rowPhotoCb_" + idx);
         if (rowCb) rowCb.checked = selectedPhotoIndices.has(idx);
       });
 
-      // 明細表右上角快捷批次下載列
       const inlineBar = document.getElementById("inlineBatchActionBar");
       const inlineText = document.getElementById("inlineSelectedCountText");
       if (inlineBar && inlineText) {
@@ -1187,7 +1179,6 @@
         }
       }
 
-      // 批次視窗内的計數提示
       const modalHint = document.getElementById("batchModalCountHint");
       if (modalHint) {
         modalHint.textContent = "已勾選 " + selectedCount + " / " + totalPhotos + " 張";
@@ -1223,7 +1214,6 @@
         return;
       }
 
-      // 若目前一張都沒選，開啟視窗時貼心預設全選（使用者可隨時取消部分勾選）
       if (selectedPhotoIndices.size === 0) {
         photoEntries.forEach(({ idx }) => selectedPhotoIndices.add(idx));
       }
@@ -2572,7 +2562,6 @@
       const qty = Number(document.getElementById("expQty").value);
       const unit = document.getElementById("expUnit").value.trim() || "式";
 
-      // 新紀錄插入最前面時，原有勾選 index 順移 +1
       const shifted = new Set();
       selectedPhotoIndices.forEach(oldIdx => shifted.add(oldIdx + 1));
       selectedPhotoIndices = shifted;
