@@ -72,12 +72,12 @@
         <div class="flex items-start gap-2.5">
           <span class="text-xl leading-none">🚨</span>
           <div>
-            <h3 class="text-sm font-bold text-rose-800">偵測到主要工程進度延誤警報！</h3>
+            <h3 class="text-sm font-bold text-rose-800">偵測到主要工程工期延誤警報！</h3>
             <p id="delayAlertDetail" class="text-xs text-rose-700 mt-1 leading-relaxed"></p>
           </div>
         </div>
         <button type="button" onclick="openProgressModal()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1.5 rounded-lg transition shadow-xs">
-          更新進度與起迄日期
+          更新起迄與完成度
         </button>
       </div>
     </section>
@@ -97,7 +97,7 @@
           ✎ 設定主/次要工程與預算
         </button>
         <button type="button" onclick="openProgressModal()" class="text-xs bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
-          📊 回報進度%與起迄時間
+          📊 編輯起迄時間與完成度%
         </button>
       </div>
       <button type="button" onclick="handleProAction('新增多個工地案場')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition">
@@ -150,36 +150,21 @@
       </div>
     </section>
 
-    <!-- 整體工程「預計進度 vs. 實際進度」雙進度條總覽 -->
-    <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+    <!-- 整體主要工程「總完成度」進度條總覽（已移除預計%） -->
+    <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-2.5">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 class="font-bold text-sm text-slate-800">主要工程總進度對比（排除管銷/利潤加權）</h2>
-          <p class="text-[11px] text-slate-400">僅依「主要工程項目」預算權重自動加權計算，精準反映現場開會施工進度</p>
+          <h2 class="font-bold text-sm text-slate-800">主要工程總完成度（排除管銷/利潤加權）</h2>
+          <p class="text-[11px] text-slate-400">依各主要工程預算權重與「實際起迄 − 計劃起迄」完成度自動加權計算</p>
         </div>
-        <div id="overallScheduleBadge" class="text-xs font-bold px-3 py-1 rounded-full"></div>
+        <div class="flex items-center gap-2">
+          <div id="overallScheduleBadge" class="text-xs font-bold px-3 py-1 rounded-full"></div>
+          <span id="overallActualText" class="text-lg font-extrabold text-sky-700">0.0%</span>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
-          <div class="flex justify-between text-xs mb-1.5">
-            <span class="font-semibold text-slate-600">📅 預計累計進度（計劃排程）</span>
-            <span id="overallPlannedText" class="font-bold text-slate-800">0.0%</span>
-          </div>
-          <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-            <div id="overallPlannedBar" class="bg-slate-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
-          </div>
-        </div>
-
-        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
-          <div class="flex justify-between text-xs mb-1.5">
-            <span class="font-semibold text-slate-600">🏗️ 實際完成度（現場核定）</span>
-            <span id="overallActualText" class="font-bold text-sky-700">0.0%</span>
-          </div>
-          <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-            <div id="overallActualBar" class="bg-sky-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
-          </div>
-        </div>
+      <div class="w-full bg-slate-200 rounded-full h-3.5 overflow-hidden">
+        <div id="overallActualBar" class="bg-sky-500 h-3.5 rounded-full transition-all duration-500" style="width: 0%"></div>
       </div>
     </section>
 
@@ -216,20 +201,20 @@
       </div>
     </section>
 
-    <!-- 中間區塊：主要工程項目（含次要子項目、計劃/實際起迄時間、完成度%） -->
+    <!-- 中間區塊：主要工程項目（含次要子項目、計劃/實際起迄時間、完成度% 與提早/延誤天數） -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
           <div>
-            <h2 class="font-bold text-sm text-slate-800">主要工程項目進度（含次要子項目、起迄時間與完成度 %）</h2>
-            <p class="text-[11px] text-slate-400">點擊主工項可展開/收合次要子項目；管銷利潤項目不列入進度條</p>
+            <h2 class="font-bold text-sm text-slate-800">主要工程項目進度（起迄時間、完成度 % 與提早/延誤天數）</h2>
+            <p class="text-[11px] text-slate-400">依「實際起迄 − 計劃起迄」自動計算完成度 %，並顯示提早或延誤天數</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openBudgetModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg font-semibold transition">
               + 新增主/次要項目
             </button>
             <button type="button" onclick="openProgressModal()" class="text-xs bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg font-semibold shadow-xs transition">
-              📊 編輯進度與起迄
+              📊 編輯起迄與完成度
             </button>
           </div>
         </div>
@@ -247,14 +232,14 @@
           <canvas id="costChart"></canvas>
         </div>
         <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-slate-400 inline-block"></span> 灰色條：預計排程進度</div>
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block"></span> 綠色條：實際完成度正常/超前</div>
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block"></span> 紅色條：實際完成度延誤落後</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block"></span> 綠色狀態：如期 / 提早完成</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-sky-500 inline-block"></span> 藍色進度條：依計劃日期施工中</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block"></span> 紅色警示：已超過計劃迄日（延誤）</div>
         </div>
       </div>
     </section>
 
-    <!-- 現場快速記帳表單（精簡為：日期時間、名稱、規格、數量、單價） -->
+    <!-- 現場快速記帳表單（日期時間、名稱、規格、數量、單價） -->
     <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div>
@@ -268,35 +253,30 @@
       </div>
 
       <form onsubmit="addExpense(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2.5">
-        <!-- 1. 日期時間 -->
         <div class="md:col-span-3">
           <label class="block text-[11px] font-semibold text-slate-500 mb-1">日期時間</label>
           <input id="expDateTime" type="datetime-local" required
             class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-800 focus:border-amber-500 focus:outline-none">
         </div>
 
-        <!-- 2. 名稱 -->
         <div class="md:col-span-3">
           <label class="block text-[11px] font-semibold text-slate-500 mb-1">名稱</label>
           <input id="expName" type="text" placeholder="如：預拌混凝土 / H型鋼" required
             class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
-        <!-- 3. 規格 -->
         <div class="md:col-span-2">
           <label class="block text-[11px] font-semibold text-slate-500 mb-1">規格</label>
           <input id="expSpec" type="text" placeholder="如：4000psi / 27支" required
             class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
-        <!-- 4. 數量 -->
         <div class="md:col-span-1">
           <label class="block text-[11px] font-semibold text-slate-500 mb-1">數量</label>
           <input id="expQty" type="number" placeholder="數量" min="0.01" step="any" value="1" required
             class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
-        <!-- 5. 單價 -->
         <div class="md:col-span-2">
           <label class="block text-[11px] font-semibold text-slate-500 mb-1">單價（未稅）</label>
           <input id="expPrice" type="number" placeholder="單價" min="1" step="any" required
@@ -476,7 +456,7 @@
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
           <h3 class="text-lg font-bold text-slate-900">合約金額與主/次要工程項目設定</h3>
-          <p class="text-xs text-slate-500 mt-0.5">每個主要工程底下可新增多筆「次要工程子項目（如 1.3.1 地界線及開挖放樣）」</p>
+          <p class="text-xs text-slate-500 mt-0.5">每個主要工程底下可新增多筆「次要工程子項目（如 1.1 土方開挖）」</p>
         </div>
         <button type="button" onclick="closeBudgetModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
@@ -510,7 +490,7 @@
           <div id="majorWbsInputsContainer" class="space-y-2.5 max-h-60 overflow-y-auto pr-1"></div>
 
           <div class="bg-sky-50/70 p-2 rounded-xl border border-sky-200 flex flex-wrap sm:flex-nowrap items-center gap-2">
-            <input id="newMajorName" type="text" placeholder="新增主要工程（如：1.3 地工工程）"
+            <input id="newMajorName" type="text" placeholder="新增主要工程（如：1.土方水保雜項工程）"
               class="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:border-sky-500 focus:outline-none">
             <input id="newMajorBudget" type="number" placeholder="預算金額（元）" min="0"
               class="w-32 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-right focus:border-sky-500 focus:outline-none">
@@ -559,13 +539,13 @@
     </div>
   </div>
 
-  <!-- 【升級】視窗 B：開會進度編輯器（輸入子項目數值即自動即時計算上方主工項平均 %） -->
+  <!-- 【升級】視窗 B：開會起迄時間與完成度（%）編輯表（拿掉預計%，依實際起迄−計劃起迄自動計算完成度與提早/延誤天數） -->
   <div id="progressModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
           <h3 class="text-lg font-bold text-slate-900">開會進度、起迄時間與完成度（%）編輯表</h3>
-          <p class="text-xs text-slate-500 mt-0.5">輸入下方次要項目的「預計%」或「完成度%」時，上方主工項進度會<strong>即時自動計算平均值</strong></p>
+          <p class="text-xs text-slate-500 mt-0.5">輸入「計劃起迄」與「實際起迄」後，系統將<strong>自動計算完成度 %</strong>，並顯示<strong>提早完成或延誤幾天</strong></p>
         </div>
         <button type="button" onclick="closeProgressModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
@@ -904,9 +884,9 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（支援子項目即時自動計算主工項完成度 %） -->
+  <!-- 核心業務邏輯（依實際起迄 − 計劃起迄自動計算完成度 % 與提早/延誤天數） -->
   <script>
-    const STORAGE_KEY = "civilcost_data_v8";
+    const STORAGE_KEY = "civilcost_data_v9";
     let isPro = false;
     let chartInstance = null;
     let tempWbsList = [];
@@ -921,6 +901,125 @@
       return y + "-" + m + "-" + d + "T" + hh + ":" + mm;
     }
 
+    function fmtPct(num) {
+      return Number(Number(num).toFixed(2));
+    }
+
+    // 核心公式：依「計劃起迄」與「實際起迄」自動計算完成度 % 與提早/延誤天數
+    function evaluateDateSchedule(pStart, pEnd, aStart, aEnd, fallbackPct = 0) {
+      const parseLocal = (str) => {
+        if (!str) return null;
+        const [y, m, d] = str.split("-").map(Number);
+        if (!y || !m || !d) return null;
+        return new Date(y, m - 1, d);
+      };
+
+      const ps = parseLocal(pStart);
+      const pe = parseLocal(pEnd);
+      const as = parseLocal(aStart);
+      const ae = parseLocal(aEnd);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const msDay = 86400000;
+
+      // 情況 1：已填入「實際迄」日期（該項已完工 -> 完成度 100%，並比較實際迄 vs 計劃迄）
+      if (ae) {
+        let diffDays = 0;
+        let statusText = "如期完成";
+        let statusType = "ontime"; // early | ontime | delayed
+
+        if (pe) {
+          diffDays = Math.round((ae - pe) / msDay);
+          if (diffDays < 0) {
+            statusText = "提早 " + Math.abs(diffDays) + " 天完成";
+            statusType = "early";
+          } else if (diffDays > 0) {
+            statusText = "延誤 " + diffDays + " 天完成";
+            statusType = "delayed";
+          }
+        }
+        return {
+          pct: 100,
+          diffDays,
+          statusText,
+          statusType,
+          isCompleted: true,
+          isDelayed: diffDays > 0
+        };
+      }
+
+      // 情況 2：已填入「實際起」但尚未填「實際迄」（施工中）
+      if (as) {
+        let pct = fallbackPct || 0;
+        if (ps && pe) {
+          const plannedDuration = Math.max(1, Math.round((pe - ps) / msDay) + 1);
+          const elapsed = Math.max(0, Math.round((today - as) / msDay) + 1);
+          pct = fmtPct(Math.min(99, Math.max(0, (elapsed / plannedDuration) * 100)));
+        }
+
+        if (pe && today > pe) {
+          const overDays = Math.round((today - pe) / msDay);
+          return {
+            pct,
+            diffDays: overDays,
+            statusText: "延誤 " + overDays + " 天（施工中）",
+            statusType: "delayed",
+            isCompleted: false,
+            isDelayed: true
+          };
+        }
+
+        return {
+          pct,
+          diffDays: 0,
+          statusText: "施工中",
+          statusType: "progress",
+          isCompleted: false,
+          isDelayed: false
+        };
+      }
+
+      // 情況 3：尚未填入實際日期
+      if (pe && today > pe && (fallbackPct || 0) < 100) {
+        const overDays = Math.round((today - pe) / msDay);
+        return {
+          pct: fmtPct(fallbackPct || 0),
+          diffDays: overDays,
+          statusText: "已逾期 " + overDays + " 天未完工",
+          statusType: "delayed",
+          isCompleted: false,
+          isDelayed: true
+        };
+      }
+
+      return {
+        pct: fmtPct(fallbackPct || 0),
+        diffDays: 0,
+        statusText: pStart ? "尚未開始" : "未設定日期",
+        statusType: "pending",
+        isCompleted: false,
+        isDelayed: false
+      };
+    }
+
+    function renderScheduleStatusBadge(evalRes, compact = false) {
+      if (!evalRes || !evalRes.statusText) return "";
+      const pad = compact ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-0.5 text-[11px]";
+      if (evalRes.statusType === "early") {
+        return '<span class="' + pad + ' rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">⚡ ' + evalRes.statusText + '</span>';
+      }
+      if (evalRes.statusType === "ontime") {
+        return '<span class="' + pad + ' rounded font-bold bg-emerald-100 text-emerald-700">✓ ' + evalRes.statusText + '</span>';
+      }
+      if (evalRes.statusType === "delayed") {
+        return '<span class="' + pad + ' rounded font-bold bg-rose-600 text-white">⚠️ ' + evalRes.statusText + '</span>';
+      }
+      if (evalRes.statusType === "progress") {
+        return '<span class="' + pad + ' rounded font-semibold bg-sky-100 text-sky-800">🔨 ' + evalRes.statusText + '</span>';
+      }
+      return '<span class="' + pad + ' rounded font-medium bg-slate-100 text-slate-500">' + evalRes.statusText + '</span>';
+    }
+
     const defaultState = {
       projectName: "新應材龍科廠新建工程",
       startDate: "2026-08-02",
@@ -930,114 +1029,119 @@
       extraContract: 0,
       wbsBudgets: [
         {
-          name: "1.3 地工工程",
+          name: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）",
           budget: 202372537,
-          plannedStart: "2026-08-02",
-          plannedEnd: "2027-03-15",
-          actualStart: "2026-08-02",
+          plannedStart: "2026-11-02",
+          plannedEnd: "2026-12-31",
+          actualStart: "2026-11-02",
           actualEnd: "",
-          plannedPct: 87.5,
-          actualPct: 70.67,
+          actualPct: 100,
           isMajor: true,
           expanded: true,
           subItems: [
-            { name: "1.3.1 地界線及開挖放樣", plannedStart: "2026-08-02", plannedEnd: "2026-08-02", actualStart: "2026-08-02", actualEnd: "2026-08-02", plannedPct: 100, actualPct: 100 },
-            { name: "1.3.2 放樣點保護", plannedStart: "2026-08-03", plannedEnd: "2026-08-07", actualStart: "2026-08-03", actualEnd: "2026-08-06", plannedPct: 100, actualPct: 100 },
-            { name: "1.3.3 擋土支撐工程-H型鋼排樁 (27/225)", plannedStart: "2026-08-08", plannedEnd: "2026-08-23", actualStart: "2026-08-07", actualEnd: "", plannedPct: 100, actualPct: 12 },
-            { name: "1.3.4 基樁工程 (54/59)", plannedStart: "2026-08-22", plannedEnd: "2026-11-30", actualStart: "2026-08-31", actualEnd: "", plannedPct: 95, actualPct: 92 },
-            { name: "1.3.5 擋土支撐工程-預壘樁 (229/305)", plannedStart: "2026-08-10", plannedEnd: "2026-12-20", actualStart: "2026-08-10", actualEnd: "", plannedPct: 80, actualPct: 75 },
-            { name: "1.3.7 擋土支撐工程-CCP止水樁 (198/436)", plannedStart: "2026-12-01", plannedEnd: "2026-12-25", actualStart: "2026-11-02", actualEnd: "", plannedPct: 50, actualPct: 45 }
+            { name: "1.1 土方開挖", plannedStart: "2026-11-02", plannedEnd: "2026-11-26", actualStart: "2026-11-02", actualEnd: "2026-11-24", actualPct: 100 },
+            { name: "1.2 擋土牆", plannedStart: "2026-11-11", plannedEnd: "2026-11-25", actualStart: "2026-11-12", actualEnd: "2026-12-03", actualPct: 100 }
           ]
         },
         {
-          name: "貳、地下停車場工程",
+          name: "2. 地下停車場工程",
           budget: 82928998,
-          plannedStart: "2026-11-01",
+          plannedStart: "2026-12-01",
           plannedEnd: "2027-04-15",
-          actualStart: "2026-11-05",
+          actualStart: "2026-11-20",
           actualEnd: "",
-          plannedPct: 40,
-          actualPct: 42,
+          actualPct: 6,
           isMajor: true,
           expanded: false,
-          subItems: []
+          subItems: [
+            { name: "2.1 停車格劃線", plannedStart: "2027-04-01", plannedEnd: "2027-04-15", actualStart: "", actualEnd: "", actualPct: 0 }
+          ]
         },
         {
-          name: "參、A棟廠辦新建工程",
+          name: "3. A棟廠辦新建工程",
           budget: 709570040,
           plannedStart: "2027-01-10",
           plannedEnd: "2027-06-30",
           actualStart: "",
           actualEnd: "",
-          plannedPct: 25,
-          actualPct: 25,
+          actualPct: 0,
           isMajor: true,
           expanded: false,
           subItems: []
         },
         {
-          name: "肆、B/C棟倉庫及警衛室工程",
+          name: "4. B/C棟倉庫及警衛室工程",
           budget: 94865716,
           plannedStart: "2027-02-01",
           plannedEnd: "2027-06-15",
           actualStart: "",
           actualEnd: "",
-          plannedPct: 15,
-          actualPct: 12,
+          actualPct: 0,
           isMajor: true,
           expanded: false,
           subItems: []
         },
         {
-          name: "伍、戶外景觀與BIM作業",
+          name: "5. 戶外景觀與BIM作業",
           budget: 25048097,
           plannedStart: "2026-08-02",
           plannedEnd: "2027-06-30",
           actualStart: "2026-08-02",
           actualEnd: "",
-          plannedPct: 50,
-          actualPct: 55,
+          actualPct: 35,
           isMajor: true,
           expanded: false,
           subItems: []
         },
-        { name: "玖、工程品質管理費（含材料試驗）", budget: 5573927, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
-        { name: "拾、職業安全衛生管理費", budget: 4459142, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
-        { name: "拾壹、交通維持.環境保護費", budget: 3344356, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
-        { name: "拾貳、包商利潤及管理費", budget: 89182831, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
-        { name: "拾參、清安費", budget: 3344356, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] }
+        { name: "玖、工程品質管理費（含材料試驗）", budget: 5573927, actualPct: 0, isMajor: false, subItems: [] },
+        { name: "拾、職業安全衛生管理費", budget: 4459142, actualPct: 0, isMajor: false, subItems: [] },
+        { name: "拾壹、交通維持.環境保護費", budget: 3344356, actualPct: 0, isMajor: false, subItems: [] },
+        { name: "拾貳、包商利潤及管理費", budget: 89182831, actualPct: 0, isMajor: false, subItems: [] },
+        { name: "拾參、清安費", budget: 3344356, actualPct: 0, isMajor: false, subItems: [] }
       ],
       expenses: [
-        { dateTime: "2026-11-27T14:30", category: "1.3 地工工程", name: "預拌混凝土", spec: "4000psi（車次）", qty: 120, price: 2850 },
-        { dateTime: "2026-11-26T09:15", category: "1.3 地工工程", name: "H型鋼排樁材料", spec: "H300×300×10×15", qty: 27, price: 18500 },
-        { dateTime: "2026-11-24T16:00", category: "1.3 地工工程", name: "塔式起重機租賃", spec: "含操作人員/月", qty: 2, price: 1487854 },
+        { dateTime: "2026-11-27T14:30", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "預拌混凝土", spec: "4000psi（車次）", qty: 120, price: 2850 },
+        { dateTime: "2026-11-26T09:15", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "H型鋼排樁材料", spec: "H300×300×10×15", qty: 27, price: 18500 },
+        { dateTime: "2026-11-24T16:00", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "塔式起重機租賃", spec: "含操作人員/月", qty: 2, price: 1487854 },
         { dateTime: "2026-11-20T10:45", category: "拾、職業安全衛生管理費", name: "工地安全警示設施", spec: "全區圍籬及告示牌", qty: 1, price: 1500120 }
       ]
     };
 
-    function fmtPct(num) {
-      return Number(Number(num).toFixed(2));
-    }
-
     function normalizeWbsList(list) {
-      return (list || []).map(w => ({
-        plannedStart: "",
-        plannedEnd: "",
-        actualStart: "",
-        actualEnd: "",
-        expanded: false,
-        ...w,
-        isMajor: w.isMajor !== undefined ? Boolean(w.isMajor) : true,
-        subItems: Array.isArray(w.subItems) ? w.subItems.map(sub => ({
+      return (list || []).map(w => {
+        const subs = Array.isArray(w.subItems) ? w.subItems.map(sub => {
+          const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
+          return {
+            plannedStart: "",
+            plannedEnd: "",
+            actualStart: "",
+            actualEnd: "",
+            ...sub,
+            actualPct: (sub.plannedStart || sub.actualStart || sub.actualEnd) ? ev.pct : fmtPct(sub.actualPct || 0)
+          };
+        }) : [];
+
+        let mainPct = fmtPct(w.actualPct || 0);
+        if (subs.length > 0) {
+          const sum = subs.reduce((acc, s) => acc + (Number(s.actualPct) || 0), 0);
+          mainPct = fmtPct(sum / subs.length);
+        } else if (w.plannedStart || w.actualStart || w.actualEnd) {
+          const evMain = evaluateDateSchedule(w.plannedStart, w.plannedEnd, w.actualStart, w.actualEnd, w.actualPct);
+          mainPct = evMain.pct;
+        }
+
+        return {
           plannedStart: "",
           plannedEnd: "",
           actualStart: "",
           actualEnd: "",
-          plannedPct: 0,
-          actualPct: 0,
-          ...sub
-        })) : []
-      }));
+          expanded: false,
+          ...w,
+          actualPct: mainPct,
+          isMajor: w.isMajor !== undefined ? Boolean(w.isMajor) : true,
+          subItems: subs
+        };
+      });
     }
 
     function normalizeExpenses(list) {
@@ -1053,7 +1157,7 @@
 
     function loadState() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v7") || localStorage.getItem("civilcost_data_v6");
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v8") || localStorage.getItem("civilcost_data_v7");
         if (saved) {
           const parsed = JSON.parse(saved);
           const merged = {
@@ -1150,6 +1254,54 @@
       };
     }
 
+    function getMainItemScheduleSummary(w) {
+      const subs = w.subItems || [];
+      if (subs.length > 0) {
+        let maxDelay = 0;
+        let maxEarly = 0;
+        let allCompleted = true;
+        subs.forEach(sub => {
+          const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
+          if (!ev.isCompleted) allCompleted = false;
+          if (ev.diffDays > maxDelay) maxDelay = ev.diffDays;
+          if (ev.diffDays < 0 && Math.abs(ev.diffDays) > maxEarly) maxEarly = Math.abs(ev.diffDays);
+        });
+
+        if (maxDelay > 0) {
+          return {
+            pct: fmtPct(w.actualPct),
+            diffDays: maxDelay,
+            statusText: allCompleted ? ("延誤 " + maxDelay + " 天完成") : ("子項目延誤 " + maxDelay + " 天"),
+            statusType: "delayed",
+            isDelayed: true
+          };
+        }
+        if (allCompleted && maxEarly > 0) {
+          return {
+            pct: fmtPct(w.actualPct),
+            diffDays: -maxEarly,
+            statusText: "提早 " + maxEarly + " 天完成",
+            statusType: "early",
+            isDelayed: false
+          };
+        }
+        if (allCompleted) {
+          return {
+            pct: fmtPct(w.actualPct),
+            diffDays: 0,
+            statusText: "如期全部完成",
+            statusType: "ontime",
+            isDelayed: false
+          };
+        }
+      }
+      const ev = evaluateDateSchedule(w.plannedStart, w.plannedEnd, w.actualStart, w.actualEnd, w.actualPct);
+      return {
+        ...ev,
+        pct: fmtPct(w.actualPct)
+      };
+    }
+
     function calculateMetrics() {
       const sState = window.appState;
       const totalContract = sState.baseContract + sState.extraContract;
@@ -1170,21 +1322,18 @@
       const majorItems = sState.wbsBudgets.filter(w => w.isMajor);
       const totalMajorBudget = majorItems.reduce((sum, w) => sum + w.budget, 0);
 
-      let weightedPlanned = 0;
       let weightedActual = 0;
       const delayedItems = [];
 
       majorItems.forEach(w => {
         const weight = totalMajorBudget > 0 ? (w.budget / totalMajorBudget) : 0;
-        weightedPlanned += w.plannedPct * weight;
-        weightedActual += w.actualPct * weight;
+        weightedActual += (Number(w.actualPct) || 0) * weight;
 
-        const diff = fmtPct(w.actualPct - w.plannedPct);
-        if (diff <= -5) {
+        const summary = getMainItemScheduleSummary(w);
+        if (summary.isDelayed) {
           delayedItems.push({
             name: w.name,
-            diff: fmtPct(Math.abs(diff)),
-            planned: fmtPct(w.plannedPct),
+            statusText: summary.statusText,
             actual: fmtPct(w.actualPct)
           });
         }
@@ -1202,7 +1351,6 @@
         currentProfit,
         remainingBudget,
         retention,
-        weightedPlanned: fmtPct(weightedPlanned),
         weightedActual: fmtPct(weightedActual),
         delayedItems,
         categoryActuals
@@ -1264,9 +1412,9 @@
       if (m.delayedItems.length > 0) {
         alertBanner.classList.remove("hidden");
         const listStr = m.delayedItems.map(d =>
-          '<strong class="underline">' + d.name + '</strong>（預計 ' + d.planned + '%，目前僅 ' + d.actual + '%，<strong>落後 ' + d.diff + '%</strong>）'
+          '<strong class="underline">' + d.name + '</strong>（目前完成度 ' + d.actual + '%，<strong>' + d.statusText + '</strong>）'
         ).join("；");
-        document.getElementById("delayAlertDetail").innerHTML = '目前共有 <strong>' + m.delayedItems.length + '</strong> 項主要工程落後排程：' + listStr;
+        document.getElementById("delayAlertDetail").innerHTML = '目前共有 <strong>' + m.delayedItems.length + '</strong> 項主要工程工期延誤：' + listStr;
       } else {
         alertBanner.classList.add("hidden");
       }
@@ -1275,27 +1423,19 @@
       document.getElementById("mainProjectOption").textContent = sState.projectName + "（合約 " + totalWan + " 萬）";
       renderCategorySelect();
 
-      document.getElementById("overallPlannedText").textContent = m.weightedPlanned + "%";
-      document.getElementById("overallPlannedBar").style.width = Math.min(m.weightedPlanned, 100) + "%";
-
       document.getElementById("overallActualText").textContent = m.weightedActual + "%";
       const actualBar = document.getElementById("overallActualBar");
       actualBar.style.width = Math.min(m.weightedActual, 100) + "%";
 
-      const scheduleDiff = fmtPct(m.weightedActual - m.weightedPlanned);
       const badgeEl = document.getElementById("overallScheduleBadge");
-      if (scheduleDiff < -2) {
-        actualBar.className = "bg-rose-500 h-3 rounded-full transition-all duration-500";
+      if (m.delayedItems.length > 0) {
+        actualBar.className = "bg-rose-500 h-3.5 rounded-full transition-all duration-500";
         badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-700";
-        badgeEl.textContent = "⚠️ 總進度落後 " + fmtPct(Math.abs(scheduleDiff)) + "%";
-      } else if (scheduleDiff > 0) {
-        actualBar.className = "bg-emerald-500 h-3 rounded-full transition-all duration-500";
-        badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700";
-        badgeEl.textContent = "🚀 總進度超前 +" + scheduleDiff + "%";
+        badgeEl.textContent = "⚠️ " + m.delayedItems.length + " 項工期延誤";
       } else {
-        actualBar.className = "bg-sky-500 h-3 rounded-full transition-all duration-500";
-        badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-700";
-        badgeEl.textContent = "✅ 進度符合排程";
+        actualBar.className = "bg-emerald-500 h-3.5 rounded-full transition-all duration-500";
+        badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700";
+        badgeEl.textContent = "✅ 工期控管正常";
       }
 
       document.getElementById("kpiBudget").textContent = "NT$ " + m.totalContract.toLocaleString();
@@ -1303,7 +1443,7 @@
       document.getElementById("kpiExtraNote").textContent = "原始 " + Math.round(sState.baseContract / 10000).toLocaleString() + "萬 ｜ 變更 " + extraSign + Math.round(sState.extraContract / 10000).toLocaleString() + "萬";
 
       document.getElementById("kpiActual").textContent = "NT$ " + m.totalActualCost.toLocaleString();
-      document.getElementById("kpiEarnedNote").textContent = "依進度換算產值：NT$ " + m.earnedContractValue.toLocaleString();
+      document.getElementById("kpiEarnedNote").textContent = "依完成度換算產值：NT$ " + m.earnedContractValue.toLocaleString();
 
       const profitCard = document.getElementById("profitStatusCard");
       const profitBadge = document.getElementById("profitStatusBadge");
@@ -1416,6 +1556,7 @@
       return (start || "待定") + " ~ " + (end || "進行中");
     }
 
+    // 主畫面渲染：只留「完成度 %」單一進度條，並在完成度後方加上提早完成或延誤幾天標籤
     function renderWBS(categoryActuals) {
       const container = document.getElementById("wbsContainer");
       const majorWithIdx = window.appState.wbsBudgets
@@ -1429,21 +1570,17 @@
         container.innerHTML = majorWithIdx.map(({ item, idx }) => {
           const actualCost = categoryActuals[item.name] || 0;
           const costPct = item.budget > 0 ? Math.round((actualCost / item.budget) * 100) : 0;
-          const plannedVal = fmtPct(item.plannedPct);
           const actualVal = fmtPct(item.actualPct);
-          const diff = fmtPct(actualVal - plannedVal);
           const subs = item.subItems || [];
+          const summary = getMainItemScheduleSummary(item);
 
-          let statusTag = '<span class="text-[11px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded">進度正常</span>';
-          let actualBarColor = "bg-emerald-500";
+          let barColor = "bg-sky-500";
           let cardBorder = "border-slate-200 bg-slate-50/50";
-
-          if (diff <= -5) {
-            statusTag = '<span class="text-[11px] bg-rose-600 text-white font-bold px-2 py-0.5 rounded">⚠️ 延誤落後 ' + fmtPct(Math.abs(diff)) + '%</span>';
-            actualBarColor = "bg-rose-500";
+          if (summary.statusType === "delayed") {
+            barColor = "bg-rose-500";
             cardBorder = "border-rose-300 bg-rose-50/40";
-          } else if (diff > 0) {
-            statusTag = '<span class="text-[11px] bg-sky-100 text-sky-700 font-bold px-2 py-0.5 rounded">超前 +' + diff + '%</span>';
+          } else if (summary.statusType === "early" || summary.statusType === "ontime") {
+            barColor = "bg-emerald-500";
           }
 
           const toggleBtnHtml = subs.length > 0
@@ -1462,30 +1599,20 @@
                       '<th class="py-1.5 px-2 rounded-tl">次要工程項目</th>' +
                       '<th class="py-1.5 px-2 whitespace-nowrap">計劃起迄</th>' +
                       '<th class="py-1.5 px-2 whitespace-nowrap">實際起迄</th>' +
-                      '<th class="py-1.5 px-2 text-right whitespace-nowrap">預計 / 實際完成度</th>' +
+                      '<th class="py-1.5 px-2 text-right whitespace-nowrap">完成度 % ／ 提早或延誤</th>' +
                     '</tr>' +
                   '</thead>' +
                   '<tbody class="divide-y divide-slate-200/70 bg-white">' +
                     subs.map(sub => {
-                      const sPlan = fmtPct(sub.plannedPct);
-                      const sAct = fmtPct(sub.actualPct);
-                      const sDiff = fmtPct(sAct - sPlan);
-                      let badgeCls = "bg-slate-100 text-slate-700";
-                      let icon = "";
-                      if (sAct >= 100) {
-                        badgeCls = "bg-emerald-100 text-emerald-800 font-bold";
-                        icon = "✓ ";
-                      } else if (sDiff <= -5) {
-                        badgeCls = "bg-rose-100 text-rose-700 font-bold";
-                        icon = "▼ ";
-                      }
+                      const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
+                      const badgeHtml = renderScheduleStatusBadge(ev, true);
                       return '<tr>' +
                         '<td class="py-1.5 px-2 font-medium text-slate-800">' + sub.name + '</td>' +
                         '<td class="py-1.5 px-2 text-slate-500 whitespace-nowrap">' + formatDateRangeText(sub.plannedStart, sub.plannedEnd) + '</td>' +
                         '<td class="py-1.5 px-2 text-slate-600 whitespace-nowrap">' + formatDateRangeText(sub.actualStart, sub.actualEnd) + '</td>' +
-                        '<td class="py-1.5 px-2 text-right whitespace-nowrap">' +
-                          '<span class="text-slate-400 mr-1.5">計 ' + sPlan + '%</span>' +
-                          '<span class="px-1.5 py-0.5 rounded ' + badgeCls + '">' + icon + sAct + '%</span>' +
+                        '<td class="py-1.5 px-2 text-right whitespace-nowrap space-x-1.5">' +
+                          '<span class="font-bold text-slate-800">' + ev.pct + '%</span>' +
+                          badgeHtml +
                         '</td>' +
                       '</tr>';
                     }).join("") +
@@ -1498,7 +1625,6 @@
             '<div class="flex flex-wrap items-center justify-between gap-1.5">' +
               '<div class="flex items-center gap-2 flex-wrap">' +
                 '<span class="font-bold text-xs md:text-sm text-slate-800">' + item.name + '</span>' +
-                statusTag +
                 toggleBtnHtml +
               '</div>' +
               '<span class="text-[11px] text-slate-500">已支 NT$ ' + (actualCost / 10000).toFixed(1) + '萬 / 預算 ' + (item.budget / 10000).toFixed(1) + '萬 (動支 ' + costPct + '%)</span>' +
@@ -1509,21 +1635,14 @@
               '<span>🏗️ 實際起迄：<strong class="text-sky-700">' + formatDateRangeText(item.actualStart, item.actualEnd) + '</strong></span>' +
             '</div>' +
 
-            '<div class="space-y-1.5">' +
-              '<div class="flex items-center gap-2">' +
-                '<span class="text-[11px] text-slate-500 w-14 shrink-0">預計進度</span>' +
-                '<div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">' +
-                  '<div class="bg-slate-400 h-2 rounded-full transition-all duration-500" style="width: ' + plannedVal + '%"></div>' +
-                '</div>' +
-                '<span class="text-[11px] font-semibold text-slate-600 w-12 text-right">' + plannedVal + '%</span>' +
+            '<!-- 單一完成度 % 進度條 + 提早/延誤天數標籤 -->' +
+            '<div class="flex flex-wrap items-center gap-2 pt-0.5">' +
+              '<span class="text-[11px] font-semibold text-slate-700 shrink-0">完成度</span>' +
+              '<div class="flex-1 min-w-[120px] bg-slate-200 rounded-full h-2.5 overflow-hidden">' +
+                '<div class="' + barColor + ' h-2.5 rounded-full transition-all duration-500" style="width: ' + Math.min(actualVal, 100) + '%"></div>' +
               '</div>' +
-              '<div class="flex items-center gap-2">' +
-                '<span class="text-[11px] font-semibold text-slate-700 w-14 shrink-0">完成度</span>' +
-                '<div class="flex-1 bg-slate-200 rounded-full h-2.5 overflow-hidden">' +
-                  '<div class="' + actualBarColor + ' h-2.5 rounded-full transition-all duration-500" style="width: ' + actualVal + '%"></div>' +
-                '</div>' +
-                '<span class="text-[11px] font-bold text-slate-800 w-12 text-right">' + actualVal + '%</span>' +
-              '</div>' +
+              '<span class="text-xs font-extrabold text-slate-800 shrink-0">' + actualVal + '%</span>' +
+              renderScheduleStatusBadge(summary, false) +
             '</div>' +
             subTableHtml +
           '</div>';
@@ -1601,7 +1720,7 @@
               '</div>' +
               subRowsHtml +
               '<div class="flex items-center gap-1.5 pl-4 pt-0.5">' +
-                '<input type="text" id="newSubInput_' + idx + '" placeholder="輸入次要項目（如：1.3.1 地界線及開挖放樣）" class="flex-1 border border-dashed border-sky-300 rounded px-2 py-1 text-[11px] bg-white">' +
+                '<input type="text" id="newSubInput_' + idx + '" placeholder="輸入次要項目（如：1.1 土方開挖）" class="flex-1 border border-dashed border-sky-300 rounded px-2 py-1 text-[11px] bg-white">' +
                 '<button type="button" onclick="addTempSubItem(' + idx + ')" class="text-[11px] bg-sky-100 hover:bg-sky-200 text-sky-800 font-semibold px-2 py-1 rounded whitespace-nowrap">+ 次要項目</button>' +
               '</div>' +
             '</div>';
@@ -1652,7 +1771,6 @@
         plannedEnd: "",
         actualStart: "",
         actualEnd: "",
-        plannedPct: 0,
         actualPct: 0
       });
       tempWbsList[parentIdx].expanded = true;
@@ -1687,7 +1805,6 @@
         plannedEnd: "",
         actualStart: "",
         actualEnd: "",
-        plannedPct: 0,
         actualPct: 0,
         isMajor: isMajorFlag,
         expanded: true,
@@ -1718,14 +1835,14 @@
       window.appState.projectName = document.getElementById("inputProjectName").value.trim();
       window.appState.baseContract = Number(document.getElementById("inputBaseContract").value) || 0;
       window.appState.extraContract = Number(document.getElementById("inputExtraContract").value) || 0;
-      window.appState.wbsBudgets = tempWbsList;
+      window.appState.wbsBudgets = normalizeWbsList(tempWbsList);
 
       saveState();
       closeBudgetModal();
       renderAll();
     }
 
-    // 【升級】開會進度編輯器：輸入子項目數值即自動即時計算上方主工項平均 %
+    // 開會起迄時間與完成度編輯表（只留完成度%，輸入日期即自動計算完成度%與提早/延誤天數）
     function openProgressModal() {
       const container = document.getElementById("progressInputsContainer");
       const majorWithIdx = window.appState.wbsBudgets
@@ -1737,26 +1854,30 @@
       } else {
         container.innerHTML = majorWithIdx.map(({ w, idx }) => {
           const subs = w.subItems || [];
-          const subHtml = subs.map((sub, sIdx) =>
-            '<div class="bg-white p-2.5 rounded-lg border border-slate-200 ml-3 space-y-2">' +
+          const subHtml = subs.map((sub, sIdx) => {
+            const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
+            return '<div class="bg-white p-2.5 rounded-lg border border-slate-200 ml-3 space-y-2">' +
               '<div class="flex flex-wrap items-center justify-between gap-2">' +
                 '<span class="text-xs font-semibold text-slate-700">↳ ' + sub.name + '</span>' +
-                '<div class="flex items-center gap-2 text-[11px]">' +
-                  '<label>預計% <input type="number" id="subPlanPct_' + idx + '_' + sIdx + '" value="' + fmtPct(sub.plannedPct) + '" min="0" max="100" step="0.01" oninput="autoCalcMainFromSubs(' + idx + ')" class="w-16 border border-slate-300 rounded px-1.5 py-0.5 text-center"></label>' +
-                  '<label class="text-sky-700 font-bold">完成度% <input type="number" id="subActPct_' + idx + '_' + sIdx + '" value="' + fmtPct(sub.actualPct) + '" min="0" max="100" step="0.01" oninput="autoCalcMainFromSubs(' + idx + ')" class="w-16 border border-sky-400 rounded px-1.5 py-0.5 text-center"></label>' +
+                '<div class="flex items-center gap-2 text-[11px] flex-wrap">' +
+                  '<label class="text-sky-700 font-bold">完成度% ' +
+                    '<input type="number" id="subActPct_' + idx + '_' + sIdx + '" value="' + ev.pct + '" min="0" max="100" step="0.01" oninput="onSubPctManualChange(' + idx + ')" class="w-16 border border-sky-400 rounded px-1.5 py-0.5 text-center">' +
+                  '</label>' +
+                  '<span id="subStatusBadge_' + idx + '_' + sIdx + '">' + renderScheduleStatusBadge(ev, true) + '</span>' +
                 '</div>' +
               '</div>' +
               '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
-                '<div><span class="text-slate-400 block">計劃起</span><input type="date" id="subPlanStart_' + idx + '_' + sIdx + '" value="' + (sub.plannedStart || "") + '" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
-                '<div><span class="text-slate-400 block">計劃迄</span><input type="date" id="subPlanEnd_' + idx + '_' + sIdx + '" value="' + (sub.plannedEnd || "") + '" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
-                '<div><span class="text-sky-600 block">實際起</span><input type="date" id="subActStart_' + idx + '_' + sIdx + '" value="' + (sub.actualStart || "") + '" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
-                '<div><span class="text-sky-600 block">實際迄</span><input type="date" id="subActEnd_' + idx + '_' + sIdx + '" value="' + (sub.actualEnd || "") + '" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-slate-400 block">計劃起</span><input type="date" id="subPlanStart_' + idx + '_' + sIdx + '" value="' + (sub.plannedStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-slate-400 block">計劃迄</span><input type="date" id="subPlanEnd_' + idx + '_' + sIdx + '" value="' + (sub.plannedEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-sky-600 block">實際起</span><input type="date" id="subActStart_' + idx + '_' + sIdx + '" value="' + (sub.actualStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-sky-600 block">實際迄</span><input type="date" id="subActEnd_' + idx + '_' + sIdx + '" value="' + (sub.actualEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
               '</div>' +
-            '</div>'
-          ).join("");
+            '</div>';
+          }).join("");
 
+          const mainSummary = getMainItemScheduleSummary(w);
           const autoHintTag = subs.length > 0
-            ? '<span class="text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-medium">✨ 子項目輸入即自動算平均</span>'
+            ? '<span class="text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-medium">✨ 依子項目自動計算平均</span>'
             : '';
 
           return '<div class="bg-slate-50 p-3 rounded-xl border border-slate-300 space-y-2.5">' +
@@ -1765,16 +1886,18 @@
                 '<span class="text-xs md:text-sm font-bold text-slate-900">' + w.name + '</span>' +
                 autoHintTag +
               '</div>' +
-              '<div class="flex items-center gap-2 text-xs">' +
-                '<label>預計% <input type="number" id="plannedInput_' + idx + '" value="' + fmtPct(w.plannedPct) + '" min="0" max="100" step="0.01" required class="w-16 border border-slate-300 rounded px-1.5 py-1 text-center bg-white"></label>' +
-                '<label class="text-sky-800 font-bold">完成度% <input type="number" id="actualInput_' + idx + '" value="' + fmtPct(w.actualPct) + '" min="0" max="100" step="0.01" required class="w-16 border border-sky-500 rounded px-1.5 py-1 text-center bg-white transition-colors"></label>' +
+              '<div class="flex items-center gap-2 text-xs flex-wrap">' +
+                '<label class="text-sky-800 font-bold">完成度% ' +
+                  '<input type="number" id="actualInput_' + idx + '" value="' + fmtPct(w.actualPct) + '" min="0" max="100" step="0.01" required class="w-16 border border-sky-500 rounded px-1.5 py-1 text-center bg-white transition-colors">' +
+                '</label>' +
+                '<span id="mainStatusBadge_' + idx + '">' + renderScheduleStatusBadge(mainSummary, false) + '</span>' +
               '</div>' +
             '</div>' +
             '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
-              '<div><span class="text-slate-500 block">主工項計劃起</span><input type="date" id="mainPlanStart_' + idx + '" value="' + (w.plannedStart || "") + '" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
-              '<div><span class="text-slate-500 block">主工項計劃迄</span><input type="date" id="mainPlanEnd_' + idx + '" value="' + (w.plannedEnd || "") + '" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
-              '<div><span class="text-sky-700 block">主工項實際起</span><input type="date" id="mainActStart_' + idx + '" value="' + (w.actualStart || "") + '" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
-              '<div><span class="text-sky-700 block">主工項實際迄</span><input type="date" id="mainActEnd_' + idx + '" value="' + (w.actualEnd || "") + '" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
+              '<div><span class="text-slate-500 block">主工項計劃起</span><input type="date" id="mainPlanStart_' + idx + '" value="' + (w.plannedStart || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
+              '<div><span class="text-slate-500 block">主工項計劃迄</span><input type="date" id="mainPlanEnd_' + idx + '" value="' + (w.plannedEnd || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
+              '<div><span class="text-sky-700 block">主工項實際起</span><input type="date" id="mainActStart_' + idx + '" value="' + (w.actualStart || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
+              '<div><span class="text-sky-700 block">主工項實際迄</span><input type="date" id="mainActEnd_' + idx + '" value="' + (w.actualEnd || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
             '</div>' +
             subHtml +
           '</div>';
@@ -1785,24 +1908,92 @@
       document.getElementById("progressModal").classList.add("flex");
     }
 
-    function autoCalcMainFromSubs(idx) {
+    // 子項目日期變更 -> 自動重算該子項目完成度 % 與提早/延誤天數 -> 同步更新主工項平均
+    function recalcSubRow(idx, sIdx) {
+      const pStart = document.getElementById("subPlanStart_" + idx + "_" + sIdx).value;
+      const pEnd = document.getElementById("subPlanEnd_" + idx + "_" + sIdx).value;
+      const aStart = document.getElementById("subActStart_" + idx + "_" + sIdx).value;
+      const aEnd = document.getElementById("subActEnd_" + idx + "_" + sIdx).value;
+      const currentPct = parseFloat(document.getElementById("subActPct_" + idx + "_" + sIdx).value) || 0;
+
+      const ev = evaluateDateSchedule(pStart, pEnd, aStart, aEnd, currentPct);
+      document.getElementById("subActPct_" + idx + "_" + sIdx).value = ev.pct;
+      document.getElementById("subStatusBadge_" + idx + "_" + sIdx).innerHTML = renderScheduleStatusBadge(ev, true);
+
+      onSubPctManualChange(idx);
+    }
+
+    // 主工項本身日期變更（無子項目時自動重算主工項完成度 % 與提早/延誤天數）
+    function recalcMainRow(idx) {
+      const w = window.appState.wbsBudgets[idx];
+      if (!w) return;
+      const pStart = document.getElementById("mainPlanStart_" + idx).value;
+      const pEnd = document.getElementById("mainPlanEnd_" + idx).value;
+      const aStart = document.getElementById("mainActStart_" + idx).value;
+      const aEnd = document.getElementById("mainActEnd_" + idx).value;
+      const currentPct = parseFloat(document.getElementById("actualInput_" + idx).value) || 0;
+
+      const ev = evaluateDateSchedule(pStart, pEnd, aStart, aEnd, currentPct);
+      if (!w.subItems || w.subItems.length === 0) {
+        document.getElementById("actualInput_" + idx).value = ev.pct;
+      }
+      document.getElementById("mainStatusBadge_" + idx).innerHTML = renderScheduleStatusBadge(ev, false);
+    }
+
+    function onSubPctManualChange(idx) {
       const w = window.appState.wbsBudgets[idx];
       if (!w || !w.subItems || w.subItems.length === 0) return;
-      let sumP = 0;
+
       let sumA = 0;
+      let maxDelay = 0;
+      let maxEarly = 0;
+      let allCompleted = true;
+
       w.subItems.forEach((_, sIdx) => {
-        const pVal = parseFloat(document.getElementById("subPlanPct_" + idx + "_" + sIdx).value);
         const aVal = parseFloat(document.getElementById("subActPct_" + idx + "_" + sIdx).value);
-        sumP += isNaN(pVal) ? 0 : Math.min(100, Math.max(0, pVal));
         sumA += isNaN(aVal) ? 0 : Math.min(100, Math.max(0, aVal));
+
+        const pStart = document.getElementById("subPlanStart_" + idx + "_" + sIdx).value;
+        const pEnd = document.getElementById("subPlanEnd_" + idx + "_" + sIdx).value;
+        const aStart = document.getElementById("subActStart_" + idx + "_" + sIdx).value;
+        const aEnd = document.getElementById("subActEnd_" + idx + "_" + sIdx).value;
+        const ev = evaluateDateSchedule(pStart, pEnd, aStart, aEnd, aVal);
+
+        if (!ev.isCompleted) allCompleted = false;
+        if (ev.diffDays > maxDelay) maxDelay = ev.diffDays;
+        if (ev.diffDays < 0 && Math.abs(ev.diffDays) > maxEarly) maxEarly = Math.abs(ev.diffDays);
       });
-      const mainPlanEl = document.getElementById("plannedInput_" + idx);
+
       const mainActEl = document.getElementById("actualInput_" + idx);
-      if (mainPlanEl) mainPlanEl.value = fmtPct(sumP / w.subItems.length);
       if (mainActEl) {
         mainActEl.value = fmtPct(sumA / w.subItems.length);
         mainActEl.classList.add("bg-sky-50");
         setTimeout(() => mainActEl.classList.remove("bg-sky-50"), 300);
+      }
+
+      const badgeContainer = document.getElementById("mainStatusBadge_" + idx);
+      if (badgeContainer) {
+        if (maxDelay > 0) {
+          badgeContainer.innerHTML = renderScheduleStatusBadge({
+            statusText: allCompleted ? ("延誤 " + maxDelay + " 天完成") : ("子項目延誤 " + maxDelay + " 天"),
+            statusType: "delayed"
+          }, false);
+        } else if (allCompleted && maxEarly > 0) {
+          badgeContainer.innerHTML = renderScheduleStatusBadge({
+            statusText: "提早 " + maxEarly + " 天完成",
+            statusType: "early"
+          }, false);
+        } else if (allCompleted) {
+          badgeContainer.innerHTML = renderScheduleStatusBadge({
+            statusText: "如期全部完成",
+            statusType: "ontime"
+          }, false);
+        } else {
+          badgeContainer.innerHTML = renderScheduleStatusBadge({
+            statusText: "施工中",
+            statusType: "progress"
+          }, false);
+        }
       }
     }
 
@@ -1815,13 +2006,10 @@
       e.preventDefault();
       window.appState.wbsBudgets.forEach((w, idx) => {
         if (!w.isMajor) return;
-        const pEl = document.getElementById("plannedInput_" + idx);
         const aEl = document.getElementById("actualInput_" + idx);
-        if (!pEl || !aEl) return;
+        if (!aEl) return;
 
-        const rawPlanned = parseFloat(pEl.value);
         const rawActual = parseFloat(aEl.value);
-        w.plannedPct = fmtPct(Math.min(100, Math.max(0, isNaN(rawPlanned) ? 0 : rawPlanned)));
         w.actualPct = fmtPct(Math.min(100, Math.max(0, isNaN(rawActual) ? 0 : rawActual)));
 
         w.plannedStart = document.getElementById("mainPlanStart_" + idx).value;
@@ -1831,10 +2019,8 @@
 
         if (Array.isArray(w.subItems)) {
           w.subItems.forEach((sub, sIdx) => {
-            const spEl = document.getElementById("subPlanPct_" + idx + "_" + sIdx);
             const saEl = document.getElementById("subActPct_" + idx + "_" + sIdx);
-            if (spEl && saEl) {
-              sub.plannedPct = fmtPct(Math.min(100, Math.max(0, parseFloat(spEl.value) || 0)));
+            if (saEl) {
               sub.actualPct = fmtPct(Math.min(100, Math.max(0, parseFloat(saEl.value) || 0)));
               sub.plannedStart = document.getElementById("subPlanStart_" + idx + "_" + sIdx).value;
               sub.plannedEnd = document.getElementById("subPlanEnd_" + idx + "_" + sIdx).value;
@@ -2054,9 +2240,8 @@
       csv += "累計已工作天數," + s.elapsedDays + " 天,,,,,,\n";
       csv += "距離完工倒數天數," + (s.remainingDays >= 0 ? s.remainingDays + " 天" : "逾期 " + Math.abs(s.remainingDays) + " 天") + ",,,,,,\n";
       csv += "合約總金額（含追加）," + m.totalContract + ",,,,,,\n";
-      csv += "主要工程加權預計進度," + m.weightedPlanned + "%,,,,,,\n";
       csv += "主要工程加權完成度," + m.weightedActual + "%,,,,,,\n";
-      csv += "依進度換算已完成產值," + m.earnedContractValue + ",,,,,,\n";
+      csv += "依完成度換算已完成產值," + m.earnedContractValue + ",,,,,,\n";
       csv += "累計實際支出總金額（含稅）," + m.totalActualCost + ",,,,,,\n";
       csv += "目前現況損益（正數為盈利/負數為虧損）," + m.currentProfit + ",,,,,,\n";
       csv += "合約剩餘未動支預算," + m.remainingBudget + ",,,,,,\n";
