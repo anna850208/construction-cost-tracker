@@ -66,18 +66,18 @@
       </button>
     </section>
 
-    <!-- 工項延誤自動預警橫幅 -->
+    <!-- 已完工工項延誤預警橫幅（僅在已確定實際完工且延誤時顯示） -->
     <section id="delayAlertBanner" class="hidden bg-rose-50 border-l-4 border-rose-600 rounded-r-xl p-4 shadow-sm">
       <div class="flex flex-wrap items-start justify-between gap-2">
         <div class="flex items-start gap-2.5">
           <span class="text-xl leading-none">🚨</span>
           <div>
-            <h3 class="text-sm font-bold text-rose-800">偵測到主要工程工期延誤警報！</h3>
+            <h3 class="text-sm font-bold text-rose-800">偵測到已完工項目較原訂計劃延誤！</h3>
             <p id="delayAlertDetail" class="text-xs text-rose-700 mt-1 leading-relaxed"></p>
           </div>
         </div>
         <button type="button" onclick="openProgressModal()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1.5 rounded-lg transition shadow-xs">
-          更新起迄與完成度
+          檢視起迄日期
         </button>
       </div>
     </section>
@@ -150,12 +150,12 @@
       </div>
     </section>
 
-    <!-- 整體主要工程「總完成度」進度條總覽（已移除預計%） -->
+    <!-- 整體主要工程「總完成度」進度條總覽 -->
     <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-2.5">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 class="font-bold text-sm text-slate-800">主要工程總完成度（排除管銷/利潤加權）</h2>
-          <p class="text-[11px] text-slate-400">依各主要工程預算權重與「實際起迄 − 計劃起迄」完成度自動加權計算</p>
+          <p class="text-[11px] text-slate-400">依各主要工程預算權重與計劃排程換算完成度自動加權計算</p>
         </div>
         <div class="flex items-center gap-2">
           <div id="overallScheduleBadge" class="text-xs font-bold px-3 py-1 rounded-full"></div>
@@ -201,13 +201,13 @@
       </div>
     </section>
 
-    <!-- 中間區塊：主要工程項目（含次要子項目、計劃/實際起迄時間、完成度% 與提早/延誤天數） -->
+    <!-- 中間區塊：主要工程項目（含次要子項目、計劃/實際起迄時間、完成度% 與狀態） -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
           <div>
-            <h2 class="font-bold text-sm text-slate-800">主要工程項目進度（起迄時間、完成度 % 與提早/延誤天數）</h2>
-            <p class="text-[11px] text-slate-400">依「實際起迄 − 計劃起迄」自動計算完成度 %，並顯示提早或延誤天數</p>
+            <h2 class="font-bold text-sm text-slate-800">主要工程項目進度（起迄時間、完成度 % 與完工結果）</h2>
+            <p class="text-[11px] text-slate-400">施工中依計劃日期換算完成度 %；填寫實際完工日後自動計算提早或延誤天數</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openBudgetModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg font-semibold transition">
@@ -232,9 +232,9 @@
           <canvas id="costChart"></canvas>
         </div>
         <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block"></span> 綠色狀態：如期 / 提早完成</div>
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-sky-500 inline-block"></span> 藍色進度條：依計劃日期施工中</div>
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block"></span> 紅色警示：已超過計劃迄日（延誤）</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-sky-500 inline-block"></span> 施工中：依計劃起迄換算目前進度 %</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block"></span> 已完工：如期完成 / 提早 X 天完成</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block"></span> 已完工：延誤 X 天完成</div>
         </div>
       </div>
     </section>
@@ -539,13 +539,13 @@
     </div>
   </div>
 
-  <!-- 【升級】視窗 B：開會起迄時間與完成度（%）編輯表（拿掉預計%，依實際起迄−計劃起迄自動計算完成度與提早/延誤天數） -->
+  <!-- 視窗 B：開會進度、起迄時間與完成度（%）編輯表 -->
   <div id="progressModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
           <h3 class="text-lg font-bold text-slate-900">開會進度、起迄時間與完成度（%）編輯表</h3>
-          <p class="text-xs text-slate-500 mt-0.5">輸入「計劃起迄」與「實際起迄」後，系統將<strong>自動計算完成度 %</strong>，並顯示<strong>提早完成或延誤幾天</strong></p>
+          <p class="text-xs text-slate-500 mt-0.5">施工中依計劃排程換算完成度 %；填寫確定的「實際迄」日期後，自動顯示提早或延誤幾天完成</p>
         </div>
         <button type="button" onclick="closeProgressModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
@@ -884,9 +884,9 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（依實際起迄 − 計劃起迄自動計算完成度 % 與提早/延誤天數） -->
+  <!-- 核心業務邏輯（施工中依計劃排程換算進度並顯示「施工中」；確定實際完成日才顯示提早/延誤幾天） -->
   <script>
-    const STORAGE_KEY = "civilcost_data_v9";
+    const STORAGE_KEY = "civilcost_data_v10";
     let isPro = false;
     let chartInstance = null;
     let tempWbsList = [];
@@ -905,7 +905,9 @@
       return Number(Number(num).toFixed(2));
     }
 
-    // 核心公式：依「計劃起迄」與「實際起迄」自動計算完成度 % 與提早/延誤天數
+    // 核心公式：
+    // 1. 有確定「實際迄」日期 -> 完成度 100%，並計算提早完成幾天或延誤幾天完成
+    // 2. 尚未填「實際迄」日期（施工中）-> 狀態一律顯示「施工中」，並依計劃起迄與已施工天數換算目前進度 %
     function evaluateDateSchedule(pStart, pEnd, aStart, aEnd, fallbackPct = 0) {
       const parseLocal = (str) => {
         if (!str) return null;
@@ -922,7 +924,7 @@
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const msDay = 86400000;
 
-      // 情況 1：已填入「實際迄」日期（該項已完工 -> 完成度 100%，並比較實際迄 vs 計劃迄）
+      // 情況 1：已有確定的「實際迄」完成時間 -> 100%，顯示提早幾天完成或延誤幾天完成
       if (ae) {
         let diffDays = 0;
         let statusText = "如期完成";
@@ -948,25 +950,22 @@
         };
       }
 
-      // 情況 2：已填入「實際起」但尚未填「實際迄」（施工中）
+      // 情況 2：尚未有實際完成時間，但已有「實際起」時間 -> 顯示「施工中」，依計劃原本要完成的日期換算進度
       if (as) {
-        let pct = fallbackPct || 0;
+        let pct = fmtPct(fallbackPct || 0);
         if (ps && pe) {
           const plannedDuration = Math.max(1, Math.round((pe - ps) / msDay) + 1);
-          const elapsed = Math.max(0, Math.round((today - as) / msDay) + 1);
-          pct = fmtPct(Math.min(99, Math.max(0, (elapsed / plannedDuration) * 100)));
-        }
-
-        if (pe && today > pe) {
-          const overDays = Math.round((today - pe) / msDay);
-          return {
-            pct,
-            diffDays: overDays,
-            statusText: "延誤 " + overDays + " 天（施工中）",
-            statusType: "delayed",
-            isCompleted: false,
-            isDelayed: true
-          };
+          const elapsed = Math.max(1, Math.round((today - as) / msDay) + 1);
+          if (today <= pe) {
+            pct = fmtPct(Math.min(95, Math.max(1, (elapsed / plannedDuration) * 100)));
+          } else {
+            // 若已過原本計劃完成日但仍在施工中，依 (計劃工期 / 實際已耗用總天數) 換算完成比例，不鎖在 99%
+            pct = fmtPct(Math.min(95, Math.max(1, (plannedDuration / elapsed) * 100)));
+          }
+        } else if (pe) {
+          const totalSpan = Math.max(1, Math.round((pe - as) / msDay) + 1);
+          const elapsed = Math.max(1, Math.round((today - as) / msDay) + 1);
+          pct = fmtPct(Math.min(95, Math.max(1, (elapsed / totalSpan) * 100)));
         }
 
         return {
@@ -979,19 +978,7 @@
         };
       }
 
-      // 情況 3：尚未填入實際日期
-      if (pe && today > pe && (fallbackPct || 0) < 100) {
-        const overDays = Math.round((today - pe) / msDay);
-        return {
-          pct: fmtPct(fallbackPct || 0),
-          diffDays: overDays,
-          statusText: "已逾期 " + overDays + " 天未完工",
-          statusType: "delayed",
-          isCompleted: false,
-          isDelayed: true
-        };
-      }
-
+      // 情況 3：尚未開始施工（未填實際起、實際迄）
       return {
         pct: fmtPct(fallbackPct || 0),
         diffDays: 0,
@@ -1015,7 +1002,7 @@
         return '<span class="' + pad + ' rounded font-bold bg-rose-600 text-white">⚠️ ' + evalRes.statusText + '</span>';
       }
       if (evalRes.statusType === "progress") {
-        return '<span class="' + pad + ' rounded font-semibold bg-sky-100 text-sky-800">🔨 ' + evalRes.statusText + '</span>';
+        return '<span class="' + pad + ' rounded font-semibold bg-sky-100 text-sky-800">🔨 施工中</span>';
       }
       return '<span class="' + pad + ' rounded font-medium bg-slate-100 text-slate-500">' + evalRes.statusText + '</span>';
     }
@@ -1035,12 +1022,12 @@
           plannedEnd: "2026-12-31",
           actualStart: "2026-11-02",
           actualEnd: "",
-          actualPct: 100,
+          actualPct: 92,
           isMajor: true,
           expanded: true,
           subItems: [
-            { name: "1.1 土方開挖", plannedStart: "2026-11-02", plannedEnd: "2026-11-26", actualStart: "2026-11-02", actualEnd: "2026-11-24", actualPct: 100 },
-            { name: "1.2 擋土牆", plannedStart: "2026-11-11", plannedEnd: "2026-11-25", actualStart: "2026-11-12", actualEnd: "2026-12-03", actualPct: 100 }
+            { name: "1.1 土方開挖", plannedStart: "2026-11-02", plannedEnd: "2026-11-26", actualStart: "2026-11-02", actualEnd: "", actualPct: 95 },
+            { name: "1.2 擋土牆", plannedStart: "2026-11-11", plannedEnd: "2026-11-25", actualStart: "2026-11-12", actualEnd: "", actualPct: 88 }
           ]
         },
         {
@@ -1048,9 +1035,9 @@
           budget: 82928998,
           plannedStart: "2026-12-01",
           plannedEnd: "2027-04-15",
-          actualStart: "2026-11-20",
+          actualStart: "",
           actualEnd: "",
-          actualPct: 6,
+          actualPct: 0,
           isMajor: true,
           expanded: false,
           subItems: [
@@ -1157,7 +1144,7 @@
 
     function loadState() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v8") || localStorage.getItem("civilcost_data_v7");
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v9") || localStorage.getItem("civilcost_data_v8");
         if (saved) {
           const parsed = JSON.parse(saved);
           const merged = {
@@ -1254,47 +1241,66 @@
       };
     }
 
+    // 主工項狀態判定：
+    // 只有當子項目（或主工項本身）已確定實際完成時間後，才判定提早或延誤幾天完成；尚未完成一律顯示「施工中」
     function getMainItemScheduleSummary(w) {
       const subs = w.subItems || [];
       if (subs.length > 0) {
         let maxDelay = 0;
         let maxEarly = 0;
+        let anyInProgress = false;
         let allCompleted = true;
+
         subs.forEach(sub => {
           const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
-          if (!ev.isCompleted) allCompleted = false;
-          if (ev.diffDays > maxDelay) maxDelay = ev.diffDays;
-          if (ev.diffDays < 0 && Math.abs(ev.diffDays) > maxEarly) maxEarly = Math.abs(ev.diffDays);
+          if (!ev.isCompleted) {
+            allCompleted = false;
+            if (ev.statusType === "progress" || sub.actualStart) anyInProgress = true;
+          } else {
+            if (ev.diffDays > maxDelay) maxDelay = ev.diffDays;
+            if (ev.diffDays < 0 && Math.abs(ev.diffDays) > maxEarly) maxEarly = Math.abs(ev.diffDays);
+          }
         });
 
-        if (maxDelay > 0) {
-          return {
-            pct: fmtPct(w.actualPct),
-            diffDays: maxDelay,
-            statusText: allCompleted ? ("延誤 " + maxDelay + " 天完成") : ("子項目延誤 " + maxDelay + " 天"),
-            statusType: "delayed",
-            isDelayed: true
-          };
-        }
-        if (allCompleted && maxEarly > 0) {
-          return {
-            pct: fmtPct(w.actualPct),
-            diffDays: -maxEarly,
-            statusText: "提早 " + maxEarly + " 天完成",
-            statusType: "early",
-            isDelayed: false
-          };
-        }
         if (allCompleted) {
+          if (maxDelay > 0) {
+            return {
+              pct: 100,
+              diffDays: maxDelay,
+              statusText: "延誤 " + maxDelay + " 天完成",
+              statusType: "delayed",
+              isDelayed: true
+            };
+          }
+          if (maxEarly > 0) {
+            return {
+              pct: 100,
+              diffDays: -maxEarly,
+              statusText: "提早 " + maxEarly + " 天完成",
+              statusType: "early",
+              isDelayed: false
+            };
+          }
           return {
-            pct: fmtPct(w.actualPct),
+            pct: 100,
             diffDays: 0,
             statusText: "如期全部完成",
             statusType: "ontime",
             isDelayed: false
           };
         }
+
+        if (anyInProgress || w.actualStart || fmtPct(w.actualPct) > 0) {
+          return {
+            pct: fmtPct(w.actualPct),
+            diffDays: 0,
+            statusText: "施工中",
+            statusType: "progress",
+            isDelayed: false
+          };
+        }
       }
+
       const ev = evaluateDateSchedule(w.plannedStart, w.plannedEnd, w.actualStart, w.actualEnd, w.actualPct);
       return {
         ...ev,
@@ -1412,9 +1418,9 @@
       if (m.delayedItems.length > 0) {
         alertBanner.classList.remove("hidden");
         const listStr = m.delayedItems.map(d =>
-          '<strong class="underline">' + d.name + '</strong>（目前完成度 ' + d.actual + '%，<strong>' + d.statusText + '</strong>）'
+          '<strong class="underline">' + d.name + '</strong>（<strong>' + d.statusText + '</strong>）'
         ).join("；");
-        document.getElementById("delayAlertDetail").innerHTML = '目前共有 <strong>' + m.delayedItems.length + '</strong> 項主要工程工期延誤：' + listStr;
+        document.getElementById("delayAlertDetail").innerHTML = '共有 <strong>' + m.delayedItems.length + '</strong> 項已完工工程較計劃延誤：' + listStr;
       } else {
         alertBanner.classList.add("hidden");
       }
@@ -1431,11 +1437,11 @@
       if (m.delayedItems.length > 0) {
         actualBar.className = "bg-rose-500 h-3.5 rounded-full transition-all duration-500";
         badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-700";
-        badgeEl.textContent = "⚠️ " + m.delayedItems.length + " 項工期延誤";
+        badgeEl.textContent = "⚠️ " + m.delayedItems.length + " 項完工延誤";
       } else {
-        actualBar.className = "bg-emerald-500 h-3.5 rounded-full transition-all duration-500";
-        badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700";
-        badgeEl.textContent = "✅ 工期控管正常";
+        actualBar.className = "bg-sky-500 h-3.5 rounded-full transition-all duration-500";
+        badgeEl.className = "text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-700";
+        badgeEl.textContent = "🔨 工程推進中";
       }
 
       document.getElementById("kpiBudget").textContent = "NT$ " + m.totalContract.toLocaleString();
@@ -1556,7 +1562,6 @@
       return (start || "待定") + " ~ " + (end || "進行中");
     }
 
-    // 主畫面渲染：只留「完成度 %」單一進度條，並在完成度後方加上提早完成或延誤幾天標籤
     function renderWBS(categoryActuals) {
       const container = document.getElementById("wbsContainer");
       const majorWithIdx = window.appState.wbsBudgets
@@ -1599,7 +1604,7 @@
                       '<th class="py-1.5 px-2 rounded-tl">次要工程項目</th>' +
                       '<th class="py-1.5 px-2 whitespace-nowrap">計劃起迄</th>' +
                       '<th class="py-1.5 px-2 whitespace-nowrap">實際起迄</th>' +
-                      '<th class="py-1.5 px-2 text-right whitespace-nowrap">完成度 % ／ 提早或延誤</th>' +
+                      '<th class="py-1.5 px-2 text-right whitespace-nowrap">完成度 % ／ 狀態</th>' +
                     '</tr>' +
                   '</thead>' +
                   '<tbody class="divide-y divide-slate-200/70 bg-white">' +
@@ -1635,7 +1640,6 @@
               '<span>🏗️ 實際起迄：<strong class="text-sky-700">' + formatDateRangeText(item.actualStart, item.actualEnd) + '</strong></span>' +
             '</div>' +
 
-            '<!-- 單一完成度 % 進度條 + 提早/延誤天數標籤 -->' +
             '<div class="flex flex-wrap items-center gap-2 pt-0.5">' +
               '<span class="text-[11px] font-semibold text-slate-700 shrink-0">完成度</span>' +
               '<div class="flex-1 min-w-[120px] bg-slate-200 rounded-full h-2.5 overflow-hidden">' +
@@ -1842,7 +1846,7 @@
       renderAll();
     }
 
-    // 開會起迄時間與完成度編輯表（只留完成度%，輸入日期即自動計算完成度%與提早/延誤天數）
+    // 開會起迄時間與完成度編輯表
     function openProgressModal() {
       const container = document.getElementById("progressInputsContainer");
       const majorWithIdx = window.appState.wbsBudgets
@@ -1908,7 +1912,6 @@
       document.getElementById("progressModal").classList.add("flex");
     }
 
-    // 子項目日期變更 -> 自動重算該子項目完成度 % 與提早/延誤天數 -> 同步更新主工項平均
     function recalcSubRow(idx, sIdx) {
       const pStart = document.getElementById("subPlanStart_" + idx + "_" + sIdx).value;
       const pEnd = document.getElementById("subPlanEnd_" + idx + "_" + sIdx).value;
@@ -1923,7 +1926,6 @@
       onSubPctManualChange(idx);
     }
 
-    // 主工項本身日期變更（無子項目時自動重算主工項完成度 % 與提早/延誤天數）
     function recalcMainRow(idx) {
       const w = window.appState.wbsBudgets[idx];
       if (!w) return;
@@ -1947,6 +1949,7 @@
       let sumA = 0;
       let maxDelay = 0;
       let maxEarly = 0;
+      let anyInProgress = false;
       let allCompleted = true;
 
       w.subItems.forEach((_, sIdx) => {
@@ -1959,9 +1962,13 @@
         const aEnd = document.getElementById("subActEnd_" + idx + "_" + sIdx).value;
         const ev = evaluateDateSchedule(pStart, pEnd, aStart, aEnd, aVal);
 
-        if (!ev.isCompleted) allCompleted = false;
-        if (ev.diffDays > maxDelay) maxDelay = ev.diffDays;
-        if (ev.diffDays < 0 && Math.abs(ev.diffDays) > maxEarly) maxEarly = Math.abs(ev.diffDays);
+        if (!ev.isCompleted) {
+          allCompleted = false;
+          if (ev.statusType === "progress" || aStart) anyInProgress = true;
+        } else {
+          if (ev.diffDays > maxDelay) maxDelay = ev.diffDays;
+          if (ev.diffDays < 0 && Math.abs(ev.diffDays) > maxEarly) maxEarly = Math.abs(ev.diffDays);
+        }
       });
 
       const mainActEl = document.getElementById("actualInput_" + idx);
@@ -1973,25 +1980,32 @@
 
       const badgeContainer = document.getElementById("mainStatusBadge_" + idx);
       if (badgeContainer) {
-        if (maxDelay > 0) {
-          badgeContainer.innerHTML = renderScheduleStatusBadge({
-            statusText: allCompleted ? ("延誤 " + maxDelay + " 天完成") : ("子項目延誤 " + maxDelay + " 天"),
-            statusType: "delayed"
-          }, false);
-        } else if (allCompleted && maxEarly > 0) {
-          badgeContainer.innerHTML = renderScheduleStatusBadge({
-            statusText: "提早 " + maxEarly + " 天完成",
-            statusType: "early"
-          }, false);
-        } else if (allCompleted) {
-          badgeContainer.innerHTML = renderScheduleStatusBadge({
-            statusText: "如期全部完成",
-            statusType: "ontime"
-          }, false);
-        } else {
+        if (allCompleted) {
+          if (maxDelay > 0) {
+            badgeContainer.innerHTML = renderScheduleStatusBadge({
+              statusText: "延誤 " + maxDelay + " 天完成",
+              statusType: "delayed"
+            }, false);
+          } else if (maxEarly > 0) {
+            badgeContainer.innerHTML = renderScheduleStatusBadge({
+              statusText: "提早 " + maxEarly + " 天完成",
+              statusType: "early"
+            }, false);
+          } else {
+            badgeContainer.innerHTML = renderScheduleStatusBadge({
+              statusText: "如期全部完成",
+              statusType: "ontime"
+            }, false);
+          }
+        } else if (anyInProgress) {
           badgeContainer.innerHTML = renderScheduleStatusBadge({
             statusText: "施工中",
             statusType: "progress"
+          }, false);
+        } else {
+          badgeContainer.innerHTML = renderScheduleStatusBadge({
+            statusText: "尚未開始",
+            statusType: "pending"
           }, false);
         }
       }
