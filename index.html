@@ -44,7 +44,7 @@
           重置範例
         </button>
 
-        <div class="hidden sm:flex items-center gap-1.5 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">
+        <div class="flex items-center gap-1.5 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">
           <button type="button" id="togglePlanBtn" onclick="togglePlan()" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-600 text-white transition">
             免費版 Free
           </button>
@@ -239,12 +239,12 @@
       </div>
     </section>
 
-    <!-- 現場快速記帳表單（日期時間、名稱、規格、數量、單價） -->
+    <!-- 現場快速記帳表單（日期、名稱、規格、數量、單價、附送貨單照片） -->
     <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div>
           <h2 class="font-bold text-sm text-slate-800">現場快速記帳</h2>
-          <p class="text-[11px] text-slate-400">填寫日期時間、名稱、規格、數量、單價即可快速入帳（自動計算含稅總額）</p>
+          <p class="text-[11px] text-slate-400">填寫日期、名稱、規格、數量、單價即可快速入帳（自動計算含稅總額）</p>
         </div>
         <div class="flex items-center gap-1.5 text-xs">
           <span class="text-slate-500">歸屬扣帳工項：</span>
@@ -253,9 +253,9 @@
       </div>
 
       <form onsubmit="addExpense(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2.5">
-        <div class="md:col-span-3">
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1">日期時間</label>
-          <input id="expDateTime" type="datetime-local" required
+        <div class="md:col-span-2">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">日期</label>
+          <input id="expDate" type="date" required
             class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-800 focus:border-amber-500 focus:outline-none">
         </div>
 
@@ -265,7 +265,7 @@
             class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
-        <div class="md:col-span-2">
+        <div class="md:col-span-3">
           <label class="block text-[11px] font-semibold text-slate-500 mb-1">規格</label>
           <input id="expSpec" type="text" placeholder="如：4000psi / 27支" required
             class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
@@ -280,7 +280,7 @@
         <div class="md:col-span-2">
           <label class="block text-[11px] font-semibold text-slate-500 mb-1">單價（未稅）</label>
           <input id="expPrice" type="number" placeholder="單價" min="1" step="any" required
-            class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
+            class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
         <div class="md:col-span-1 flex items-end">
@@ -290,10 +290,27 @@
         </div>
       </form>
 
+      <!-- 隱藏的拍照/選圖 input -->
+      <input type="file" id="receiptFileInput" accept="image/*" class="hidden" onchange="handleReceiptFileSelected(event, 'add')">
+
+      <!-- 新記帳待上傳照片預覽列 -->
+      <div id="newReceiptPreviewBox" class="hidden mt-3 p-2.5 bg-amber-50/70 border border-amber-200 rounded-xl items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <img id="newReceiptPreviewImg" src="" alt="送貨單預覽" class="w-12 h-12 object-cover rounded-lg border border-amber-300 bg-white cursor-pointer" onclick="openPhotoViewer(this.src, '待上傳送貨單預覽')">
+          <div class="text-xs">
+            <p class="font-bold text-amber-900">📎 已附加送貨單 / 簽收單照片</p>
+            <p class="text-[11px] text-amber-700">已自動壓縮最佳化，按下「+ 寫入」即會隨此筆帳目存證</p>
+          </div>
+        </div>
+        <button type="button" onclick="clearNewReceiptPhoto()" class="text-xs text-rose-600 hover:text-rose-800 bg-white border border-rose-200 px-2.5 py-1 rounded-lg font-semibold">
+          ✕ 移除照片
+        </button>
+      </div>
+
       <!-- Pro 專屬功能列 -->
       <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-        <button type="button" onclick="handleProAction('工地送貨單 / 發票拍照雲端存證')" class="text-xs flex items-center gap-1.5 text-slate-600 hover:text-amber-700 font-medium">
-          📷 附加送貨單/簽收單照片 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded">PRO</span>
+        <button type="button" id="attachPhotoBtn" onclick="triggerReceiptUpload('add')" class="text-xs flex items-center gap-1.5 text-slate-700 hover:text-amber-700 bg-amber-50/60 hover:bg-amber-100/70 border border-amber-200 px-3 py-1.5 rounded-lg font-semibold transition">
+          📷 附加送貨單/簽收單照片 <span id="photoProTag" class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded">PRO</span>
         </button>
         <div class="flex items-center gap-2">
           <button type="button" onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium">
@@ -316,12 +333,13 @@
         <table class="w-full text-left border-collapse text-sm">
           <thead>
             <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-              <th class="py-2.5 px-3">日期時間</th>
+              <th class="py-2.5 px-3">日期</th>
               <th class="py-2.5 px-3">名稱</th>
               <th class="py-2.5 px-3">規格</th>
               <th class="py-2.5 px-3 text-right">數量</th>
               <th class="py-2.5 px-3 text-right">單價（未稅）</th>
               <th class="py-2.5 px-3 text-right">含稅總額</th>
+              <th class="py-2.5 px-3 text-center">單據照片</th>
               <th class="py-2.5 px-3 text-center">操作</th>
             </tr>
           </thead>
@@ -331,6 +349,27 @@
     </section>
 
   </main>
+
+  <!-- 視窗 F：送貨單 / 簽收單照片放大檢視視窗 -->
+  <div id="photoViewerModal" class="fixed inset-0 bg-slate-900/80 hidden items-center justify-center z-50 p-4" onclick="closePhotoViewer()">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-4 shadow-2xl space-y-3" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <h3 id="photoViewerTitle" class="text-sm font-bold text-slate-900">送貨單 / 簽收單存證照片</h3>
+        <button type="button" onclick="closePhotoViewer()" class="text-slate-400 hover:text-slate-700 text-lg font-bold px-2">✕</button>
+      </div>
+      <div class="bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center max-h-[70vh]">
+        <img id="photoViewerImg" src="" alt="送貨單大圖" class="max-h-[70vh] w-auto object-contain">
+      </div>
+      <div class="flex justify-end gap-2">
+        <a id="photoDownloadLink" href="" download="送貨單存證.jpg" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3.5 py-2 rounded-lg transition">
+          ⬇ 下載此單據照片
+        </a>
+        <button type="button" onclick="closePhotoViewer()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3.5 py-2 rounded-lg">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- 視窗 E：雲端帳號登入 / 註冊視窗 -->
   <div id="authModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
@@ -565,7 +604,7 @@
     </div>
   </div>
 
-  <!-- 視窗 C：編輯單筆現場記帳明細 -->
+  <!-- 視窗 C：編輯單筆現場記帳明細（含補傳/更換送貨單照片） -->
   <div id="editExpenseModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -580,8 +619,8 @@
         <input type="hidden" id="editExpIndex">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">日期時間</label>
-            <input id="editExpDateTime" type="datetime-local" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs focus:border-amber-500 focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 mb-1">日期</label>
+            <input id="editExpDate" type="date" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs focus:border-amber-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">歸屬扣帳工項</label>
@@ -608,6 +647,24 @@
             <label class="block text-xs font-bold text-slate-700 mb-1">單價（未稅）</label>
             <input id="editExpPrice" type="number" min="0" step="any" required oninput="updateEditPreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
           </div>
+        </div>
+
+        <!-- 編輯視窗内的單據照片管理 -->
+        <div class="pt-1">
+          <label class="block text-xs font-bold text-slate-700 mb-1">送貨單 / 簽收單照片（PRO）</label>
+          <input type="file" id="editReceiptFileInput" accept="image/*" class="hidden" onchange="handleReceiptFileSelected(event, 'edit')">
+
+          <div id="editReceiptPreviewBox" class="hidden p-2 bg-slate-50 border border-slate-200 rounded-lg items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <img id="editReceiptPreviewImg" src="" alt="單據照片" class="w-12 h-12 object-cover rounded border border-slate-300 cursor-pointer" onclick="openPhotoViewer(this.src, '單據存證照片')">
+              <span class="text-xs text-slate-600 font-medium">已附加單據（點擊可放大）</span>
+            </div>
+            <button type="button" onclick="clearEditReceiptPhoto()" class="text-xs text-rose-600 hover:underline font-semibold">移除</button>
+          </div>
+
+          <button type="button" onclick="triggerReceiptUpload('edit')" class="w-full text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold py-2 rounded-lg transition">
+            📷 上傳 / 更換送貨單照片
+          </button>
         </div>
 
         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
@@ -655,7 +712,7 @@
     </div>
   </div>
 
-  <!-- Firebase SDK 與即時雲端同步邏輯（已代入正確 39 碼 apiKey） -->
+  <!-- Firebase SDK 與即時雲端同步邏輯 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import {
@@ -884,30 +941,125 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（施工中依計劃排程換算進度並顯示「施工中」；確定實際完成日才顯示提早/延誤幾天） -->
+  <!-- 核心業務邏輯（純日期記帳 ＋ Pro 單據照片拍照壓縮存證與放大檢視） -->
   <script>
-    const STORAGE_KEY = "civilcost_data_v10";
+    const STORAGE_KEY = "civilcost_data_v11";
     let isPro = false;
     let chartInstance = null;
     let tempWbsList = [];
+    let pendingNewReceiptPhoto = "";
+    let pendingEditReceiptPhoto = "";
 
-    function getCurrentLocalDateTime() {
+    function getCurrentLocalDate() {
       const now = new Date();
       const y = now.getFullYear();
       const m = String(now.getMonth() + 1).padStart(2, "0");
       const d = String(now.getDate()).padStart(2, "0");
-      const hh = String(now.getHours()).padStart(2, "0");
-      const mm = String(now.getMinutes()).padStart(2, "0");
-      return y + "-" + m + "-" + d + "T" + hh + ":" + mm;
+      return y + "-" + m + "-" + d;
     }
 
     function fmtPct(num) {
       return Number(Number(num).toFixed(2));
     }
 
-    // 核心公式：
-    // 1. 有確定「實際迄」日期 -> 完成度 100%，並計算提早完成幾天或延誤幾天完成
-    // 2. 尚未填「實際迄」日期（施工中）-> 狀態一律顯示「施工中」，並依計劃起迄與已施工天數換算目前進度 %
+    // 圖片前端自動壓縮（最大邊長 1000px、JPEG 0.7 品質，確保可順暢存入雲端與本機）
+    function compressImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const MAX_SIZE = 1000;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > MAX_SIZE) {
+                height = Math.round((height * MAX_SIZE) / width);
+                width = MAX_SIZE;
+              }
+            } else if (height > MAX_SIZE) {
+              width = Math.round((width * MAX_SIZE) / height);
+              height = MAX_SIZE;
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/jpeg", 0.72));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function triggerReceiptUpload(mode) {
+      if (!isPro) {
+        handleProAction("工地送貨單 / 簽收單拍照雲端存證");
+        return;
+      }
+      if (mode === "edit") {
+        document.getElementById("editReceiptFileInput").click();
+      } else {
+        document.getElementById("receiptFileInput").click();
+      }
+    }
+
+    async function handleReceiptFileSelected(event, mode) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      try {
+        const compressedBase64 = await compressImageFile(file);
+        if (mode === "edit") {
+          pendingEditReceiptPhoto = compressedBase64;
+          const box = document.getElementById("editReceiptPreviewBox");
+          document.getElementById("editReceiptPreviewImg").src = compressedBase64;
+          box.classList.remove("hidden");
+          box.classList.add("flex");
+        } else {
+          pendingNewReceiptPhoto = compressedBase64;
+          const box = document.getElementById("newReceiptPreviewBox");
+          document.getElementById("newReceiptPreviewImg").src = compressedBase64;
+          box.classList.remove("hidden");
+          box.classList.add("flex");
+        }
+      } catch (err) {
+        alert("照片讀取失敗，請改選其他圖片或重新拍攝。");
+      }
+      event.target.value = "";
+    }
+
+    function clearNewReceiptPhoto() {
+      pendingNewReceiptPhoto = "";
+      const box = document.getElementById("newReceiptPreviewBox");
+      box.classList.add("hidden");
+      box.classList.remove("flex");
+    }
+
+    function clearEditReceiptPhoto() {
+      pendingEditReceiptPhoto = "";
+      const box = document.getElementById("editReceiptPreviewBox");
+      box.classList.add("hidden");
+      box.classList.remove("flex");
+    }
+
+    function openPhotoViewer(src, titleText) {
+      if (!src) return;
+      document.getElementById("photoViewerImg").src = src;
+      document.getElementById("photoViewerTitle").textContent = titleText || "送貨單 / 簽收單存證照片";
+      document.getElementById("photoDownloadLink").href = src;
+      document.getElementById("photoViewerModal").classList.remove("hidden");
+      document.getElementById("photoViewerModal").classList.add("flex");
+    }
+
+    function closePhotoViewer() {
+      document.getElementById("photoViewerModal").classList.add("hidden");
+      document.getElementById("photoViewerModal").classList.remove("flex");
+    }
+
     function evaluateDateSchedule(pStart, pEnd, aStart, aEnd, fallbackPct = 0) {
       const parseLocal = (str) => {
         if (!str) return null;
@@ -924,11 +1076,10 @@
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const msDay = 86400000;
 
-      // 情況 1：已有確定的「實際迄」完成時間 -> 100%，顯示提早幾天完成或延誤幾天完成
       if (ae) {
         let diffDays = 0;
         let statusText = "如期完成";
-        let statusType = "ontime"; // early | ontime | delayed
+        let statusType = "ontime";
 
         if (pe) {
           diffDays = Math.round((ae - pe) / msDay);
@@ -950,7 +1101,6 @@
         };
       }
 
-      // 情況 2：尚未有實際完成時間，但已有「實際起」時間 -> 顯示「施工中」，依計劃原本要完成的日期換算進度
       if (as) {
         let pct = fmtPct(fallbackPct || 0);
         if (ps && pe) {
@@ -959,7 +1109,6 @@
           if (today <= pe) {
             pct = fmtPct(Math.min(95, Math.max(1, (elapsed / plannedDuration) * 100)));
           } else {
-            // 若已過原本計劃完成日但仍在施工中，依 (計劃工期 / 實際已耗用總天數) 換算完成比例，不鎖在 99%
             pct = fmtPct(Math.min(95, Math.max(1, (plannedDuration / elapsed) * 100)));
           }
         } else if (pe) {
@@ -978,7 +1127,6 @@
         };
       }
 
-      // 情況 3：尚未開始施工（未填實際起、實際迄）
       return {
         pct: fmtPct(fallbackPct || 0),
         diffDays: 0,
@@ -1087,10 +1235,10 @@
         { name: "拾參、清安費", budget: 3344356, actualPct: 0, isMajor: false, subItems: [] }
       ],
       expenses: [
-        { dateTime: "2026-11-27T14:30", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "預拌混凝土", spec: "4000psi（車次）", qty: 120, price: 2850 },
-        { dateTime: "2026-11-26T09:15", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "H型鋼排樁材料", spec: "H300×300×10×15", qty: 27, price: 18500 },
-        { dateTime: "2026-11-24T16:00", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "塔式起重機租賃", spec: "含操作人員/月", qty: 2, price: 1487854 },
-        { dateTime: "2026-11-20T10:45", category: "拾、職業安全衛生管理費", name: "工地安全警示設施", spec: "全區圍籬及告示牌", qty: 1, price: 1500120 }
+        { date: "2026-11-27", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "預拌混凝土", spec: "4000psi（車次）", qty: 120, price: 2850, photo: "" },
+        { date: "2026-11-26", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "H型鋼排樁材料", spec: "H300×300×10×15", qty: 27, price: 18500, photo: "" },
+        { date: "2026-11-24", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "塔式起重機租賃", spec: "含操作人員/月", qty: 2, price: 1487854, photo: "" },
+        { date: "2026-11-20", category: "拾、職業安全衛生管理費", name: "工地安全警示設施", spec: "全區圍籬及告示牌", qty: 1, price: 1500120, photo: "" }
       ]
     };
 
@@ -1132,19 +1280,26 @@
     }
 
     function normalizeExpenses(list) {
-      return (list || []).map(e => ({
-        dateTime: e.dateTime || (e.date ? e.date + "T09:00" : getCurrentLocalDateTime()),
-        category: e.category || "",
-        name: e.name || e.item || "",
-        spec: e.spec || e.vendor || "-",
-        qty: Number(e.qty) || 1,
-        price: Number(e.price) || 0
-      }));
+      return (list || []).map(e => {
+        let pureDate = e.date || "";
+        if (!pureDate && e.dateTime) {
+          pureDate = String(e.dateTime).split("T")[0];
+        }
+        return {
+          date: pureDate || getCurrentLocalDate(),
+          category: e.category || "",
+          name: e.name || e.item || "",
+          spec: e.spec || e.vendor || "-",
+          qty: Number(e.qty) || 1,
+          price: Number(e.price) || 0,
+          photo: e.photo || ""
+        };
+      });
     }
 
     function loadState() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v9") || localStorage.getItem("civilcost_data_v8");
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v10") || localStorage.getItem("civilcost_data_v9");
         if (saved) {
           const parsed = JSON.parse(saved);
           const merged = {
@@ -1241,8 +1396,6 @@
       };
     }
 
-    // 主工項狀態判定：
-    // 只有當子項目（或主工項本身）已確定實際完成時間後，才判定提早或延誤幾天完成；尚未完成一律顯示「施工中」
     function getMainItemScheduleSummary(w) {
       const subs = w.subItems || [];
       if (subs.length > 0) {
@@ -1368,9 +1521,9 @@
       const m = calculateMetrics();
       const s = computeScheduleInfo(sState.startDate, sState.baseEndDate, sState.extraDays);
 
-      const dtInput = document.getElementById("expDateTime");
-      if (dtInput && !dtInput.value) {
-        dtInput.value = getCurrentLocalDateTime();
+      const dInput = document.getElementById("expDate");
+      if (dInput && !dInput.value) {
+        dInput.value = getCurrentLocalDate();
       }
 
       document.getElementById("totalDurationBadge").textContent = "核定總工期 " + s.totalDays.toLocaleString() + " 天";
@@ -1846,7 +1999,6 @@
       renderAll();
     }
 
-    // 開會起迄時間與完成度編輯表
     function openProgressModal() {
       const container = document.getElementById("progressInputsContainer");
       const majorWithIdx = window.appState.wbsBudgets
@@ -2049,24 +2201,26 @@
       renderAll();
     }
 
-    function formatDisplayDateTime(dtStr) {
-      if (!dtStr) return "-";
-      return dtStr.replace("T", " ");
-    }
-
     function renderExpenses() {
       const tbody = document.getElementById("expenseTableBody");
       tbody.innerHTML = window.appState.expenses.map((e, idx) => {
         const subtotal = e.qty * e.price;
         const totalWithTax = Math.round(subtotal * 1.05);
 
+        const photoCellHtml = e.photo
+          ? '<button type="button" onclick="openPhotoViewer(window.appState.expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\')" class="inline-flex items-center gap-1 text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-1 rounded-lg transition">' +
+              '📷 檢視單據' +
+            '</button>'
+          : '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-[11px] text-slate-400 hover:text-amber-700 underline">+ 補傳</button>';
+
         return '<tr class="hover:bg-slate-50">' +
-          '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap text-xs">' + formatDisplayDateTime(e.dateTime) + '</td>' +
+          '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap text-xs">' + (e.date || "-") + '</td>' +
           '<td class="py-2.5 px-3 font-semibold text-slate-800">' + e.name + '</td>' +
           '<td class="py-2.5 px-3 text-slate-600">' + e.spec + '</td>' +
           '<td class="py-2.5 px-3 text-right text-slate-700 whitespace-nowrap">' + e.qty.toLocaleString() + '</td>' +
           '<td class="py-2.5 px-3 text-right text-slate-600 whitespace-nowrap">NT$ ' + e.price.toLocaleString() + '</td>' +
           '<td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">NT$ ' + totalWithTax.toLocaleString() + '</td>' +
+          '<td class="py-2.5 px-3 text-center whitespace-nowrap">' + photoCellHtml + '</td>' +
           '<td class="py-2.5 px-3 text-center whitespace-nowrap space-x-2">' +
             '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-xs text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-2 py-1 rounded font-semibold transition">編輯</button>' +
             '<button type="button" onclick="deleteExpense(' + idx + ')" class="text-xs text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded font-semibold transition">刪除</button>' +
@@ -2080,7 +2234,7 @@
       if (!exp) return;
 
       document.getElementById("editExpIndex").value = idx;
-      document.getElementById("editExpDateTime").value = exp.dateTime || getCurrentLocalDateTime();
+      document.getElementById("editExpDate").value = exp.date || getCurrentLocalDate();
 
       const catSelect = document.getElementById("editExpCategory");
       catSelect.innerHTML = window.appState.wbsBudgets.map(w =>
@@ -2094,6 +2248,17 @@
       document.getElementById("editExpSpec").value = exp.spec;
       document.getElementById("editExpQty").value = exp.qty;
       document.getElementById("editExpPrice").value = exp.price;
+
+      pendingEditReceiptPhoto = exp.photo || "";
+      const prevBox = document.getElementById("editReceiptPreviewBox");
+      if (pendingEditReceiptPhoto) {
+        document.getElementById("editReceiptPreviewImg").src = pendingEditReceiptPhoto;
+        prevBox.classList.remove("hidden");
+        prevBox.classList.add("flex");
+      } else {
+        prevBox.classList.add("hidden");
+        prevBox.classList.remove("flex");
+      }
 
       updateEditPreview();
 
@@ -2119,12 +2284,13 @@
       if (!window.appState.expenses[idx]) return;
 
       window.appState.expenses[idx] = {
-        dateTime: document.getElementById("editExpDateTime").value,
+        date: document.getElementById("editExpDate").value,
         category: document.getElementById("editExpCategory").value,
         name: document.getElementById("editExpName").value.trim(),
         spec: document.getElementById("editExpSpec").value.trim(),
         qty: Number(document.getElementById("editExpQty").value) || 1,
-        price: Number(document.getElementById("editExpPrice").value) || 0
+        price: Number(document.getElementById("editExpPrice").value) || 0,
+        photo: pendingEditReceiptPhoto || ""
       };
 
       saveState();
@@ -2134,21 +2300,30 @@
 
     function addExpense(e) {
       e.preventDefault();
-      const dateTime = document.getElementById("expDateTime").value || getCurrentLocalDateTime();
+      const date = document.getElementById("expDate").value || getCurrentLocalDate();
       const category = document.getElementById("expCategory").value;
       const name = document.getElementById("expName").value.trim();
       const spec = document.getElementById("expSpec").value.trim();
       const qty = Number(document.getElementById("expQty").value);
       const price = Number(document.getElementById("expPrice").value);
 
-      window.appState.expenses.unshift({ dateTime, category, name, spec, qty, price });
+      window.appState.expenses.unshift({
+        date,
+        category,
+        name,
+        spec,
+        qty,
+        price,
+        photo: pendingNewReceiptPhoto || ""
+      });
       saveState();
 
       document.getElementById("expName").value = "";
       document.getElementById("expSpec").value = "";
       document.getElementById("expQty").value = 1;
       document.getElementById("expPrice").value = "";
-      document.getElementById("expDateTime").value = getCurrentLocalDateTime();
+      document.getElementById("expDate").value = getCurrentLocalDate();
+      clearNewReceiptPhoto();
       renderAll();
     }
 
@@ -2163,16 +2338,25 @@
     function updatePlanUI() {
       const btn = document.getElementById("togglePlanBtn");
       const proOpt = document.getElementById("proProjectOption");
+      const photoProTag = document.getElementById("photoProTag");
       if (!btn || !proOpt) return;
       if (isPro) {
         btn.textContent = "進階付費版 PRO ★";
         btn.className = "text-xs font-bold px-2.5 py-0.5 rounded-full pro-badge text-white transition shadow";
         proOpt.textContent = "新竹竹北廠房基礎開挖工程（合約 2,800 萬）";
+        if (photoProTag) {
+          photoProTag.textContent = "已開通";
+          photoProTag.className = "bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded";
+        }
       } else {
         btn.textContent = "免費版 Free";
         btn.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-600 text-white transition";
         proOpt.textContent = "🔒 [Pro] 新竹竹北廠房基礎開挖工程（合約 2,800 萬）";
         document.getElementById("projectSelect").value = "0";
+        if (photoProTag) {
+          photoProTag.textContent = "PRO";
+          photoProTag.className = "pro-badge text-white text-[10px] px-1.5 py-0.5 rounded";
+        }
       }
     }
 
@@ -2221,7 +2405,7 @@
       const esc = (str) => '"' + String(str).replace(/"/g, '""') + '"';
 
       let csv = "\uFEFF";
-      csv += "日期時間,名稱,規格,數量,未稅單價,未稅小計,營業稅(5%),含稅總額\n";
+      csv += "日期,名稱,規格,數量,未稅單價,未稅小計,營業稅(5%),含稅總額,單據存證\n";
 
       sState.expenses.forEach(e => {
         const sub = Math.round(e.qty * e.price);
@@ -2232,34 +2416,35 @@
         totalWithTax += withTax;
 
         csv += [
-          esc(formatDisplayDateTime(e.dateTime)),
+          esc(e.date || "-"),
           esc(e.name),
           esc(e.spec),
           e.qty,
           e.price,
           sub,
           tax,
-          withTax
+          withTax,
+          esc(e.photo ? "已附照片" : "未附")
         ].join(",") + "\n";
       });
 
-      csv += ",,,,明細支出總計," + totalSubtotal + "," + totalTax + "," + totalWithTax + "\n\n";
+      csv += ",,,,明細支出總計," + totalSubtotal + "," + totalTax + "," + totalWithTax + ",\n\n";
 
-      csv += "【專案合約、工期與目前損益總表】,,,,,,,\n";
-      csv += "工程案場名稱," + esc(sState.projectName) + ",,,,,,\n";
-      csv += "正式開工日期," + esc(s.startDate) + ",,,,,,\n";
-      csv += "原始預計完工日," + esc(s.baseEndDate) + ",,,,,,\n";
-      csv += "核定追加工期天數," + s.extraDays + " 天,,,,,,\n";
-      csv += "展延後最終完工日," + esc(s.finalEndDate) + ",,,,,,\n";
-      csv += "累計已工作天數," + s.elapsedDays + " 天,,,,,,\n";
-      csv += "距離完工倒數天數," + (s.remainingDays >= 0 ? s.remainingDays + " 天" : "逾期 " + Math.abs(s.remainingDays) + " 天") + ",,,,,,\n";
-      csv += "合約總金額（含追加）," + m.totalContract + ",,,,,,\n";
-      csv += "主要工程加權完成度," + m.weightedActual + "%,,,,,,\n";
-      csv += "依完成度換算已完成產值," + m.earnedContractValue + ",,,,,,\n";
-      csv += "累計實際支出總金額（含稅）," + m.totalActualCost + ",,,,,,\n";
-      csv += "目前現況損益（正數為盈利/負數為虧損）," + m.currentProfit + ",,,,,,\n";
-      csv += "合約剩餘未動支預算," + m.remainingBudget + ",,,,,,\n";
-      csv += "協力廠商保留款 (10%)," + m.retention + ",,,,,,\n";
+      csv += "【專案合約、工期與目前損益總表】,,,,,,,,\n";
+      csv += "工程案場名稱," + esc(sState.projectName) + ",,,,,,,\n";
+      csv += "正式開工日期," + esc(s.startDate) + ",,,,,,,\n";
+      csv += "原始預計完工日," + esc(s.baseEndDate) + ",,,,,,,\n";
+      csv += "核定追加工期天數," + s.extraDays + " 天,,,,,,,\n";
+      csv += "展延後最終完工日," + esc(s.finalEndDate) + ",,,,,,,\n";
+      csv += "累計已工作天數," + s.elapsedDays + " 天,,,,,,,\n";
+      csv += "距離完工倒數天數," + (s.remainingDays >= 0 ? s.remainingDays + " 天" : "逾期 " + Math.abs(s.remainingDays) + " 天") + ",,,,,,,\n";
+      csv += "合約總金額（含追加）," + m.totalContract + ",,,,,,,\n";
+      csv += "主要工程加權完成度," + m.weightedActual + "%,,,,,,,\n";
+      csv += "依完成度換算已完成產值," + m.earnedContractValue + ",,,,,,,\n";
+      csv += "累計實際支出總金額（含稅）," + m.totalActualCost + ",,,,,,,\n";
+      csv += "目前現況損益（正數為盈利/負數為虧損）," + m.currentProfit + ",,,,,,,\n";
+      csv += "合約剩餘未動支預算," + m.remainingBudget + ",,,,,,,\n";
+      csv += "協力廠商保留款 (10%)," + m.retention + ",,,,,,,\n";
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
