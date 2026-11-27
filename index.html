@@ -216,7 +216,7 @@
       </div>
     </section>
 
-    <!-- 【升級】中間區塊：主要工程項目（含次要子項目、計劃/實際起迄時間、完成度%） -->
+    <!-- 中間區塊：主要工程項目（含次要子項目、計劃/實際起迄時間、完成度%） -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
@@ -254,7 +254,7 @@
       </div>
     </section>
 
-    <!-- 【升級】現場快速記帳表單（精簡為：日期時間、名稱、規格、數量、單價） -->
+    <!-- 現場快速記帳表單（精簡為：日期時間、名稱、規格、數量、單價） -->
     <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div>
@@ -326,7 +326,7 @@
       </div>
     </section>
 
-    <!-- 採購與記帳明細表（對應：日期時間、名稱、規格、數量、單價、含稅總額） -->
+    <!-- 採購與記帳明細表 -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
         <h2 class="font-bold text-sm text-slate-800">近期現場記帳明細</h2>
@@ -470,7 +470,7 @@
     </div>
   </div>
 
-  <!-- 【升級】視窗 A：設定合約金額、主要工程（含次要子項目）與非主要項目 -->
+  <!-- 視窗 A：設定合約金額、主要工程（含次要子項目）與非主要項目 -->
   <div id="budgetModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -559,13 +559,13 @@
     </div>
   </div>
 
-  <!-- 【升級】視窗 B：開會進度編輯器（主要工程 + 次要工程 起迄時間、預計進度 %、實際完成度 %） -->
+  <!-- 【升級】視窗 B：開會進度編輯器（輸入子項目數值即自動即時計算上方主工項平均 %） -->
   <div id="progressModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
           <h3 class="text-lg font-bold text-slate-900">開會進度、起迄時間與完成度（%）編輯表</h3>
-          <p class="text-xs text-slate-500 mt-0.5">可針對每個「主要項目」與底下「次要項目」設定計劃/實際起迄日期與進度 %（支援小數點）</p>
+          <p class="text-xs text-slate-500 mt-0.5">輸入下方次要項目的「預計%」或「完成度%」時，上方主工項進度會<strong>即時自動計算平均值</strong></p>
         </div>
         <button type="button" onclick="closeProgressModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
@@ -585,7 +585,7 @@
     </div>
   </div>
 
-  <!-- 【升級】視窗 C：編輯單筆現場記帳明細（日期時間、名稱、規格、數量、單價） -->
+  <!-- 視窗 C：編輯單筆現場記帳明細 -->
   <div id="editExpenseModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -675,7 +675,7 @@
     </div>
   </div>
 
-  <!-- Firebase SDK 與即時雲端同步邏輯 -->
+  <!-- Firebase SDK 與即時雲端同步邏輯（已代入正確 39 碼 apiKey） -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import {
@@ -904,7 +904,7 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（支援主/次要工程階層＋起迄時間＋極簡 5 欄快速記帳） -->
+  <!-- 核心業務邏輯（支援子項目即時自動計算主工項完成度 %） -->
   <script>
     const STORAGE_KEY = "civilcost_data_v8";
     let isPro = false;
@@ -936,8 +936,8 @@
           plannedEnd: "2027-03-15",
           actualStart: "2026-08-02",
           actualEnd: "",
-          plannedPct: 68,
-          actualPct: 62,
+          plannedPct: 87.5,
+          actualPct: 70.67,
           isMajor: true,
           expanded: true,
           subItems: [
@@ -1001,7 +1001,6 @@
           expanded: false,
           subItems: []
         },
-        // 非主要工程項目（不列入進度條）
         { name: "玖、工程品質管理費（含材料試驗）", budget: 5573927, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
         { name: "拾、職業安全衛生管理費", budget: 4459142, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
         { name: "拾壹、交通維持.環境保護費", budget: 3344356, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
@@ -1215,7 +1214,6 @@
       const m = calculateMetrics();
       const s = computeScheduleInfo(sState.startDate, sState.baseEndDate, sState.extraDays);
 
-      // 預設記帳日期時間欄位若為空則帶入現在時間
       const dtInput = document.getElementById("expDateTime");
       if (dtInput && !dtInput.value) {
         dtInput.value = getCurrentLocalDateTime();
@@ -1418,7 +1416,6 @@
       return (start || "待定") + " ~ " + (end || "進行中");
     }
 
-    // 渲染主要工程項目（含可展開的次要子項目、計劃/實際起迄時間與完成度%）
     function renderWBS(categoryActuals) {
       const container = document.getElementById("wbsContainer");
       const majorWithIdx = window.appState.wbsBudgets
@@ -1507,7 +1504,6 @@
               '<span class="text-[11px] text-slate-500">已支 NT$ ' + (actualCost / 10000).toFixed(1) + '萬 / 預算 ' + (item.budget / 10000).toFixed(1) + '萬 (動支 ' + costPct + '%)</span>' +
             '</div>' +
 
-            '<!-- 主工項計劃與實際起迄時間 -->' +
             '<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 bg-white/80 px-2.5 py-1 rounded-lg border border-slate-200/70">' +
               '<span>📅 計劃起迄：<strong class="text-slate-700">' + formatDateRangeText(item.plannedStart, item.plannedEnd) + '</strong></span>' +
               '<span>🏗️ 實際起迄：<strong class="text-sky-700">' + formatDateRangeText(item.actualStart, item.actualEnd) + '</strong></span>' +
@@ -1729,7 +1725,7 @@
       renderAll();
     }
 
-    // 【升級】開會進度、起迄時間與完成度%編輯視窗（支援主要項目 + 次要子項目）
+    // 【升級】開會進度編輯器：輸入子項目數值即自動即時計算上方主工項平均 %
     function openProgressModal() {
       const container = document.getElementById("progressInputsContainer");
       const majorWithIdx = window.appState.wbsBudgets
@@ -1746,8 +1742,8 @@
               '<div class="flex flex-wrap items-center justify-between gap-2">' +
                 '<span class="text-xs font-semibold text-slate-700">↳ ' + sub.name + '</span>' +
                 '<div class="flex items-center gap-2 text-[11px]">' +
-                  '<label>預計% <input type="number" id="subPlanPct_' + idx + '_' + sIdx + '" value="' + fmtPct(sub.plannedPct) + '" min="0" max="100" step="0.01" class="w-16 border border-slate-300 rounded px-1.5 py-0.5 text-center"></label>' +
-                  '<label class="text-sky-700 font-bold">完成度% <input type="number" id="subActPct_' + idx + '_' + sIdx + '" value="' + fmtPct(sub.actualPct) + '" min="0" max="100" step="0.01" class="w-16 border border-sky-400 rounded px-1.5 py-0.5 text-center"></label>' +
+                  '<label>預計% <input type="number" id="subPlanPct_' + idx + '_' + sIdx + '" value="' + fmtPct(sub.plannedPct) + '" min="0" max="100" step="0.01" oninput="autoCalcMainFromSubs(' + idx + ')" class="w-16 border border-slate-300 rounded px-1.5 py-0.5 text-center"></label>' +
+                  '<label class="text-sky-700 font-bold">完成度% <input type="number" id="subActPct_' + idx + '_' + sIdx + '" value="' + fmtPct(sub.actualPct) + '" min="0" max="100" step="0.01" oninput="autoCalcMainFromSubs(' + idx + ')" class="w-16 border border-sky-400 rounded px-1.5 py-0.5 text-center"></label>' +
                 '</div>' +
               '</div>' +
               '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
@@ -1759,19 +1755,19 @@
             '</div>'
           ).join("");
 
-          const autoCalcBtn = subs.length > 0
-            ? '<button type="button" onclick="autoCalcMainFromSubs(' + idx + ')" class="text-[11px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-semibold">依子項目自動平均%</button>'
+          const autoHintTag = subs.length > 0
+            ? '<span class="text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-medium">✨ 子項目輸入即自動算平均</span>'
             : '';
 
           return '<div class="bg-slate-50 p-3 rounded-xl border border-slate-300 space-y-2.5">' +
             '<div class="flex flex-wrap items-center justify-between gap-2">' +
-              '<div class="flex items-center gap-2">' +
+              '<div class="flex items-center gap-2 flex-wrap">' +
                 '<span class="text-xs md:text-sm font-bold text-slate-900">' + w.name + '</span>' +
-                autoCalcBtn +
+                autoHintTag +
               '</div>' +
               '<div class="flex items-center gap-2 text-xs">' +
                 '<label>預計% <input type="number" id="plannedInput_' + idx + '" value="' + fmtPct(w.plannedPct) + '" min="0" max="100" step="0.01" required class="w-16 border border-slate-300 rounded px-1.5 py-1 text-center bg-white"></label>' +
-                '<label class="text-sky-800 font-bold">完成度% <input type="number" id="actualInput_' + idx + '" value="' + fmtPct(w.actualPct) + '" min="0" max="100" step="0.01" required class="w-16 border border-sky-500 rounded px-1.5 py-1 text-center bg-white"></label>' +
+                '<label class="text-sky-800 font-bold">完成度% <input type="number" id="actualInput_' + idx + '" value="' + fmtPct(w.actualPct) + '" min="0" max="100" step="0.01" required class="w-16 border border-sky-500 rounded px-1.5 py-1 text-center bg-white transition-colors"></label>' +
               '</div>' +
             '</div>' +
             '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
@@ -1795,11 +1791,19 @@
       let sumP = 0;
       let sumA = 0;
       w.subItems.forEach((_, sIdx) => {
-        sumP += parseFloat(document.getElementById("subPlanPct_" + idx + "_" + sIdx).value) || 0;
-        sumA += parseFloat(document.getElementById("subActPct_" + idx + "_" + sIdx).value) || 0;
+        const pVal = parseFloat(document.getElementById("subPlanPct_" + idx + "_" + sIdx).value);
+        const aVal = parseFloat(document.getElementById("subActPct_" + idx + "_" + sIdx).value);
+        sumP += isNaN(pVal) ? 0 : Math.min(100, Math.max(0, pVal));
+        sumA += isNaN(aVal) ? 0 : Math.min(100, Math.max(0, aVal));
       });
-      document.getElementById("plannedInput_" + idx).value = fmtPct(sumP / w.subItems.length);
-      document.getElementById("actualInput_" + idx).value = fmtPct(sumA / w.subItems.length);
+      const mainPlanEl = document.getElementById("plannedInput_" + idx);
+      const mainActEl = document.getElementById("actualInput_" + idx);
+      if (mainPlanEl) mainPlanEl.value = fmtPct(sumP / w.subItems.length);
+      if (mainActEl) {
+        mainActEl.value = fmtPct(sumA / w.subItems.length);
+        mainActEl.classList.add("bg-sky-50");
+        setTimeout(() => mainActEl.classList.remove("bg-sky-50"), 300);
+      }
     }
 
     function closeProgressModal() {
