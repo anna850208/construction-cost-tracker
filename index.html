@@ -20,7 +20,7 @@
         <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center font-bold text-slate-900">工</div>
         <div>
           <h1 class="font-bold text-base leading-tight">工地算盤 CivilCost</h1>
-          <p class="text-xs text-slate-400">土木營造成本、工期與即時盈虧控管</p>
+          <p class="text-xs text-slate-400">土木營造進料數量、工期與即時盈虧控管</p>
         </div>
       </div>
 
@@ -66,7 +66,7 @@
       </button>
     </section>
 
-    <!-- 已完工工項延誤預警橫幅（僅在已確定實際完工且延誤時顯示） -->
+    <!-- 已完工工項延誤預警橫幅 -->
     <section id="delayAlertBanner" class="hidden bg-rose-50 border-l-4 border-rose-600 rounded-r-xl p-4 shadow-sm">
       <div class="flex flex-wrap items-start justify-between gap-2">
         <div class="flex items-start gap-2.5">
@@ -180,24 +180,24 @@
       </div>
 
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <p class="text-xs text-slate-500">累計實際支出（含稅）</p>
-        <p id="kpiActual" class="text-lg md:text-xl font-bold text-slate-800 mt-1">NT$ 0</p>
+        <p class="text-xs text-slate-500">現場進料登記總筆數</p>
+        <p id="kpiRecordCount" class="text-lg md:text-xl font-bold text-slate-800 mt-1">0 筆</p>
         <span id="kpiEarnedNote" class="text-[11px] text-slate-500">已完成工程產值：NT$ 0</span>
       </div>
 
       <div id="profitStatusCard" class="bg-white p-4 rounded-xl shadow-sm border-2 transition">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-semibold text-slate-600">目前現況損益狀態</p>
-          <span id="profitStatusBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full">計算中</span>
+          <p class="text-xs font-semibold text-slate-600">已完成工程產值預估</p>
+          <span id="profitStatusBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">計算中</span>
         </div>
-        <p id="kpiCurrentProfit" class="text-lg md:text-xl font-bold mt-1">NT$ 0</p>
-        <span id="kpiProfitDesc" class="text-[11px] block mt-0.5">已完成產值 − 實際支出</span>
+        <p id="kpiCurrentProfit" class="text-lg md:text-xl font-bold text-emerald-700 mt-1">NT$ 0</p>
+        <span id="kpiProfitDesc" class="text-[11px] text-emerald-700 block mt-0.5">依主要工程加權完成度換算</span>
       </div>
 
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <p class="text-xs text-slate-500">合約剩餘未動支預算</p>
+        <p class="text-xs text-slate-500">尚未請款合約餘額</p>
         <p id="kpiMargin" class="text-lg md:text-xl font-bold text-indigo-600 mt-1">NT$ 0</p>
-        <span id="kpiRetentionNote" class="text-[11px] text-slate-400">含廠商保留款(10%)：NT$ 0</span>
+        <span id="kpiRetentionNote" class="text-[11px] text-slate-400">預估保留款(10%)：NT$ 0</span>
       </div>
     </section>
 
@@ -225,9 +225,9 @@
         <div id="nonMajorSummaryBox" class="pt-3 border-t border-slate-200"></div>
       </div>
 
-      <!-- 成本結構圓餅圖 -->
+      <!-- 各工項進料登記筆數圓餅圖 -->
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
-        <h2 class="font-bold text-sm text-slate-800 mb-2">各工程項目實際支出佔比</h2>
+        <h2 class="font-bold text-sm text-slate-800 mb-2">各工程項目進料登記佔比</h2>
         <div class="relative h-52 w-full flex items-center justify-center">
           <canvas id="costChart"></canvas>
         </div>
@@ -239,18 +239,32 @@
       </div>
     </section>
 
-    <!-- 現場快速記帳表單（日期、名稱、規格、數量、單價、附送貨單照片） -->
+    <!-- 現場快速記帳表單（日期、名稱、規格、數量、單位、附送貨單照片） -->
     <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div>
-          <h2 class="font-bold text-sm text-slate-800">現場快速記帳</h2>
-          <p class="text-[11px] text-slate-400">填寫日期、名稱、規格、數量、單價即可快速入帳（自動計算含稅總額）</p>
+          <h2 class="font-bold text-sm text-slate-800">現場快速記帳（進料數量與單位登記）</h2>
+          <p class="text-[11px] text-slate-400">只需填寫日期、名稱、規格、數量與單位（如：鋼筋 15.6 噸、水泥 50 包、油漆 20 桶）</p>
         </div>
         <div class="flex items-center gap-1.5 text-xs">
-          <span class="text-slate-500">歸屬扣帳工項：</span>
+          <span class="text-slate-500">歸屬工項：</span>
           <select id="expCategory" class="border border-slate-300 rounded-lg px-2 py-1 text-xs bg-slate-50 text-slate-700 font-medium"></select>
         </div>
       </div>
+
+      <!-- 常用單位快速參考清單 -->
+      <datalist id="unitSuggestions">
+        <option value="噸">
+        <option value="包">
+        <option value="桶">
+        <option value="m³">
+        <option value="支">
+        <option value="才">
+        <option value="式">
+        <option value="車">
+        <option value="組">
+        <option value="片">
+      </datalist>
 
       <form onsubmit="addExpense(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2.5">
         <div class="md:col-span-2">
@@ -261,26 +275,26 @@
 
         <div class="md:col-span-3">
           <label class="block text-[11px] font-semibold text-slate-500 mb-1">名稱</label>
-          <input id="expName" type="text" placeholder="如：預拌混凝土 / H型鋼" required
+          <input id="expName" type="text" placeholder="如：鋼筋 / 水泥 / 油漆" required
             class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
         <div class="md:col-span-3">
           <label class="block text-[11px] font-semibold text-slate-500 mb-1">規格</label>
-          <input id="expSpec" type="text" placeholder="如：4000psi / 27支" required
+          <input id="expSpec" type="text" placeholder="如：SD420W / 品牌一 / 乳膠漆" required
+            class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">數量</label>
+          <input id="expQty" type="number" placeholder="如：15.6" min="0.01" step="any" required
             class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
         <div class="md:col-span-1">
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1">數量</label>
-          <input id="expQty" type="number" placeholder="數量" min="0.01" step="any" value="1" required
-            class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm focus:border-amber-500 focus:outline-none">
-        </div>
-
-        <div class="md:col-span-2">
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1">單價（未稅）</label>
-          <input id="expPrice" type="number" placeholder="單價" min="1" step="any" required
-            class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm focus:border-amber-500 focus:outline-none">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">單位</label>
+          <input id="expUnit" type="text" list="unitSuggestions" placeholder="噸/包/桶" required
+            class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm text-center font-medium focus:border-amber-500 focus:outline-none">
         </div>
 
         <div class="md:col-span-1 flex items-end">
@@ -299,7 +313,7 @@
           <img id="newReceiptPreviewImg" src="" alt="送貨單預覽" class="w-12 h-12 object-cover rounded-lg border border-amber-300 bg-white cursor-pointer" onclick="openPhotoViewer(this.src, '待上傳送貨單預覽')">
           <div class="text-xs">
             <p class="font-bold text-amber-900">📎 已附加送貨單 / 簽收單照片</p>
-            <p class="text-[11px] text-amber-700">已自動壓縮最佳化，按下「+ 寫入」即會隨此筆帳目存證</p>
+            <p class="text-[11px] text-amber-700">已自動壓縮最佳化，按下「+ 寫入」即會隨此筆進料紀錄存證</p>
           </div>
         </div>
         <button type="button" onclick="clearNewReceiptPhoto()" class="text-xs text-rose-600 hover:text-rose-800 bg-white border border-rose-200 px-2.5 py-1 rounded-lg font-semibold">
@@ -314,7 +328,7 @@
         </button>
         <div class="flex items-center gap-2">
           <button type="button" onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium">
-            下載明細與進度 CSV（免費）
+            下載進料明細與進度 CSV（免費）
           </button>
           <button type="button" onclick="handleProAction('一鍵產出廠商月結請款單與業主估驗計價表')" class="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg font-medium">
             產出估驗請款單 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded ml-1">PRO</span>
@@ -323,11 +337,11 @@
       </div>
     </section>
 
-    <!-- 採購與記帳明細表 -->
+    <!-- 採購與進料明細表 -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-        <h2 class="font-bold text-sm text-slate-800">近期現場記帳明細</h2>
-        <span class="text-xs text-slate-400">自動計算 5% 營業稅與 10% 保留款</span>
+        <h2 class="font-bold text-sm text-slate-800">近期現場記帳明細（進料數量與單據存證）</h2>
+        <span class="text-xs text-slate-400">依日期、材料名稱、規格、數量與單位紀錄</span>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse text-sm">
@@ -337,8 +351,7 @@
               <th class="py-2.5 px-3">名稱</th>
               <th class="py-2.5 px-3">規格</th>
               <th class="py-2.5 px-3 text-right">數量</th>
-              <th class="py-2.5 px-3 text-right">單價（未稅）</th>
-              <th class="py-2.5 px-3 text-right">含稅總額</th>
+              <th class="py-2.5 px-3">單位</th>
               <th class="py-2.5 px-3 text-center">單據照片</th>
               <th class="py-2.5 px-3 text-center">操作</th>
             </tr>
@@ -604,13 +617,13 @@
     </div>
   </div>
 
-  <!-- 視窗 C：編輯單筆現場記帳明細（含補傳/更換送貨單照片） -->
+  <!-- 視窗 C：編輯單筆現場記帳明細（日期、名稱、規格、數量、單位、送貨單照片） -->
   <div id="editExpenseModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
           <h3 class="text-lg font-bold text-slate-900">編輯現場記帳明細</h3>
-          <p class="text-xs text-slate-500 mt-0.5">修改後將自動重新計算含稅總額與盈虧</p>
+          <p class="text-xs text-slate-500 mt-0.5">修改材料名稱、規格、數量、單位或補傳送貨單照片</p>
         </div>
         <button type="button" onclick="closeEditExpenseModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
@@ -623,7 +636,7 @@
             <input id="editExpDate" type="date" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs focus:border-amber-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">歸屬扣帳工項</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">歸屬工項</label>
             <select id="editExpCategory" required class="w-full border border-slate-300 rounded-lg px-2 py-2 text-xs bg-white focus:border-amber-500 focus:outline-none"></select>
           </div>
         </div>
@@ -641,11 +654,11 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">數量</label>
-            <input id="editExpQty" type="number" min="0.01" step="any" required oninput="updateEditPreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+            <input id="editExpQty" type="number" min="0.01" step="any" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">單價（未稅）</label>
-            <input id="editExpPrice" type="number" min="0" step="any" required oninput="updateEditPreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 mb-1">單位</label>
+            <input id="editExpUnit" type="text" list="unitSuggestions" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
           </div>
         </div>
 
@@ -665,11 +678,6 @@
           <button type="button" onclick="triggerReceiptUpload('edit')" class="w-full text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold py-2 rounded-lg transition">
             📷 上傳 / 更換送貨單照片
           </button>
-        </div>
-
-        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
-          <span class="text-slate-500">修改後含稅總額（含 5% 營業稅）：</span>
-          <span id="editExpTotalPreview" class="text-sm font-bold text-amber-700">NT$ 0</span>
         </div>
 
         <div class="pt-2 flex gap-2">
@@ -696,9 +704,9 @@
         專為土木營造老闆與工地主任設計，省下每月 15 小時對帳時間，杜絕材料超叫與漏算追加款：
       </p>
       <ul class="text-xs text-slate-700 space-y-2 bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
-        <li>✅ <strong>無限個工地案場</strong>同時管理與跨案場單價比對</li>
+        <li>✅ <strong>無限個工地案場</strong>同時管理與跨案場數量統計</li>
         <li>✅ <strong>工地送貨單拍照上傳</strong>（自動壓縮雲端存證）</li>
-        <li>✅ <strong>變更設計追加減帳</strong>與即時毛利率重算</li>
+        <li>✅ <strong>變更設計追加減帳</strong>與即時工期控管</li>
         <li>✅ 一鍵匯出<strong>業主估驗計價表</strong>與<strong>廠商保留款明細</strong></li>
       </ul>
       <div class="pt-2 flex flex-col gap-2">
@@ -941,9 +949,9 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（純日期記帳 ＋ Pro 單據照片拍照壓縮存證與放大檢視） -->
+  <!-- 核心業務邏輯（日期/名稱/規格/數量/單位 ＋ Pro 單據照片拍照壓縮存證） -->
   <script>
-    const STORAGE_KEY = "civilcost_data_v11";
+    const STORAGE_KEY = "civilcost_data_v12";
     let isPro = false;
     let chartInstance = null;
     let tempWbsList = [];
@@ -962,7 +970,6 @@
       return Number(Number(num).toFixed(2));
     }
 
-    // 圖片前端自動壓縮（最大邊長 1000px、JPEG 0.7 品質，確保可順暢存入雲端與本機）
     function compressImageFile(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1235,10 +1242,10 @@
         { name: "拾參、清安費", budget: 3344356, actualPct: 0, isMajor: false, subItems: [] }
       ],
       expenses: [
-        { date: "2026-11-27", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "預拌混凝土", spec: "4000psi（車次）", qty: 120, price: 2850, photo: "" },
-        { date: "2026-11-26", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "H型鋼排樁材料", spec: "H300×300×10×15", qty: 27, price: 18500, photo: "" },
-        { date: "2026-11-24", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "塔式起重機租賃", spec: "含操作人員/月", qty: 2, price: 1487854, photo: "" },
-        { date: "2026-11-20", category: "拾、職業安全衛生管理費", name: "工地安全警示設施", spec: "全區圍籬及告示牌", qty: 1, price: 1500120, photo: "" }
+        { date: "2026-11-27", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "鋼筋", spec: "SD420W #6~#8", qty: 15.6, unit: "噸", photo: "" },
+        { date: "2026-11-26", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "水泥", spec: "品牌一 卜特蘭I型", qty: 50, unit: "包", photo: "" },
+        { date: "2026-11-24", category: "3. A棟廠辦新建工程", name: "油漆", spec: "室外耐候乳膠漆", qty: 20, unit: "桶", photo: "" },
+        { date: "2026-11-20", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "預拌混凝土", spec: "4000psi", qty: 120, unit: "m³", photo: "" }
       ]
     };
 
@@ -1291,7 +1298,7 @@
           name: e.name || e.item || "",
           spec: e.spec || e.vendor || "-",
           qty: Number(e.qty) || 1,
-          price: Number(e.price) || 0,
+          unit: e.unit || "式",
           photo: e.photo || ""
         };
       });
@@ -1299,7 +1306,7 @@
 
     function loadState() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v10") || localStorage.getItem("civilcost_data_v9");
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v11") || localStorage.getItem("civilcost_data_v10");
         if (saved) {
           const parsed = JSON.parse(saved);
           const merged = {
@@ -1344,7 +1351,7 @@
     }
 
     function resetDemoData() {
-      if (confirm("確定要將合約金額、工期、主/次要工程項目與帳目重置為預設開會紀錄表範例嗎？")) {
+      if (confirm("確定要將合約金額、工期、主/次要工程項目與帳目重置為預設範例（鋼筋 15.6 噸、水泥 50 包、油漆 20 桶）嗎？")) {
         window.appState = JSON.parse(JSON.stringify(defaultState));
         saveState();
         renderAll();
@@ -1464,17 +1471,14 @@
     function calculateMetrics() {
       const sState = window.appState;
       const totalContract = sState.baseContract + sState.extraContract;
-      const categoryActuals = {};
-      sState.wbsBudgets.forEach(w => { categoryActuals[w.name] = 0; });
+      const categoryCounts = {};
+      sState.wbsBudgets.forEach(w => { categoryCounts[w.name] = 0; });
 
-      let totalActualCost = 0;
       sState.expenses.forEach(e => {
-        const subWithTax = Math.round(e.qty * e.price * 1.05);
-        totalActualCost += subWithTax;
-        if (categoryActuals[e.category] !== undefined) {
-          categoryActuals[e.category] += subWithTax;
+        if (categoryCounts[e.category] !== undefined) {
+          categoryCounts[e.category] += 1;
         } else if (sState.wbsBudgets.length > 0) {
-          categoryActuals[sState.wbsBudgets[0].name] += subWithTax;
+          categoryCounts[sState.wbsBudgets[0].name] += 1;
         }
       });
 
@@ -1499,20 +1503,18 @@
       });
 
       const earnedContractValue = Math.round(totalContract * (weightedActual / 100));
-      const currentProfit = Math.round(earnedContractValue - totalActualCost);
-      const remainingBudget = totalContract - totalActualCost;
-      const retention = Math.round(totalActualCost * 0.10);
+      const remainingContract = Math.max(0, totalContract - earnedContractValue);
+      const retention = Math.round(earnedContractValue * 0.10);
 
       return {
         totalContract,
-        totalActualCost,
+        recordCount: sState.expenses.length,
         earnedContractValue,
-        currentProfit,
-        remainingBudget,
+        remainingContract,
         retention,
         weightedActual: fmtPct(weightedActual),
         delayedItems,
-        categoryActuals
+        categoryCounts
       };
     }
 
@@ -1601,38 +1603,24 @@
       const extraSign = sState.extraContract >= 0 ? "+" : "";
       document.getElementById("kpiExtraNote").textContent = "原始 " + Math.round(sState.baseContract / 10000).toLocaleString() + "萬 ｜ 變更 " + extraSign + Math.round(sState.extraContract / 10000).toLocaleString() + "萬";
 
-      document.getElementById("kpiActual").textContent = "NT$ " + m.totalActualCost.toLocaleString();
-      document.getElementById("kpiEarnedNote").textContent = "依完成度換算產值：NT$ " + m.earnedContractValue.toLocaleString();
+      const photoCount = sState.expenses.filter(e => e.photo).length;
+      document.getElementById("kpiRecordCount").textContent = m.recordCount.toLocaleString() + " 筆";
+      document.getElementById("kpiEarnedNote").textContent = "已附單據照片：" + photoCount + " 筆";
 
       const profitCard = document.getElementById("profitStatusCard");
       const profitBadge = document.getElementById("profitStatusBadge");
       const profitVal = document.getElementById("kpiCurrentProfit");
-      const profitDesc = document.getElementById("kpiProfitDesc");
+      profitCard.className = "bg-emerald-50/60 p-4 rounded-xl shadow-sm border-2 border-emerald-400 transition";
+      profitBadge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white";
+      profitBadge.textContent = "進度 " + m.weightedActual + "%";
+      profitVal.textContent = "NT$ " + m.earnedContractValue.toLocaleString();
 
-      if (m.currentProfit >= 0) {
-        profitCard.className = "bg-emerald-50/60 p-4 rounded-xl shadow-sm border-2 border-emerald-400 transition";
-        profitBadge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white";
-        profitBadge.textContent = "🟢 目前盈利中";
-        profitVal.className = "text-lg md:text-xl font-bold text-emerald-700 mt-1";
-        profitVal.textContent = "+NT$ " + m.currentProfit.toLocaleString();
-        profitDesc.className = "text-[11px] text-emerald-700 block mt-0.5";
-        profitDesc.textContent = "已完成產值大於實際支出，成本控管良好";
-      } else {
-        profitCard.className = "bg-rose-50/70 p-4 rounded-xl shadow-sm border-2 border-rose-500 transition";
-        profitBadge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-600 text-white";
-        profitBadge.textContent = "🔴 目前虧損中";
-        profitVal.className = "text-lg md:text-xl font-bold text-rose-700 mt-1";
-        profitVal.textContent = "-NT$ " + Math.abs(m.currentProfit).toLocaleString();
-        profitDesc.className = "text-[11px] text-rose-700 block mt-0.5";
-        profitDesc.textContent = "實際支出已超過目前完工進度產值";
-      }
+      document.getElementById("kpiMargin").textContent = "NT$ " + m.remainingContract.toLocaleString();
+      document.getElementById("kpiRetentionNote").textContent = "預估保留款(10%)：NT$ " + m.retention.toLocaleString();
 
-      document.getElementById("kpiMargin").textContent = "NT$ " + m.remainingBudget.toLocaleString();
-      document.getElementById("kpiRetentionNote").textContent = "廠商保留款(10%)：NT$ " + m.retention.toLocaleString();
-
-      renderWBS(m.categoryActuals);
+      renderWBS(m.categoryCounts);
       renderExpenses();
-      renderChart(m.categoryActuals);
+      renderChart(m.categoryCounts);
       updatePlanUI();
     }
 
@@ -1715,7 +1703,7 @@
       return (start || "待定") + " ~ " + (end || "進行中");
     }
 
-    function renderWBS(categoryActuals) {
+    function renderWBS(categoryCounts) {
       const container = document.getElementById("wbsContainer");
       const majorWithIdx = window.appState.wbsBudgets
         .map((w, idx) => ({ item: w, idx }))
@@ -1726,8 +1714,7 @@
         container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">尚未設定主要工程項目，請點右上角「+ 新增主/次要項目」新增。</p>';
       } else {
         container.innerHTML = majorWithIdx.map(({ item, idx }) => {
-          const actualCost = categoryActuals[item.name] || 0;
-          const costPct = item.budget > 0 ? Math.round((actualCost / item.budget) * 100) : 0;
+          const recCount = categoryCounts[item.name] || 0;
           const actualVal = fmtPct(item.actualPct);
           const subs = item.subItems || [];
           const summary = getMainItemScheduleSummary(item);
@@ -1785,7 +1772,7 @@
                 '<span class="font-bold text-xs md:text-sm text-slate-800">' + item.name + '</span>' +
                 toggleBtnHtml +
               '</div>' +
-              '<span class="text-[11px] text-slate-500">已支 NT$ ' + (actualCost / 10000).toFixed(1) + '萬 / 預算 ' + (item.budget / 10000).toFixed(1) + '萬 (動支 ' + costPct + '%)</span>' +
+              '<span class="text-[11px] text-slate-500">合約預算 ' + (item.budget / 10000).toFixed(1) + '萬 ｜ 進料 ' + recCount + ' 筆</span>' +
             '</div>' +
 
             '<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 bg-white/80 px-2.5 py-1 rounded-lg border border-slate-200/70">' +
@@ -1811,19 +1798,17 @@
         summaryBox.innerHTML = "";
       } else {
         const nonMajorTotalBudget = nonMajorItems.reduce((s, w) => s + w.budget, 0);
-        const nonMajorTotalSpent = nonMajorItems.reduce((s, w) => s + (categoryActuals[w.name] || 0), 0);
         summaryBox.innerHTML =
           '<div class="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3 space-y-2">' +
             '<div class="flex flex-wrap items-center justify-between gap-1">' +
               '<span class="text-xs font-bold text-amber-900">📋 非主要工程項目（管理費 / 利潤 / 清安費 — 不列入施工進度條）</span>' +
-              '<span class="text-[11px] font-semibold text-amber-800">合計已支 NT$ ' + (nonMajorTotalSpent / 10000).toFixed(1) + '萬 / 預算 ' + (nonMajorTotalBudget / 10000).toFixed(1) + '萬</span>' +
+              '<span class="text-[11px] font-semibold text-amber-800">預算合計 NT$ ' + (nonMajorTotalBudget / 10000).toFixed(1) + '萬</span>' +
             '</div>' +
             '<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">' +
               nonMajorItems.map(item => {
-                const spent = categoryActuals[item.name] || 0;
                 return '<div class="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-amber-100 text-[11px]">' +
                   '<span class="text-slate-700 font-medium truncate pr-2">' + item.name + '</span>' +
-                  '<span class="text-slate-500 shrink-0">支 ' + (spent / 10000).toFixed(1) + '萬 / ' + (item.budget / 10000).toFixed(1) + '萬</span>' +
+                  '<span class="text-slate-500 shrink-0">' + (item.budget / 10000).toFixed(1) + '萬</span>' +
                 '</div>';
               }).join("") +
             '</div>' +
@@ -2204,9 +2189,6 @@
     function renderExpenses() {
       const tbody = document.getElementById("expenseTableBody");
       tbody.innerHTML = window.appState.expenses.map((e, idx) => {
-        const subtotal = e.qty * e.price;
-        const totalWithTax = Math.round(subtotal * 1.05);
-
         const photoCellHtml = e.photo
           ? '<button type="button" onclick="openPhotoViewer(window.appState.expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\')" class="inline-flex items-center gap-1 text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-1 rounded-lg transition">' +
               '📷 檢視單據' +
@@ -2217,9 +2199,8 @@
           '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap text-xs">' + (e.date || "-") + '</td>' +
           '<td class="py-2.5 px-3 font-semibold text-slate-800">' + e.name + '</td>' +
           '<td class="py-2.5 px-3 text-slate-600">' + e.spec + '</td>' +
-          '<td class="py-2.5 px-3 text-right text-slate-700 whitespace-nowrap">' + e.qty.toLocaleString() + '</td>' +
-          '<td class="py-2.5 px-3 text-right text-slate-600 whitespace-nowrap">NT$ ' + e.price.toLocaleString() + '</td>' +
-          '<td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">NT$ ' + totalWithTax.toLocaleString() + '</td>' +
+          '<td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">' + e.qty.toLocaleString() + '</td>' +
+          '<td class="py-2.5 px-3 text-slate-700 font-medium whitespace-nowrap">' + (e.unit || "式") + '</td>' +
           '<td class="py-2.5 px-3 text-center whitespace-nowrap">' + photoCellHtml + '</td>' +
           '<td class="py-2.5 px-3 text-center whitespace-nowrap space-x-2">' +
             '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-xs text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-2 py-1 rounded font-semibold transition">編輯</button>' +
@@ -2247,7 +2228,7 @@
       document.getElementById("editExpName").value = exp.name;
       document.getElementById("editExpSpec").value = exp.spec;
       document.getElementById("editExpQty").value = exp.qty;
-      document.getElementById("editExpPrice").value = exp.price;
+      document.getElementById("editExpUnit").value = exp.unit || "式";
 
       pendingEditReceiptPhoto = exp.photo || "";
       const prevBox = document.getElementById("editReceiptPreviewBox");
@@ -2260,17 +2241,8 @@
         prevBox.classList.remove("flex");
       }
 
-      updateEditPreview();
-
       document.getElementById("editExpenseModal").classList.remove("hidden");
       document.getElementById("editExpenseModal").classList.add("flex");
-    }
-
-    function updateEditPreview() {
-      const qty = Number(document.getElementById("editExpQty").value) || 0;
-      const price = Number(document.getElementById("editExpPrice").value) || 0;
-      const totalWithTax = Math.round(qty * price * 1.05);
-      document.getElementById("editExpTotalPreview").textContent = "NT$ " + totalWithTax.toLocaleString();
     }
 
     function closeEditExpenseModal() {
@@ -2289,7 +2261,7 @@
         name: document.getElementById("editExpName").value.trim(),
         spec: document.getElementById("editExpSpec").value.trim(),
         qty: Number(document.getElementById("editExpQty").value) || 1,
-        price: Number(document.getElementById("editExpPrice").value) || 0,
+        unit: document.getElementById("editExpUnit").value.trim() || "式",
         photo: pendingEditReceiptPhoto || ""
       };
 
@@ -2305,7 +2277,7 @@
       const name = document.getElementById("expName").value.trim();
       const spec = document.getElementById("expSpec").value.trim();
       const qty = Number(document.getElementById("expQty").value);
-      const price = Number(document.getElementById("expPrice").value);
+      const unit = document.getElementById("expUnit").value.trim() || "式";
 
       window.appState.expenses.unshift({
         date,
@@ -2313,22 +2285,22 @@
         name,
         spec,
         qty,
-        price,
+        unit,
         photo: pendingNewReceiptPhoto || ""
       });
       saveState();
 
       document.getElementById("expName").value = "";
       document.getElementById("expSpec").value = "";
-      document.getElementById("expQty").value = 1;
-      document.getElementById("expPrice").value = "";
+      document.getElementById("expQty").value = "";
+      document.getElementById("expUnit").value = "";
       document.getElementById("expDate").value = getCurrentLocalDate();
       clearNewReceiptPhoto();
       renderAll();
     }
 
     function deleteExpense(idx) {
-      if (confirm("確定要刪除這筆記帳明細嗎？")) {
+      if (confirm("確定要刪除這筆現場記帳明細嗎？")) {
         window.appState.expenses.splice(idx, 1);
         saveState();
         renderAll();
@@ -2398,68 +2370,52 @@
       const sState = window.appState;
       const m = calculateMetrics();
       const s = computeScheduleInfo(sState.startDate, sState.baseEndDate, sState.extraDays);
-      let totalSubtotal = 0;
-      let totalTax = 0;
-      let totalWithTax = 0;
 
       const esc = (str) => '"' + String(str).replace(/"/g, '""') + '"';
 
       let csv = "\uFEFF";
-      csv += "日期,名稱,規格,數量,未稅單價,未稅小計,營業稅(5%),含稅總額,單據存證\n";
+      csv += "日期,歸屬工項,名稱,規格,數量,單位,單據存證\n";
 
       sState.expenses.forEach(e => {
-        const sub = Math.round(e.qty * e.price);
-        const withTax = Math.round(sub * 1.05);
-        const tax = withTax - sub;
-        totalSubtotal += sub;
-        totalTax += tax;
-        totalWithTax += withTax;
-
         csv += [
           esc(e.date || "-"),
+          esc(e.category || "-"),
           esc(e.name),
           esc(e.spec),
           e.qty,
-          e.price,
-          sub,
-          tax,
-          withTax,
+          esc(e.unit || "式"),
           esc(e.photo ? "已附照片" : "未附")
         ].join(",") + "\n";
       });
 
-      csv += ",,,,明細支出總計," + totalSubtotal + "," + totalTax + "," + totalWithTax + ",\n\n";
-
-      csv += "【專案合約、工期與目前損益總表】,,,,,,,,\n";
-      csv += "工程案場名稱," + esc(sState.projectName) + ",,,,,,,\n";
-      csv += "正式開工日期," + esc(s.startDate) + ",,,,,,,\n";
-      csv += "原始預計完工日," + esc(s.baseEndDate) + ",,,,,,,\n";
-      csv += "核定追加工期天數," + s.extraDays + " 天,,,,,,,\n";
-      csv += "展延後最終完工日," + esc(s.finalEndDate) + ",,,,,,,\n";
-      csv += "累計已工作天數," + s.elapsedDays + " 天,,,,,,,\n";
-      csv += "距離完工倒數天數," + (s.remainingDays >= 0 ? s.remainingDays + " 天" : "逾期 " + Math.abs(s.remainingDays) + " 天") + ",,,,,,,\n";
-      csv += "合約總金額（含追加）," + m.totalContract + ",,,,,,,\n";
-      csv += "主要工程加權完成度," + m.weightedActual + "%,,,,,,,\n";
-      csv += "依完成度換算已完成產值," + m.earnedContractValue + ",,,,,,,\n";
-      csv += "累計實際支出總金額（含稅）," + m.totalActualCost + ",,,,,,,\n";
-      csv += "目前現況損益（正數為盈利/負數為虧損）," + m.currentProfit + ",,,,,,,\n";
-      csv += "合約剩餘未動支預算," + m.remainingBudget + ",,,,,,,\n";
-      csv += "協力廠商保留款 (10%)," + m.retention + ",,,,,,,\n";
+      csv += "\n【專案合約與工期進度總表】,,,,,,\n";
+      csv += "工程案場名稱," + esc(sState.projectName) + ",,,,,\n";
+      csv += "正式開工日期," + esc(s.startDate) + ",,,,,\n";
+      csv += "原始預計完工日," + esc(s.baseEndDate) + ",,,,,\n";
+      csv += "核定追加工期天數," + s.extraDays + " 天,,,,,\n";
+      csv += "展延後最終完工日," + esc(s.finalEndDate) + ",,,,,\n";
+      csv += "累計已工作天數," + s.elapsedDays + " 天,,,,,\n";
+      csv += "距離完工倒數天數," + (s.remainingDays >= 0 ? s.remainingDays + " 天" : "逾期 " + Math.abs(s.remainingDays) + " 天") + ",,,,,\n";
+      csv += "合約總金額（含追加）," + m.totalContract + ",,,,,\n";
+      csv += "主要工程加權完成度," + m.weightedActual + "%,,,,,\n";
+      csv += "依完成度換算已完成產值," + m.earnedContractValue + ",,,,,\n";
+      csv += "尚未請款合約餘額," + m.remainingContract + ",,,,,\n";
+      csv += "預估保留款 (10%)," + m.retention + ",,,,,\n";
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = sState.projectName + "_成本與進度明細表.csv";
+      a.download = sState.projectName + "_進料與進度明細表.csv";
       a.click();
     }
 
-    function renderChart(categoryActuals) {
+    function renderChart(categoryCounts) {
       if (typeof Chart === "undefined") return;
       const ctx = document.getElementById("costChart").getContext("2d");
       if (chartInstance) chartInstance.destroy();
       const palette = ["#64748b", "#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316", "#6366f1", "#84cc16"];
-      const activeItems = window.appState.wbsBudgets.filter(w => (categoryActuals[w.name] || 0) > 0);
+      const activeItems = window.appState.wbsBudgets.filter(w => (categoryCounts[w.name] || 0) > 0);
       const chartItems = activeItems.length > 0 ? activeItems : window.appState.wbsBudgets.slice(0, 5);
 
       chartInstance = new Chart(ctx, {
@@ -2467,7 +2423,7 @@
         data: {
           labels: chartItems.map(w => w.name.split("（")[0]),
           datasets: [{
-            data: chartItems.map(w => categoryActuals[w.name] || 0),
+            data: chartItems.map(w => categoryCounts[w.name] || 0),
             backgroundColor: chartItems.map((_, i) => palette[i % palette.length]),
             borderWidth: 0
           }]
