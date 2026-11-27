@@ -77,7 +77,7 @@
           </div>
         </div>
         <button type="button" onclick="openProgressModal()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3 py-1.5 rounded-lg transition shadow-xs">
-          更新現場進度 %
+          更新進度與起迄日期
         </button>
       </div>
     </section>
@@ -91,13 +91,13 @@
           <option value="1" id="proProjectOption">🔒 [Pro] 新竹竹北廠房基礎開挖工程（合約 2,800 萬）</option>
         </select>
         <button type="button" onclick="openScheduleModal()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
-          📅 設定工期與追加天數
+          📅 全案開工/完工設定
         </button>
         <button type="button" onclick="openBudgetModal()" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
-          ✎ 設定主要/非主要工程項目
+          ✎ 設定主/次要工程與預算
         </button>
         <button type="button" onclick="openProgressModal()" class="text-xs bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
-          📊 回報主要工程進度
+          📊 回報進度%與起迄時間
         </button>
       </div>
       <button type="button" onclick="handleProAction('新增多個工地案場')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition">
@@ -105,11 +105,11 @@
       </button>
     </section>
 
-    <!-- 工期與時程控管總覽卡片 -->
+    <!-- 全案工期與天數控管看板 -->
     <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
         <div class="flex items-center gap-2">
-          <h2 class="font-bold text-sm text-slate-800">工期與天數控管看板（日曆天計算）</h2>
+          <h2 class="font-bold text-sm text-slate-800">全案工期與天數控管看板（日曆天計算）</h2>
           <span id="totalDurationBadge" class="text-[11px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded">總工期 0 天</span>
         </div>
         <button type="button" onclick="openScheduleModal()" class="text-xs text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 font-semibold px-2.5 py-1 rounded-lg transition">
@@ -120,19 +120,19 @@
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
         <div onclick="openScheduleModal()" class="bg-slate-50 hover:bg-slate-100/80 p-3 rounded-lg border border-slate-200 cursor-pointer transition">
           <p class="text-[11px] text-slate-500 font-medium">🚩 正式開工日期</p>
-          <p id="dispStartDate" class="text-sm md:text-base font-bold text-slate-800 mt-1">2026-06-01</p>
+          <p id="dispStartDate" class="text-sm md:text-base font-bold text-slate-800 mt-1">2026-08-02</p>
           <span class="text-[10px] text-slate-400">點擊可修改</span>
         </div>
 
         <div onclick="openScheduleModal()" class="bg-slate-50 hover:bg-slate-100/80 p-3 rounded-lg border border-slate-200 cursor-pointer transition">
           <p class="text-[11px] text-slate-500 font-medium">🏁 最終預計完工日</p>
-          <p id="dispFinalEndDate" class="text-sm md:text-base font-bold text-slate-800 mt-1">2027-06-15</p>
-          <span id="dispBaseEndNote" class="text-[10px] text-slate-500 block truncate">原訂：2027-05-31</span>
+          <p id="dispFinalEndDate" class="text-sm md:text-base font-bold text-slate-800 mt-1">2027-06-30</p>
+          <span id="dispBaseEndNote" class="text-[10px] text-slate-500 block truncate">原訂：2027-06-30</span>
         </div>
 
         <div onclick="openScheduleModal()" class="bg-amber-50/70 hover:bg-amber-100/60 p-3 rounded-lg border border-amber-200 cursor-pointer transition">
           <p class="text-[11px] text-amber-800 font-semibold">➕ 核定追加工期</p>
-          <p id="dispExtraDays" class="text-sm md:text-base font-bold text-amber-700 mt-1">+15 天</p>
+          <p id="dispExtraDays" class="text-sm md:text-base font-bold text-amber-700 mt-1">+0 天</p>
           <span class="text-[10px] text-amber-600/80">自動順延最終完工日</span>
         </div>
 
@@ -150,12 +150,12 @@
       </div>
     </section>
 
-    <!-- 整體工程「預計進度 vs. 實際進度」雙進度條總覽（僅依主要工程項目加權） -->
+    <!-- 整體工程「預計進度 vs. 實際進度」雙進度條總覽 -->
     <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 class="font-bold text-sm text-slate-800">主要工程總進度對比（排除管銷/利潤加權）</h2>
-          <p class="text-[11px] text-slate-400">僅依「主要工程項目」預算權重自動加權計算，精準反映現場實際施工進度</p>
+          <p class="text-[11px] text-slate-400">僅依「主要工程項目」預算權重自動加權計算，精準反映現場開會施工進度</p>
         </div>
         <div id="overallScheduleBadge" class="text-xs font-bold px-3 py-1 rounded-full"></div>
       </div>
@@ -163,7 +163,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
         <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
           <div class="flex justify-between text-xs mb-1.5">
-            <span class="font-semibold text-slate-600">📅 預計累計進度（合約排程）</span>
+            <span class="font-semibold text-slate-600">📅 預計累計進度（計劃排程）</span>
             <span id="overallPlannedText" class="font-bold text-slate-800">0.0%</span>
           </div>
           <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
@@ -173,7 +173,7 @@
 
         <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/80">
           <div class="flex justify-between text-xs mb-1.5">
-            <span class="font-semibold text-slate-600">🏗️ 實際完工進度（現場核定）</span>
+            <span class="font-semibold text-slate-600">🏗️ 實際完成度（現場核定）</span>
             <span id="overallActualText" class="font-bold text-sky-700">0.0%</span>
           </div>
           <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
@@ -216,25 +216,24 @@
       </div>
     </section>
 
-    <!-- 中間區塊：僅顯示「主要工程項目」雙進度條 + 成本結構圓餅圖 -->
+    <!-- 【升級】中間區塊：主要工程項目（含次要子項目、計劃/實際起迄時間、完成度%） -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
           <div>
-            <h2 class="font-bold text-sm text-slate-800">主要工程項目進度（預計 vs. 實際）與成本控管</h2>
-            <p class="text-[11px] text-slate-400">僅顯示「主要工程項目」進度條；非主要項目（管理費/利潤/清安費）不列入進度條</p>
+            <h2 class="font-bold text-sm text-slate-800">主要工程項目進度（含次要子項目、起迄時間與完成度 %）</h2>
+            <p class="text-[11px] text-slate-400">點擊主工項可展開/收合次要子項目；管銷利潤項目不列入進度條</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openBudgetModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg font-semibold transition">
-              + 管理主要/非主要項目
+              + 新增主/次要項目
             </button>
             <button type="button" onclick="openProgressModal()" class="text-xs bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg font-semibold shadow-xs transition">
-              📊 更新進度
+              📊 編輯進度與起迄
             </button>
           </div>
         </div>
 
-        <!-- 僅渲染主要工程項目進度條 -->
         <div id="wbsContainer" class="space-y-4"></div>
 
         <!-- 非主要工程項目（管銷/利潤/清安費）精簡彙總列 -->
@@ -243,61 +242,69 @@
 
       <!-- 成本結構圓餅圖 -->
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
-        <h2 class="font-bold text-sm text-slate-800 mb-2">各項目實際支出佔比</h2>
+        <h2 class="font-bold text-sm text-slate-800 mb-2">各工程項目實際支出佔比</h2>
         <div class="relative h-52 w-full flex items-center justify-center">
           <canvas id="costChart"></canvas>
         </div>
         <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
           <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-slate-400 inline-block"></span> 灰色條：預計排程進度</div>
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block"></span> 綠色條：實際進度正常/超前</div>
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block"></span> 紅色條：實際進度延誤落後</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block"></span> 綠色條：實際完成度正常/超前</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block"></span> 紅色條：實際完成度延誤落後</div>
         </div>
       </div>
     </section>
 
-    <!-- 【升級】現場快速記帳表單（最左邊支援自行輸入項次/分類 + 歸屬標單大項） -->
+    <!-- 【升級】現場快速記帳表單（精簡為：日期時間、名稱、規格、數量、單價） -->
     <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div>
-          <h2 class="font-bold text-sm text-slate-800">現場快速記帳（叫料 / 點工 / 機具）</h2>
-          <p class="text-[11px] text-slate-400">最左欄可直接輸入標單項次或自訂分類（如：壹.一.4.1 或 模板工資），並選擇歸屬工程項目</p>
+          <h2 class="font-bold text-sm text-slate-800">現場快速記帳</h2>
+          <p class="text-[11px] text-slate-400">填寫日期時間、名稱、規格、數量、單價即可快速入帳（自動計算含稅總額）</p>
         </div>
-        <button type="button" onclick="openBudgetModal(true)" class="text-xs text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 font-semibold px-2.5 py-1 rounded-lg transition">
-          + 管理主要/非主要工程項目
-        </button>
+        <div class="flex items-center gap-1.5 text-xs">
+          <span class="text-slate-500">歸屬扣帳工項：</span>
+          <select id="expCategory" class="border border-slate-300 rounded-lg px-2 py-1 text-xs bg-slate-50 text-slate-700 font-medium"></select>
+        </div>
       </div>
 
       <form onsubmit="addExpense(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2.5">
-        <!-- 最左邊：可自行輸入項次或分類名稱（附歷史常用項次自動提示） -->
-        <div class="md:col-span-2">
-          <input id="expItemCode" list="itemCodeHistoryList" type="text" placeholder="項次/分類（如：壹.一.4.1）" required
-            class="w-full border border-amber-400 bg-amber-50/30 rounded-lg px-2.5 py-2 text-sm font-semibold text-slate-800 focus:border-amber-600 focus:outline-none">
-          <datalist id="itemCodeHistoryList"></datalist>
+        <!-- 1. 日期時間 -->
+        <div class="md:col-span-3">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">日期時間</label>
+          <input id="expDateTime" type="datetime-local" required
+            class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-800 focus:border-amber-500 focus:outline-none">
         </div>
 
-        <!-- 歸屬標單工程大項（分主要與非主要兩組） -->
-        <div class="md:col-span-2">
-          <select id="expCategory" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white"></select>
+        <!-- 2. 名稱 -->
+        <div class="md:col-span-3">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">名稱</label>
+          <input id="expName" type="text" placeholder="如：預拌混凝土 / H型鋼" required
+            class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
+        <!-- 3. 規格 -->
         <div class="md:col-span-2">
-          <input id="expVendor" type="text" placeholder="廠商名稱（如：國產實業）" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">規格</label>
+          <input id="expSpec" type="text" placeholder="如：4000psi / 27支" required
+            class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
-        <div class="md:col-span-2">
-          <input id="expItem" type="text" placeholder="品名/規格（如：洗車台設備）" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
-        </div>
-
+        <!-- 4. 數量 -->
         <div class="md:col-span-1">
-          <input id="expQty" type="number" placeholder="數量" min="0.01" step="any" value="1" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">數量</label>
+          <input id="expQty" type="number" placeholder="數量" min="0.01" step="any" value="1" required
+            class="w-full border border-slate-300 rounded-lg px-2 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
+        <!-- 5. 單價 -->
         <div class="md:col-span-2">
-          <input id="expPrice" type="number" placeholder="單價（未稅）" min="1" step="any" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">單價（未稅）</label>
+          <input id="expPrice" type="number" placeholder="單價" min="1" step="any" required
+            class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
-        <div class="md:col-span-1">
-          <button type="submit" class="w-full h-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-lg px-3 py-2 text-sm transition shadow-sm whitespace-nowrap">
+        <div class="md:col-span-1 flex items-end">
+          <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-lg px-3 py-2 text-sm transition shadow-sm whitespace-nowrap">
             + 寫入
           </button>
         </div>
@@ -310,7 +317,7 @@
         </button>
         <div class="flex items-center gap-2">
           <button type="button" onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium">
-            下載含項次明細 CSV（免費）
+            下載明細與進度 CSV（免費）
           </button>
           <button type="button" onclick="handleProAction('一鍵產出廠商月結請款單與業主估驗計價表')" class="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg font-medium">
             產出估驗請款單 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded ml-1">PRO</span>
@@ -319,21 +326,21 @@
       </div>
     </section>
 
-    <!-- 採購與請款明細表 -->
+    <!-- 採購與記帳明細表（對應：日期時間、名稱、規格、數量、單價、含稅總額） -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-        <h2 class="font-bold text-sm text-slate-800">近期叫料與發包明細</h2>
+        <h2 class="font-bold text-sm text-slate-800">近期現場記帳明細</h2>
         <span class="text-xs text-slate-400">自動計算 5% 營業稅與 10% 保留款</span>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse text-sm">
           <thead>
             <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-              <th class="py-2.5 px-3">日期</th>
-              <th class="py-2.5 px-3">標單項次 / 分類</th>
-              <th class="py-2.5 px-3">歸屬工程項目</th>
-              <th class="py-2.5 px-3">廠商 / 品名</th>
-              <th class="py-2.5 px-3 text-right">數量 × 單價</th>
+              <th class="py-2.5 px-3">日期時間</th>
+              <th class="py-2.5 px-3">名稱</th>
+              <th class="py-2.5 px-3">規格</th>
+              <th class="py-2.5 px-3 text-right">數量</th>
+              <th class="py-2.5 px-3 text-right">單價（未稅）</th>
               <th class="py-2.5 px-3 text-right">含稅總額</th>
               <th class="py-2.5 px-3 text-center">操作</th>
             </tr>
@@ -405,12 +412,12 @@
     </div>
   </div>
 
-  <!-- 視窗 D：編輯開工日期、原始預計完工日與追加工期天數 -->
+  <!-- 視窗 D：編輯全案開工日期、原始預計完工日與追加工期天數 -->
   <div id="scheduleModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
-          <h3 class="text-lg font-bold text-slate-900">工期日期與追加天數設定</h3>
+          <h3 class="text-lg font-bold text-slate-900">全案工期日期與追加天數設定</h3>
           <p class="text-xs text-slate-500 mt-0.5">輸入追加工期天數後，系統將自動推算最終展延完工日與倒數天數</p>
         </div>
         <button type="button" onclick="closeScheduleModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
@@ -463,13 +470,13 @@
     </div>
   </div>
 
-  <!-- 【升級】視窗 A：設定合約金額、主要工程項目 與 非主要工程項目 -->
+  <!-- 【升級】視窗 A：設定合約金額、主要工程（含次要子項目）與非主要項目 -->
   <div id="budgetModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
-          <h3 class="text-lg font-bold text-slate-900">合約金額與工程標單項目設定</h3>
-          <p class="text-xs text-slate-500 mt-0.5">區分「主要工程（顯示進度條）」與「非主要項目（管理費/利潤/清安費，不列進度條）」</p>
+          <h3 class="text-lg font-bold text-slate-900">合約金額與主/次要工程項目設定</h3>
+          <p class="text-xs text-slate-500 mt-0.5">每個主要工程底下可新增多筆「次要工程子項目（如 1.3.1 地界線及開挖放樣）」</p>
         </div>
         <button type="button" onclick="closeBudgetModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
@@ -491,19 +498,19 @@
           </div>
         </div>
 
-        <!-- 區塊 1：主要工程項目（會顯示進度條） -->
-        <div class="pt-3 border-t border-slate-200 space-y-2">
+        <!-- 區塊 1：主要工程項目 ＋ 次要子項目 -->
+        <div class="pt-3 border-t border-slate-200 space-y-2.5">
           <div class="flex items-center justify-between">
-            <label class="text-xs font-bold text-sky-800 flex items-center gap-1.5">
-              🏗️ 主要工程項目（列入施工進度條與總進度加權）
+            <label class="text-xs font-bold text-sky-800">
+              🏗️ 主要工程項目與次要子項目（列入進度條、起迄時間與完成度%）
             </label>
             <span id="majorBudgetTotalHint" class="text-[11px] font-semibold text-sky-700"></span>
           </div>
 
-          <div id="majorWbsInputsContainer" class="space-y-1.5 max-h-40 overflow-y-auto pr-1"></div>
+          <div id="majorWbsInputsContainer" class="space-y-2.5 max-h-60 overflow-y-auto pr-1"></div>
 
           <div class="bg-sky-50/70 p-2 rounded-xl border border-sky-200 flex flex-wrap sm:flex-nowrap items-center gap-2">
-            <input id="newMajorName" type="text" placeholder="新增主要工程（如：壹、土方水保雜項工程）"
+            <input id="newMajorName" type="text" placeholder="新增主要工程（如：1.3 地工工程）"
               class="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:border-sky-500 focus:outline-none">
             <input id="newMajorBudget" type="number" placeholder="預算金額（元）" min="0"
               class="w-32 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-right focus:border-sky-500 focus:outline-none">
@@ -513,19 +520,19 @@
           </div>
         </div>
 
-        <!-- 區塊 2：非主要工程項目（含管理費、包商利潤、清安費等，不列進度條） -->
+        <!-- 區塊 2：非主要工程項目 -->
         <div class="pt-3 border-t border-slate-200 space-y-2">
           <div class="flex items-center justify-between">
-            <label class="text-xs font-bold text-amber-800 flex items-center gap-1.5">
+            <label class="text-xs font-bold text-amber-800">
               📋 非主要工程項目（管理費 / 包商利潤 / 清安費等，不列進度條）
             </label>
             <span id="nonMajorBudgetTotalHint" class="text-[11px] font-semibold text-amber-700"></span>
           </div>
 
-          <div id="nonMajorWbsInputsContainer" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
+          <div id="nonMajorWbsInputsContainer" class="space-y-1.5 max-h-32 overflow-y-auto pr-1"></div>
 
           <div class="bg-amber-50/70 p-2 rounded-xl border border-amber-200 flex flex-wrap sm:flex-nowrap items-center gap-2">
-            <input id="newNonMajorName" type="text" placeholder="新增非主要項目（如：拾貳、包商利潤及管理費）"
+            <input id="newNonMajorName" type="text" placeholder="新增非主要項目（如：包商利潤及管理費）"
               class="flex-1 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:border-amber-500 focus:outline-none">
             <input id="newNonMajorBudget" type="number" placeholder="預算金額（元）" min="0"
               class="w-32 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-right focus:border-amber-500 focus:outline-none">
@@ -552,28 +559,23 @@
     </div>
   </div>
 
-  <!-- 視窗 B：更新「主要工程項目」預計進度 % 與實際進度 % -->
+  <!-- 【升級】視窗 B：開會進度編輯器（主要工程 + 次要工程 起迄時間、預計進度 %、實際完成度 %） -->
   <div id="progressModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 my-8">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
-          <h3 class="text-lg font-bold text-slate-900">回報主要工程施工進度（%）</h3>
-          <p class="text-xs text-slate-500 mt-0.5">僅列出主要工程項目，支援小數點輸入（如 38.25）</p>
+          <h3 class="text-lg font-bold text-slate-900">開會進度、起迄時間與完成度（%）編輯表</h3>
+          <p class="text-xs text-slate-500 mt-0.5">可針對每個「主要項目」與底下「次要項目」設定計劃/實際起迄日期與進度 %（支援小數點）</p>
         </div>
         <button type="button" onclick="closeProgressModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
 
       <form onsubmit="saveProgressSettings(event)" class="space-y-3">
-        <div class="grid grid-cols-12 text-[11px] font-bold text-slate-500 px-1">
-          <div class="col-span-6">主要工程項目</div>
-          <div class="col-span-3 text-center">預計進度 %</div>
-          <div class="col-span-3 text-center text-sky-700">實際進度 %</div>
-        </div>
-        <div id="progressInputsContainer" class="space-y-2.5 max-h-64 overflow-y-auto pr-1"></div>
+        <div id="progressInputsContainer" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
 
-        <div class="pt-3 flex gap-2">
+        <div class="pt-3 flex gap-2 border-t border-slate-100">
           <button type="submit" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 rounded-xl text-sm shadow transition">
-            確認更新進度與損益
+            確認儲存進度與起迄時間
           </button>
           <button type="button" onclick="closeProgressModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm">
             取消
@@ -583,13 +585,13 @@
     </div>
   </div>
 
-  <!-- 視窗 C：編輯單筆叫料與發包明細（含標單項次修改） -->
+  <!-- 【升級】視窗 C：編輯單筆現場記帳明細（日期時間、名稱、規格、數量、單價） -->
   <div id="editExpenseModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
-          <h3 class="text-lg font-bold text-slate-900">編輯叫料與發包明細</h3>
-          <p class="text-xs text-slate-500 mt-0.5">修改後將自動重新計算含稅總額、預算執行率與盈虧</p>
+          <h3 class="text-lg font-bold text-slate-900">編輯現場記帳明細</h3>
+          <p class="text-xs text-slate-500 mt-0.5">修改後將自動重新計算含稅總額與盈虧</p>
         </div>
         <button type="button" onclick="closeEditExpenseModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
@@ -598,28 +600,23 @@
         <input type="hidden" id="editExpIndex">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">叫料/請款日期</label>
-            <input id="editExpDate" type="date" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 mb-1">日期時間</label>
+            <input id="editExpDateTime" type="datetime-local" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-xs focus:border-amber-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">標單項次 / 自訂分類</label>
-            <input id="editExpItemCode" type="text" placeholder="如：壹.一.4.1" required class="w-full border border-amber-400 bg-amber-50/30 rounded-lg px-3 py-2 text-sm font-semibold focus:border-amber-500 focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 mb-1">歸屬扣帳工項</label>
+            <select id="editExpCategory" required class="w-full border border-slate-300 rounded-lg px-2 py-2 text-xs bg-white focus:border-amber-500 focus:outline-none"></select>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">歸屬標單工程項目</label>
-          <select id="editExpCategory" required class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:border-amber-500 focus:outline-none"></select>
+          <label class="block text-xs font-bold text-slate-700 mb-1">名稱</label>
+          <input id="editExpName" type="text" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">協力廠商 / 供應商名稱</label>
-          <input id="editExpVendor" type="text" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">品名 / 規格說明</label>
-          <input id="editExpItem" type="text" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+          <label class="block text-xs font-bold text-slate-700 mb-1">規格</label>
+          <input id="editExpSpec" type="text" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -628,7 +625,7 @@
             <input id="editExpQty" type="number" min="0.01" step="any" required oninput="updateEditPreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">未稅單價（元）</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">單價（未稅）</label>
             <input id="editExpPrice" type="number" min="0" step="any" required oninput="updateEditPreview()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
           </div>
         </div>
@@ -907,42 +904,115 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（支援主要/非主要工項分離 ＋ 自訂標單項次記帳） -->
+  <!-- 核心業務邏輯（支援主/次要工程階層＋起迄時間＋極簡 5 欄快速記帳） -->
   <script>
-    const STORAGE_KEY = "civilcost_data_v7";
+    const STORAGE_KEY = "civilcost_data_v8";
     let isPro = false;
     let chartInstance = null;
     let tempWbsList = [];
 
+    function getCurrentLocalDateTime() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      return y + "-" + m + "-" + d + "T" + hh + ":" + mm;
+    }
+
     const defaultState = {
       projectName: "新應材龍科廠新建工程",
-      startDate: "2026-03-02",
+      startDate: "2026-08-02",
       baseEndDate: "2027-06-30",
       extraDays: 0,
       baseContract: 1220690000,
       extraContract: 0,
       wbsBudgets: [
-        // 主要工程項目（isMajor: true，會顯示進度條）
-        { name: "壹、土方水保雜項工程", budget: 202372537, plannedPct: 65, actualPct: 60, isMajor: true },
-        { name: "貳、地下停車場工程", budget: 82928998, plannedPct: 40, actualPct: 42, isMajor: true },
-        { name: "參、A棟廠辦新建工程", budget: 709570040, plannedPct: 25, actualPct: 25, isMajor: true },
-        { name: "肆、B棟危物倉新建工程", budget: 23235455, plannedPct: 10, actualPct: 10, isMajor: true },
-        { name: "伍、C棟一般倉新建工程", budget: 69070764, plannedPct: 15, actualPct: 12, isMajor: true },
-        { name: "陸、D警衛室新建工程", budget: 2559497, plannedPct: 0, actualPct: 0, isMajor: true },
-        { name: "柒、廠區戶外景觀雜項工程", budget: 20048097, plannedPct: 0, actualPct: 0, isMajor: true },
-        { name: "捌、BIM（LOD300）繪製作業費", budget: 5000000, plannedPct: 50, actualPct: 55, isMajor: true },
-        // 非主要工程項目（isMajor: false，不顯示進度條，但計入總預算與成本扣抵）
-        { name: "玖、工程品質管理費（含材料試驗）", budget: 5573927, plannedPct: 0, actualPct: 0, isMajor: false },
-        { name: "拾、職業安全衛生管理費", budget: 4459142, plannedPct: 0, actualPct: 0, isMajor: false },
-        { name: "拾壹、交通維持.環境保護費", budget: 3344356, plannedPct: 0, actualPct: 0, isMajor: false },
-        { name: "拾貳、包商利潤及管理費", budget: 89182831, plannedPct: 0, actualPct: 0, isMajor: false },
-        { name: "拾參、清安費", budget: 3344356, plannedPct: 0, actualPct: 0, isMajor: false }
+        {
+          name: "1.3 地工工程",
+          budget: 202372537,
+          plannedStart: "2026-08-02",
+          plannedEnd: "2027-03-15",
+          actualStart: "2026-08-02",
+          actualEnd: "",
+          plannedPct: 68,
+          actualPct: 62,
+          isMajor: true,
+          expanded: true,
+          subItems: [
+            { name: "1.3.1 地界線及開挖放樣", plannedStart: "2026-08-02", plannedEnd: "2026-08-02", actualStart: "2026-08-02", actualEnd: "2026-08-02", plannedPct: 100, actualPct: 100 },
+            { name: "1.3.2 放樣點保護", plannedStart: "2026-08-03", plannedEnd: "2026-08-07", actualStart: "2026-08-03", actualEnd: "2026-08-06", plannedPct: 100, actualPct: 100 },
+            { name: "1.3.3 擋土支撐工程-H型鋼排樁 (27/225)", plannedStart: "2026-08-08", plannedEnd: "2026-08-23", actualStart: "2026-08-07", actualEnd: "", plannedPct: 100, actualPct: 12 },
+            { name: "1.3.4 基樁工程 (54/59)", plannedStart: "2026-08-22", plannedEnd: "2026-11-30", actualStart: "2026-08-31", actualEnd: "", plannedPct: 95, actualPct: 92 },
+            { name: "1.3.5 擋土支撐工程-預壘樁 (229/305)", plannedStart: "2026-08-10", plannedEnd: "2026-12-20", actualStart: "2026-08-10", actualEnd: "", plannedPct: 80, actualPct: 75 },
+            { name: "1.3.7 擋土支撐工程-CCP止水樁 (198/436)", plannedStart: "2026-12-01", plannedEnd: "2026-12-25", actualStart: "2026-11-02", actualEnd: "", plannedPct: 50, actualPct: 45 }
+          ]
+        },
+        {
+          name: "貳、地下停車場工程",
+          budget: 82928998,
+          plannedStart: "2026-11-01",
+          plannedEnd: "2027-04-15",
+          actualStart: "2026-11-05",
+          actualEnd: "",
+          plannedPct: 40,
+          actualPct: 42,
+          isMajor: true,
+          expanded: false,
+          subItems: []
+        },
+        {
+          name: "參、A棟廠辦新建工程",
+          budget: 709570040,
+          plannedStart: "2027-01-10",
+          plannedEnd: "2027-06-30",
+          actualStart: "",
+          actualEnd: "",
+          plannedPct: 25,
+          actualPct: 25,
+          isMajor: true,
+          expanded: false,
+          subItems: []
+        },
+        {
+          name: "肆、B/C棟倉庫及警衛室工程",
+          budget: 94865716,
+          plannedStart: "2027-02-01",
+          plannedEnd: "2027-06-15",
+          actualStart: "",
+          actualEnd: "",
+          plannedPct: 15,
+          actualPct: 12,
+          isMajor: true,
+          expanded: false,
+          subItems: []
+        },
+        {
+          name: "伍、戶外景觀與BIM作業",
+          budget: 25048097,
+          plannedStart: "2026-08-02",
+          plannedEnd: "2027-06-30",
+          actualStart: "2026-08-02",
+          actualEnd: "",
+          plannedPct: 50,
+          actualPct: 55,
+          isMajor: true,
+          expanded: false,
+          subItems: []
+        },
+        // 非主要工程項目（不列入進度條）
+        { name: "玖、工程品質管理費（含材料試驗）", budget: 5573927, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
+        { name: "拾、職業安全衛生管理費", budget: 4459142, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
+        { name: "拾壹、交通維持.環境保護費", budget: 3344356, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
+        { name: "拾貳、包商利潤及管理費", budget: 89182831, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] },
+        { name: "拾參、清安費", budget: 3344356, plannedPct: 0, actualPct: 0, isMajor: false, subItems: [] }
       ],
       expenses: [
-        { date: "2026-11-24", itemCode: "壹.一.4.1", category: "壹、土方水保雜項工程", vendor: "宏達洗車設備", item: "洗車沖洗設備（洗車台）", qty: 1, price: 450000, hasPhoto: true },
-        { date: "2026-11-22", itemCode: "壹.一.16", category: "壹、土方水保雜項工程", vendor: "永大重機具租賃", item: "塔式起重機（含操作人員）", qty: 2, price: 1487854, hasPhoto: true },
-        { date: "2026-11-18", itemCode: "參.二.1", category: "參、A棟廠辦新建工程", vendor: "國產建材實業", item: "4000psi 預拌混凝土", qty: 350, price: 2850, hasPhoto: false },
-        { date: "2026-11-15", itemCode: "拾.一", category: "拾、職業安全衛生管理費", vendor: "安衛防護器材行", item: "工地安全警示設施及告示牌", qty: 1, price: 1500120, hasPhoto: false }
+        { dateTime: "2026-11-27T14:30", category: "1.3 地工工程", name: "預拌混凝土", spec: "4000psi（車次）", qty: 120, price: 2850 },
+        { dateTime: "2026-11-26T09:15", category: "1.3 地工工程", name: "H型鋼排樁材料", spec: "H300×300×10×15", qty: 27, price: 18500 },
+        { dateTime: "2026-11-24T16:00", category: "1.3 地工工程", name: "塔式起重機租賃", spec: "含操作人員/月", qty: 2, price: 1487854 },
+        { dateTime: "2026-11-20T10:45", category: "拾、職業安全衛生管理費", name: "工地安全警示設施", spec: "全區圍籬及告示牌", qty: 1, price: 1500120 }
       ]
     };
 
@@ -950,17 +1020,41 @@
       return Number(Number(num).toFixed(2));
     }
 
-    // 相容舊資料：若舊資料沒有 isMajor 欄位，預設視為 true（主要工程項目）
     function normalizeWbsList(list) {
       return (list || []).map(w => ({
+        plannedStart: "",
+        plannedEnd: "",
+        actualStart: "",
+        actualEnd: "",
+        expanded: false,
         ...w,
-        isMajor: w.isMajor !== undefined ? Boolean(w.isMajor) : true
+        isMajor: w.isMajor !== undefined ? Boolean(w.isMajor) : true,
+        subItems: Array.isArray(w.subItems) ? w.subItems.map(sub => ({
+          plannedStart: "",
+          plannedEnd: "",
+          actualStart: "",
+          actualEnd: "",
+          plannedPct: 0,
+          actualPct: 0,
+          ...sub
+        })) : []
+      }));
+    }
+
+    function normalizeExpenses(list) {
+      return (list || []).map(e => ({
+        dateTime: e.dateTime || (e.date ? e.date + "T09:00" : getCurrentLocalDateTime()),
+        category: e.category || "",
+        name: e.name || e.item || "",
+        spec: e.spec || e.vendor || "-",
+        qty: Number(e.qty) || 1,
+        price: Number(e.price) || 0
       }));
     }
 
     function loadState() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v6");
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v7") || localStorage.getItem("civilcost_data_v6");
         if (saved) {
           const parsed = JSON.parse(saved);
           const merged = {
@@ -968,6 +1062,7 @@
             ...parsed
           };
           merged.wbsBudgets = normalizeWbsList(merged.wbsBudgets);
+          merged.expenses = normalizeExpenses(merged.expenses);
           return merged;
         }
       } catch (err) {
@@ -984,6 +1079,7 @@
         ...cloudData
       };
       merged.wbsBudgets = normalizeWbsList(merged.wbsBudgets);
+      merged.expenses = normalizeExpenses(merged.expenses);
       window.appState = merged;
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
@@ -1003,7 +1099,7 @@
     }
 
     function resetDemoData() {
-      if (confirm("確定要將合約金額、工期、主要/非主要工項與帳目重置為預設標單範例嗎？")) {
+      if (confirm("確定要將合約金額、工期、主/次要工程項目與帳目重置為預設開會紀錄表範例嗎？")) {
         window.appState = JSON.parse(JSON.stringify(defaultState));
         saveState();
         renderAll();
@@ -1012,7 +1108,7 @@
 
     function computeScheduleInfo(startStr, baseEndStr, extraDaysVal) {
       const parseLocal = (str) => {
-        const [y, m, d] = (str || "2026-06-01").split("-").map(Number);
+        const [y, m, d] = (str || "2026-08-02").split("-").map(Number);
         return new Date(y, (m || 1) - 1, d || 1);
       };
       const formatYMD = (dt) => {
@@ -1067,12 +1163,11 @@
         totalActualCost += subWithTax;
         if (categoryActuals[e.category] !== undefined) {
           categoryActuals[e.category] += subWithTax;
-        } else {
-          categoryActuals[e.category] = (categoryActuals[e.category] || 0) + subWithTax;
+        } else if (sState.wbsBudgets.length > 0) {
+          categoryActuals[sState.wbsBudgets[0].name] += subWithTax;
         }
       });
 
-      // 【關鍵邏輯】僅針對「主要工程項目 (isMajor === true)」計算進度權重與延誤預警
       const majorItems = sState.wbsBudgets.filter(w => w.isMajor);
       const totalMajorBudget = majorItems.reduce((sum, w) => sum + w.budget, 0);
 
@@ -1096,7 +1191,6 @@
         }
       });
 
-      // 依主要工程加權實際進度，換算全案已完成工程產值（含同比例間接管銷利潤）
       const earnedContractValue = Math.round(totalContract * (weightedActual / 100));
       const currentProfit = Math.round(earnedContractValue - totalActualCost);
       const remainingBudget = totalContract - totalActualCost;
@@ -1120,6 +1214,12 @@
       const sState = window.appState;
       const m = calculateMetrics();
       const s = computeScheduleInfo(sState.startDate, sState.baseEndDate, sState.extraDays);
+
+      // 預設記帳日期時間欄位若為空則帶入現在時間
+      const dtInput = document.getElementById("expDateTime");
+      if (dtInput && !dtInput.value) {
+        dtInput.value = getCurrentLocalDateTime();
+      }
 
       document.getElementById("totalDurationBadge").textContent = "核定總工期 " + s.totalDays.toLocaleString() + " 天";
       document.getElementById("dispStartDate").textContent = s.startDate;
@@ -1176,7 +1276,6 @@
       const totalWan = Math.round(m.totalContract / 10000).toLocaleString();
       document.getElementById("mainProjectOption").textContent = sState.projectName + "（合約 " + totalWan + " 萬）";
       renderCategorySelect();
-      renderItemCodeDatalist();
 
       document.getElementById("overallPlannedText").textContent = m.weightedPlanned + "%";
       document.getElementById("overallPlannedBar").style.width = Math.min(m.weightedPlanned, 100) + "%";
@@ -1281,9 +1380,9 @@
       renderAll();
     }
 
-    // 記帳下拉選單：分成「主要工程項目」與「非主要工程項目」兩組 optgroup
     function renderCategorySelect() {
       const select = document.getElementById("expCategory");
+      if (!select) return;
       const currentVal = select.value;
       const majorItems = window.appState.wbsBudgets.filter(w => w.isMajor);
       const nonMajorItems = window.appState.wbsBudgets.filter(w => !w.isMajor);
@@ -1295,7 +1394,7 @@
           '</optgroup>';
       }
       if (nonMajorItems.length > 0) {
-        html += '<optgroup label="📋 非主要工程項目（管理費/利潤/清安費）">' +
+        html += '<optgroup label="📋 非主要工程項目">' +
           nonMajorItems.map(w => '<option value="' + w.name + '">' + w.name + '</option>').join("") +
           '</optgroup>';
       }
@@ -1306,29 +1405,37 @@
       }
     }
 
-    // 自動收集已輸入過的「標單項次/分類」，提供快速選取提示
-    function renderItemCodeDatalist() {
-      const datalist = document.getElementById("itemCodeHistoryList");
-      if (!datalist) return;
-      const uniqueCodes = [...new Set(window.appState.expenses.map(e => e.itemCode).filter(Boolean))];
-      datalist.innerHTML = uniqueCodes.map(c => '<option value="' + c + '">').join("");
+    function toggleSubItems(globalIdx) {
+      const item = window.appState.wbsBudgets[globalIdx];
+      if (!item) return;
+      item.expanded = !item.expanded;
+      saveState();
+      renderAll();
     }
 
-    // 畫面進度條區塊：只渲染 isMajor === true 的主要工程項目，非主要項目放在底部精簡統計區
+    function formatDateRangeText(start, end) {
+      if (!start && !end) return "未設定";
+      return (start || "待定") + " ~ " + (end || "進行中");
+    }
+
+    // 渲染主要工程項目（含可展開的次要子項目、計劃/實際起迄時間與完成度%）
     function renderWBS(categoryActuals) {
       const container = document.getElementById("wbsContainer");
-      const majorItems = window.appState.wbsBudgets.filter(w => w.isMajor);
+      const majorWithIdx = window.appState.wbsBudgets
+        .map((w, idx) => ({ item: w, idx }))
+        .filter(obj => obj.item.isMajor);
       const nonMajorItems = window.appState.wbsBudgets.filter(w => !w.isMajor);
 
-      if (majorItems.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">尚未設定主要工程項目，請點右上角「+ 管理主要/非主要項目」新增。</p>';
+      if (majorWithIdx.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">尚未設定主要工程項目，請點右上角「+ 新增主/次要項目」新增。</p>';
       } else {
-        container.innerHTML = majorItems.map(item => {
+        container.innerHTML = majorWithIdx.map(({ item, idx }) => {
           const actualCost = categoryActuals[item.name] || 0;
           const costPct = item.budget > 0 ? Math.round((actualCost / item.budget) * 100) : 0;
           const plannedVal = fmtPct(item.plannedPct);
           const actualVal = fmtPct(item.actualPct);
           const diff = fmtPct(actualVal - plannedVal);
+          const subs = item.subItems || [];
 
           let statusTag = '<span class="text-[11px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded">進度正常</span>';
           let actualBarColor = "bg-emerald-500";
@@ -1342,14 +1449,70 @@
             statusTag = '<span class="text-[11px] bg-sky-100 text-sky-700 font-bold px-2 py-0.5 rounded">超前 +' + diff + '%</span>';
           }
 
+          const toggleBtnHtml = subs.length > 0
+            ? '<button type="button" onclick="toggleSubItems(' + idx + ')" class="text-[11px] bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold px-2 py-0.5 rounded transition">' +
+                (item.expanded ? '▾ 收合次要項目 (' + subs.length + ')' : '▸ 展開次要項目 (' + subs.length + ')') +
+              '</button>'
+            : '<button type="button" onclick="openBudgetModal()" class="text-[11px] text-slate-400 hover:text-sky-700 px-1.5 py-0.5 rounded transition">+ 次要項目</button>';
+
+          let subTableHtml = "";
+          if (subs.length > 0 && item.expanded) {
+            subTableHtml =
+              '<div class="mt-2.5 pt-2.5 border-t border-slate-200/80 overflow-x-auto">' +
+                '<table class="w-full text-left border-collapse text-[11px]">' +
+                  '<thead>' +
+                    '<tr class="bg-slate-200/60 text-slate-600">' +
+                      '<th class="py-1.5 px-2 rounded-tl">次要工程項目</th>' +
+                      '<th class="py-1.5 px-2 whitespace-nowrap">計劃起迄</th>' +
+                      '<th class="py-1.5 px-2 whitespace-nowrap">實際起迄</th>' +
+                      '<th class="py-1.5 px-2 text-right whitespace-nowrap">預計 / 實際完成度</th>' +
+                    '</tr>' +
+                  '</thead>' +
+                  '<tbody class="divide-y divide-slate-200/70 bg-white">' +
+                    subs.map(sub => {
+                      const sPlan = fmtPct(sub.plannedPct);
+                      const sAct = fmtPct(sub.actualPct);
+                      const sDiff = fmtPct(sAct - sPlan);
+                      let badgeCls = "bg-slate-100 text-slate-700";
+                      let icon = "";
+                      if (sAct >= 100) {
+                        badgeCls = "bg-emerald-100 text-emerald-800 font-bold";
+                        icon = "✓ ";
+                      } else if (sDiff <= -5) {
+                        badgeCls = "bg-rose-100 text-rose-700 font-bold";
+                        icon = "▼ ";
+                      }
+                      return '<tr>' +
+                        '<td class="py-1.5 px-2 font-medium text-slate-800">' + sub.name + '</td>' +
+                        '<td class="py-1.5 px-2 text-slate-500 whitespace-nowrap">' + formatDateRangeText(sub.plannedStart, sub.plannedEnd) + '</td>' +
+                        '<td class="py-1.5 px-2 text-slate-600 whitespace-nowrap">' + formatDateRangeText(sub.actualStart, sub.actualEnd) + '</td>' +
+                        '<td class="py-1.5 px-2 text-right whitespace-nowrap">' +
+                          '<span class="text-slate-400 mr-1.5">計 ' + sPlan + '%</span>' +
+                          '<span class="px-1.5 py-0.5 rounded ' + badgeCls + '">' + icon + sAct + '%</span>' +
+                        '</td>' +
+                      '</tr>';
+                    }).join("") +
+                  '</tbody>' +
+                '</table>' +
+              '</div>';
+          }
+
           return '<div class="p-3 rounded-xl border ' + cardBorder + ' space-y-2">' +
-            '<div class="flex flex-wrap items-center justify-between gap-1">' +
-              '<div class="flex items-center gap-2">' +
+            '<div class="flex flex-wrap items-center justify-between gap-1.5">' +
+              '<div class="flex items-center gap-2 flex-wrap">' +
                 '<span class="font-bold text-xs md:text-sm text-slate-800">' + item.name + '</span>' +
                 statusTag +
+                toggleBtnHtml +
               '</div>' +
               '<span class="text-[11px] text-slate-500">已支 NT$ ' + (actualCost / 10000).toFixed(1) + '萬 / 預算 ' + (item.budget / 10000).toFixed(1) + '萬 (動支 ' + costPct + '%)</span>' +
             '</div>' +
+
+            '<!-- 主工項計劃與實際起迄時間 -->' +
+            '<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 bg-white/80 px-2.5 py-1 rounded-lg border border-slate-200/70">' +
+              '<span>📅 計劃起迄：<strong class="text-slate-700">' + formatDateRangeText(item.plannedStart, item.plannedEnd) + '</strong></span>' +
+              '<span>🏗️ 實際起迄：<strong class="text-sky-700">' + formatDateRangeText(item.actualStart, item.actualEnd) + '</strong></span>' +
+            '</div>' +
+
             '<div class="space-y-1.5">' +
               '<div class="flex items-center gap-2">' +
                 '<span class="text-[11px] text-slate-500 w-14 shrink-0">預計進度</span>' +
@@ -1359,18 +1522,18 @@
                 '<span class="text-[11px] font-semibold text-slate-600 w-12 text-right">' + plannedVal + '%</span>' +
               '</div>' +
               '<div class="flex items-center gap-2">' +
-                '<span class="text-[11px] font-semibold text-slate-700 w-14 shrink-0">實際進度</span>' +
+                '<span class="text-[11px] font-semibold text-slate-700 w-14 shrink-0">完成度</span>' +
                 '<div class="flex-1 bg-slate-200 rounded-full h-2.5 overflow-hidden">' +
                   '<div class="' + actualBarColor + ' h-2.5 rounded-full transition-all duration-500" style="width: ' + actualVal + '%"></div>' +
                 '</div>' +
                 '<span class="text-[11px] font-bold text-slate-800 w-12 text-right">' + actualVal + '%</span>' +
               '</div>' +
             '</div>' +
+            subTableHtml +
           '</div>';
         }).join("");
       }
 
-      // 非主要工程項目彙總卡片（不顯示進度條，僅顯示預算與已支出對照）
       const summaryBox = document.getElementById("nonMajorSummaryBox");
       if (nonMajorItems.length === 0) {
         summaryBox.innerHTML = "";
@@ -1422,19 +1585,38 @@
       let nonMajorHtml = "";
 
       tempWbsList.forEach((w, idx) => {
-        const rowHtml =
-          '<div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">' +
-            '<input type="text" value="' + w.name + '" onchange="updateTempWbs(' + idx + ', \'name\', this.value)" required class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs font-semibold text-slate-700 bg-white">' +
-            '<input type="number" value="' + w.budget + '" oninput="updateTempWbs(' + idx + ', \'budget\', this.value)" min="0" required class="w-32 border border-slate-300 rounded px-2 py-1 text-xs text-right font-semibold bg-white">' +
-            '<button type="button" onclick="removeTempWbsRow(' + idx + ')" title="刪除此項目" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-1.5 py-1">✕</button>' +
-          '</div>';
-
         if (w.isMajor) {
           majorSum += Number(w.budget) || 0;
-          majorHtml += rowHtml;
+          const subs = w.subItems || [];
+          const subRowsHtml = subs.map((sub, sIdx) =>
+            '<div class="flex items-center gap-1.5 pl-4">' +
+              '<span class="text-slate-400 text-xs">↳</span>' +
+              '<input type="text" value="' + sub.name + '" onchange="updateTempSubItem(' + idx + ', ' + sIdx + ', this.value)" placeholder="次要項目名稱" class="flex-1 border border-slate-200 rounded px-2 py-1 text-[11px] bg-white">' +
+              '<button type="button" onclick="removeTempSubItem(' + idx + ', ' + sIdx + ')" class="text-[11px] text-rose-400 hover:text-rose-600 px-1">✕</button>' +
+            '</div>'
+          ).join("");
+
+          majorHtml +=
+            '<div class="bg-slate-50 p-2 rounded-lg border border-slate-200 space-y-1.5">' +
+              '<div class="flex items-center gap-2">' +
+                '<input type="text" value="' + w.name + '" onchange="updateTempWbs(' + idx + ', \'name\', this.value)" required class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs font-bold text-slate-800 bg-white">' +
+                '<input type="number" value="' + w.budget + '" oninput="updateTempWbs(' + idx + ', \'budget\', this.value)" min="0" required class="w-32 border border-slate-300 rounded px-2 py-1 text-xs text-right font-semibold bg-white">' +
+                '<button type="button" onclick="removeTempWbsRow(' + idx + ')" title="刪除此主要項目" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-1.5 py-1">✕</button>' +
+              '</div>' +
+              subRowsHtml +
+              '<div class="flex items-center gap-1.5 pl-4 pt-0.5">' +
+                '<input type="text" id="newSubInput_' + idx + '" placeholder="輸入次要項目（如：1.3.1 地界線及開挖放樣）" class="flex-1 border border-dashed border-sky-300 rounded px-2 py-1 text-[11px] bg-white">' +
+                '<button type="button" onclick="addTempSubItem(' + idx + ')" class="text-[11px] bg-sky-100 hover:bg-sky-200 text-sky-800 font-semibold px-2 py-1 rounded whitespace-nowrap">+ 次要項目</button>' +
+              '</div>' +
+            '</div>';
         } else {
           nonMajorSum += Number(w.budget) || 0;
-          nonMajorHtml += rowHtml;
+          nonMajorHtml +=
+            '<div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">' +
+              '<input type="text" value="' + w.name + '" onchange="updateTempWbs(' + idx + ', \'name\', this.value)" required class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs font-semibold text-slate-700 bg-white">' +
+              '<input type="number" value="' + w.budget + '" oninput="updateTempWbs(' + idx + ', \'budget\', this.value)" min="0" required class="w-32 border border-slate-300 rounded px-2 py-1 text-xs text-right font-semibold bg-white">' +
+              '<button type="button" onclick="removeTempWbsRow(' + idx + ')" title="刪除此項目" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-1.5 py-1">✕</button>' +
+            '</div>';
         }
       });
 
@@ -1459,6 +1641,37 @@
       }
     }
 
+    function addTempSubItem(parentIdx) {
+      const inp = document.getElementById("newSubInput_" + parentIdx);
+      const val = inp ? inp.value.trim() : "";
+      if (!val) {
+        alert("請先輸入次要項目名稱！");
+        if (inp) inp.focus();
+        return;
+      }
+      if (!tempWbsList[parentIdx].subItems) tempWbsList[parentIdx].subItems = [];
+      tempWbsList[parentIdx].subItems.push({
+        name: val,
+        plannedStart: "",
+        plannedEnd: "",
+        actualStart: "",
+        actualEnd: "",
+        plannedPct: 0,
+        actualPct: 0
+      });
+      tempWbsList[parentIdx].expanded = true;
+      renderTempWbsRows();
+    }
+
+    function updateTempSubItem(parentIdx, subIdx, val) {
+      tempWbsList[parentIdx].subItems[subIdx].name = val.trim();
+    }
+
+    function removeTempSubItem(parentIdx, subIdx) {
+      tempWbsList[parentIdx].subItems.splice(subIdx, 1);
+      renderTempWbsRows();
+    }
+
     function addNewWbsRow(isMajorFlag) {
       const nameInput = document.getElementById(isMajorFlag ? "newMajorName" : "newNonMajorName");
       const budgetInput = document.getElementById(isMajorFlag ? "newMajorBudget" : "newNonMajorBudget");
@@ -1466,7 +1679,7 @@
       const budgetVal = Number(budgetInput.value) || 0;
 
       if (!rawName) {
-        alert(isMajorFlag ? "請先輸入主要工程項目名稱！" : "請先輸入非主要工程項目名稱（如：包商利潤及管理費）！");
+        alert(isMajorFlag ? "請先輸入主要工程項目名稱！" : "請先輸入非主要工程項目名稱！");
         nameInput.focus();
         return;
       }
@@ -1474,9 +1687,15 @@
       tempWbsList.push({
         name: rawName,
         budget: budgetVal,
+        plannedStart: "",
+        plannedEnd: "",
+        actualStart: "",
+        actualEnd: "",
         plannedPct: 0,
         actualPct: 0,
-        isMajor: isMajorFlag
+        isMajor: isMajorFlag,
+        expanded: true,
+        subItems: []
       });
 
       nameInput.value = "";
@@ -1510,7 +1729,7 @@
       renderAll();
     }
 
-    // 進度回報視窗：僅列出 isMajor === true 的主要工程項目
+    // 【升級】開會進度、起迄時間與完成度%編輯視窗（支援主要項目 + 次要子項目）
     function openProgressModal() {
       const container = document.getElementById("progressInputsContainer");
       const majorWithIdx = window.appState.wbsBudgets
@@ -1518,19 +1737,69 @@
         .filter(obj => obj.w.isMajor);
 
       if (majorWithIdx.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">目前沒有主要工程項目，請先在「設定主要/非主要工程項目」中新增。</p>';
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">目前沒有主要工程項目。</p>';
       } else {
-        container.innerHTML = majorWithIdx.map(({ w, idx }) =>
-          '<div class="grid grid-cols-12 items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">' +
-            '<div class="col-span-6 text-xs font-semibold text-slate-700">' + w.name + '</div>' +
-            '<div class="col-span-3"><input type="number" id="plannedInput_' + idx + '" value="' + fmtPct(w.plannedPct) + '" min="0" max="100" step="0.01" required class="w-full border border-slate-300 rounded px-2 py-1 text-xs text-center bg-white"></div>' +
-            '<div class="col-span-3"><input type="number" id="actualInput_' + idx + '" value="' + fmtPct(w.actualPct) + '" min="0" max="100" step="0.01" required class="w-full border border-sky-400 rounded px-2 py-1 text-xs text-center font-bold text-sky-800 bg-white"></div>' +
-          '</div>'
-        ).join("");
+        container.innerHTML = majorWithIdx.map(({ w, idx }) => {
+          const subs = w.subItems || [];
+          const subHtml = subs.map((sub, sIdx) =>
+            '<div class="bg-white p-2.5 rounded-lg border border-slate-200 ml-3 space-y-2">' +
+              '<div class="flex flex-wrap items-center justify-between gap-2">' +
+                '<span class="text-xs font-semibold text-slate-700">↳ ' + sub.name + '</span>' +
+                '<div class="flex items-center gap-2 text-[11px]">' +
+                  '<label>預計% <input type="number" id="subPlanPct_' + idx + '_' + sIdx + '" value="' + fmtPct(sub.plannedPct) + '" min="0" max="100" step="0.01" class="w-16 border border-slate-300 rounded px-1.5 py-0.5 text-center"></label>' +
+                  '<label class="text-sky-700 font-bold">完成度% <input type="number" id="subActPct_' + idx + '_' + sIdx + '" value="' + fmtPct(sub.actualPct) + '" min="0" max="100" step="0.01" class="w-16 border border-sky-400 rounded px-1.5 py-0.5 text-center"></label>' +
+                '</div>' +
+              '</div>' +
+              '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
+                '<div><span class="text-slate-400 block">計劃起</span><input type="date" id="subPlanStart_' + idx + '_' + sIdx + '" value="' + (sub.plannedStart || "") + '" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-slate-400 block">計劃迄</span><input type="date" id="subPlanEnd_' + idx + '_' + sIdx + '" value="' + (sub.plannedEnd || "") + '" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-sky-600 block">實際起</span><input type="date" id="subActStart_' + idx + '_' + sIdx + '" value="' + (sub.actualStart || "") + '" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-sky-600 block">實際迄</span><input type="date" id="subActEnd_' + idx + '_' + sIdx + '" value="' + (sub.actualEnd || "") + '" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
+              '</div>' +
+            '</div>'
+          ).join("");
+
+          const autoCalcBtn = subs.length > 0
+            ? '<button type="button" onclick="autoCalcMainFromSubs(' + idx + ')" class="text-[11px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-semibold">依子項目自動平均%</button>'
+            : '';
+
+          return '<div class="bg-slate-50 p-3 rounded-xl border border-slate-300 space-y-2.5">' +
+            '<div class="flex flex-wrap items-center justify-between gap-2">' +
+              '<div class="flex items-center gap-2">' +
+                '<span class="text-xs md:text-sm font-bold text-slate-900">' + w.name + '</span>' +
+                autoCalcBtn +
+              '</div>' +
+              '<div class="flex items-center gap-2 text-xs">' +
+                '<label>預計% <input type="number" id="plannedInput_' + idx + '" value="' + fmtPct(w.plannedPct) + '" min="0" max="100" step="0.01" required class="w-16 border border-slate-300 rounded px-1.5 py-1 text-center bg-white"></label>' +
+                '<label class="text-sky-800 font-bold">完成度% <input type="number" id="actualInput_' + idx + '" value="' + fmtPct(w.actualPct) + '" min="0" max="100" step="0.01" required class="w-16 border border-sky-500 rounded px-1.5 py-1 text-center bg-white"></label>' +
+              '</div>' +
+            '</div>' +
+            '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
+              '<div><span class="text-slate-500 block">主工項計劃起</span><input type="date" id="mainPlanStart_' + idx + '" value="' + (w.plannedStart || "") + '" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
+              '<div><span class="text-slate-500 block">主工項計劃迄</span><input type="date" id="mainPlanEnd_' + idx + '" value="' + (w.plannedEnd || "") + '" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
+              '<div><span class="text-sky-700 block">主工項實際起</span><input type="date" id="mainActStart_' + idx + '" value="' + (w.actualStart || "") + '" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
+              '<div><span class="text-sky-700 block">主工項實際迄</span><input type="date" id="mainActEnd_' + idx + '" value="' + (w.actualEnd || "") + '" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
+            '</div>' +
+            subHtml +
+          '</div>';
+        }).join("");
       }
 
       document.getElementById("progressModal").classList.remove("hidden");
       document.getElementById("progressModal").classList.add("flex");
+    }
+
+    function autoCalcMainFromSubs(idx) {
+      const w = window.appState.wbsBudgets[idx];
+      if (!w || !w.subItems || w.subItems.length === 0) return;
+      let sumP = 0;
+      let sumA = 0;
+      w.subItems.forEach((_, sIdx) => {
+        sumP += parseFloat(document.getElementById("subPlanPct_" + idx + "_" + sIdx).value) || 0;
+        sumA += parseFloat(document.getElementById("subActPct_" + idx + "_" + sIdx).value) || 0;
+      });
+      document.getElementById("plannedInput_" + idx).value = fmtPct(sumP / w.subItems.length);
+      document.getElementById("actualInput_" + idx).value = fmtPct(sumA / w.subItems.length);
     }
 
     function closeProgressModal() {
@@ -1545,14 +1814,40 @@
         const pEl = document.getElementById("plannedInput_" + idx);
         const aEl = document.getElementById("actualInput_" + idx);
         if (!pEl || !aEl) return;
+
         const rawPlanned = parseFloat(pEl.value);
         const rawActual = parseFloat(aEl.value);
         w.plannedPct = fmtPct(Math.min(100, Math.max(0, isNaN(rawPlanned) ? 0 : rawPlanned)));
         w.actualPct = fmtPct(Math.min(100, Math.max(0, isNaN(rawActual) ? 0 : rawActual)));
+
+        w.plannedStart = document.getElementById("mainPlanStart_" + idx).value;
+        w.plannedEnd = document.getElementById("mainPlanEnd_" + idx).value;
+        w.actualStart = document.getElementById("mainActStart_" + idx).value;
+        w.actualEnd = document.getElementById("mainActEnd_" + idx).value;
+
+        if (Array.isArray(w.subItems)) {
+          w.subItems.forEach((sub, sIdx) => {
+            const spEl = document.getElementById("subPlanPct_" + idx + "_" + sIdx);
+            const saEl = document.getElementById("subActPct_" + idx + "_" + sIdx);
+            if (spEl && saEl) {
+              sub.plannedPct = fmtPct(Math.min(100, Math.max(0, parseFloat(spEl.value) || 0)));
+              sub.actualPct = fmtPct(Math.min(100, Math.max(0, parseFloat(saEl.value) || 0)));
+              sub.plannedStart = document.getElementById("subPlanStart_" + idx + "_" + sIdx).value;
+              sub.plannedEnd = document.getElementById("subPlanEnd_" + idx + "_" + sIdx).value;
+              sub.actualStart = document.getElementById("subActStart_" + idx + "_" + sIdx).value;
+              sub.actualEnd = document.getElementById("subActEnd_" + idx + "_" + sIdx).value;
+            }
+          });
+        }
       });
       saveState();
       closeProgressModal();
       renderAll();
+    }
+
+    function formatDisplayDateTime(dtStr) {
+      if (!dtStr) return "-";
+      return dtStr.replace("T", " ");
     }
 
     function renderExpenses() {
@@ -1560,16 +1855,13 @@
       tbody.innerHTML = window.appState.expenses.map((e, idx) => {
         const subtotal = e.qty * e.price;
         const totalWithTax = Math.round(subtotal * 1.05);
-        const codeBadge = e.itemCode
-          ? '<span class="inline-block bg-amber-100 text-amber-900 font-bold text-xs px-2 py-0.5 rounded border border-amber-300">' + e.itemCode + '</span>'
-          : '<span class="text-xs text-slate-400">-</span>';
 
         return '<tr class="hover:bg-slate-50">' +
-          '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap">' + e.date + '</td>' +
-          '<td class="py-2.5 px-3 whitespace-nowrap">' + codeBadge + '</td>' +
-          '<td class="py-2.5 px-3 font-medium text-slate-700">' + e.category + '</td>' +
-          '<td class="py-2.5 px-3"><div class="font-semibold text-slate-800">' + e.vendor + '</div><div class="text-xs text-slate-500">' + e.item + '</div></td>' +
-          '<td class="py-2.5 px-3 text-right text-slate-600 whitespace-nowrap">' + e.qty + ' × ' + e.price.toLocaleString() + '</td>' +
+          '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap text-xs">' + formatDisplayDateTime(e.dateTime) + '</td>' +
+          '<td class="py-2.5 px-3 font-semibold text-slate-800">' + e.name + '</td>' +
+          '<td class="py-2.5 px-3 text-slate-600">' + e.spec + '</td>' +
+          '<td class="py-2.5 px-3 text-right text-slate-700 whitespace-nowrap">' + e.qty.toLocaleString() + '</td>' +
+          '<td class="py-2.5 px-3 text-right text-slate-600 whitespace-nowrap">NT$ ' + e.price.toLocaleString() + '</td>' +
           '<td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">NT$ ' + totalWithTax.toLocaleString() + '</td>' +
           '<td class="py-2.5 px-3 text-center whitespace-nowrap space-x-2">' +
             '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-xs text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-2 py-1 rounded font-semibold transition">編輯</button>' +
@@ -1584,22 +1876,18 @@
       if (!exp) return;
 
       document.getElementById("editExpIndex").value = idx;
-      document.getElementById("editExpDate").value = exp.date;
-      document.getElementById("editExpItemCode").value = exp.itemCode || "";
+      document.getElementById("editExpDateTime").value = exp.dateTime || getCurrentLocalDateTime();
 
       const catSelect = document.getElementById("editExpCategory");
-      const optionsHtml = window.appState.wbsBudgets.map(w =>
+      catSelect.innerHTML = window.appState.wbsBudgets.map(w =>
         '<option value="' + w.name + '">' + w.name + '</option>'
       ).join("");
-      catSelect.innerHTML = optionsHtml;
-
-      if (!window.appState.wbsBudgets.some(w => w.name === exp.category)) {
-        catSelect.innerHTML += '<option value="' + exp.category + '">' + exp.category + '（已移除項目）</option>';
+      if (window.appState.wbsBudgets.some(w => w.name === exp.category)) {
+        catSelect.value = exp.category;
       }
-      catSelect.value = exp.category;
 
-      document.getElementById("editExpVendor").value = exp.vendor;
-      document.getElementById("editExpItem").value = exp.item;
+      document.getElementById("editExpName").value = exp.name;
+      document.getElementById("editExpSpec").value = exp.spec;
       document.getElementById("editExpQty").value = exp.qty;
       document.getElementById("editExpPrice").value = exp.price;
 
@@ -1627,12 +1915,10 @@
       if (!window.appState.expenses[idx]) return;
 
       window.appState.expenses[idx] = {
-        ...window.appState.expenses[idx],
-        date: document.getElementById("editExpDate").value,
-        itemCode: document.getElementById("editExpItemCode").value.trim(),
+        dateTime: document.getElementById("editExpDateTime").value,
         category: document.getElementById("editExpCategory").value,
-        vendor: document.getElementById("editExpVendor").value.trim(),
-        item: document.getElementById("editExpItem").value.trim(),
+        name: document.getElementById("editExpName").value.trim(),
+        spec: document.getElementById("editExpSpec").value.trim(),
         qty: Number(document.getElementById("editExpQty").value) || 1,
         price: Number(document.getElementById("editExpPrice").value) || 0
       };
@@ -1644,24 +1930,26 @@
 
     function addExpense(e) {
       e.preventDefault();
-      const itemCode = document.getElementById("expItemCode").value.trim();
+      const dateTime = document.getElementById("expDateTime").value || getCurrentLocalDateTime();
       const category = document.getElementById("expCategory").value;
-      const vendor = document.getElementById("expVendor").value.trim();
-      const item = document.getElementById("expItem").value.trim();
+      const name = document.getElementById("expName").value.trim();
+      const spec = document.getElementById("expSpec").value.trim();
       const qty = Number(document.getElementById("expQty").value);
       const price = Number(document.getElementById("expPrice").value);
-      const today = new Date().toISOString().split("T")[0];
 
-      window.appState.expenses.unshift({ date: today, itemCode, category, vendor, item, qty, price, hasPhoto: false });
+      window.appState.expenses.unshift({ dateTime, category, name, spec, qty, price });
       saveState();
 
-      e.target.reset();
+      document.getElementById("expName").value = "";
+      document.getElementById("expSpec").value = "";
       document.getElementById("expQty").value = 1;
+      document.getElementById("expPrice").value = "";
+      document.getElementById("expDateTime").value = getCurrentLocalDateTime();
       renderAll();
     }
 
     function deleteExpense(idx) {
-      if (confirm("確定要刪除這筆叫料/發包紀錄嗎？")) {
+      if (confirm("確定要刪除這筆記帳明細嗎？")) {
         window.appState.expenses.splice(idx, 1);
         saveState();
         renderAll();
@@ -1729,7 +2017,7 @@
       const esc = (str) => '"' + String(str).replace(/"/g, '""') + '"';
 
       let csv = "\uFEFF";
-      csv += "日期,標單項次/分類,歸屬工程項目,廠商,品名,數量,未稅單價,未稅小計,營業稅(5%),含稅總額\n";
+      csv += "日期時間,名稱,規格,數量,未稅單價,未稅小計,營業稅(5%),含稅總額\n";
 
       sState.expenses.forEach(e => {
         const sub = Math.round(e.qty * e.price);
@@ -1740,11 +2028,9 @@
         totalWithTax += withTax;
 
         csv += [
-          esc(e.date),
-          esc(e.itemCode || ""),
-          esc(e.category),
-          esc(e.vendor),
-          esc(e.item),
+          esc(formatDisplayDateTime(e.dateTime)),
+          esc(e.name),
+          esc(e.spec),
           e.qty,
           e.price,
           sub,
@@ -1753,24 +2039,24 @@
         ].join(",") + "\n";
       });
 
-      csv += ",,,,,,明細支出總計," + totalSubtotal + "," + totalTax + "," + totalWithTax + "\n\n";
+      csv += ",,,,明細支出總計," + totalSubtotal + "," + totalTax + "," + totalWithTax + "\n\n";
 
-      csv += "【專案合約、工期與目前損益總表】,,,,,,,,,\n";
-      csv += "工程案場名稱," + esc(sState.projectName) + ",,,,,,,,\n";
-      csv += "正式開工日期," + esc(s.startDate) + ",,,,,,,,\n";
-      csv += "原始預計完工日," + esc(s.baseEndDate) + ",,,,,,,,\n";
-      csv += "核定追加工期天數," + s.extraDays + " 天,,,,,,,,\n";
-      csv += "展延後最終完工日," + esc(s.finalEndDate) + ",,,,,,,,\n";
-      csv += "累計已工作天數," + s.elapsedDays + " 天,,,,,,,,\n";
-      csv += "距離完工倒數天數," + (s.remainingDays >= 0 ? s.remainingDays + " 天" : "逾期 " + Math.abs(s.remainingDays) + " 天") + ",,,,,,,,\n";
-      csv += "合約總金額（含追加）," + m.totalContract + ",,,,,,,,\n";
-      csv += "主要工程加權預計進度," + m.weightedPlanned + "%,,,,,,,,\n";
-      csv += "主要工程加權實際進度," + m.weightedActual + "%,,,,,,,,\n";
-      csv += "依進度換算已完成產值," + m.earnedContractValue + ",,,,,,,,\n";
-      csv += "累計實際支出總金額（含稅）," + m.totalActualCost + ",,,,,,,,\n";
-      csv += "目前現況損益（正數為盈利/負數為虧損）," + m.currentProfit + ",,,,,,,,\n";
-      csv += "合約剩餘未動支預算," + m.remainingBudget + ",,,,,,,,\n";
-      csv += "協力廠商保留款 (10%)," + m.retention + ",,,,,,,,\n";
+      csv += "【專案合約、工期與目前損益總表】,,,,,,,\n";
+      csv += "工程案場名稱," + esc(sState.projectName) + ",,,,,,\n";
+      csv += "正式開工日期," + esc(s.startDate) + ",,,,,,\n";
+      csv += "原始預計完工日," + esc(s.baseEndDate) + ",,,,,,\n";
+      csv += "核定追加工期天數," + s.extraDays + " 天,,,,,,\n";
+      csv += "展延後最終完工日," + esc(s.finalEndDate) + ",,,,,,\n";
+      csv += "累計已工作天數," + s.elapsedDays + " 天,,,,,,\n";
+      csv += "距離完工倒數天數," + (s.remainingDays >= 0 ? s.remainingDays + " 天" : "逾期 " + Math.abs(s.remainingDays) + " 天") + ",,,,,,\n";
+      csv += "合約總金額（含追加）," + m.totalContract + ",,,,,,\n";
+      csv += "主要工程加權預計進度," + m.weightedPlanned + "%,,,,,,\n";
+      csv += "主要工程加權完成度," + m.weightedActual + "%,,,,,,\n";
+      csv += "依進度換算已完成產值," + m.earnedContractValue + ",,,,,,\n";
+      csv += "累計實際支出總金額（含稅）," + m.totalActualCost + ",,,,,,\n";
+      csv += "目前現況損益（正數為盈利/負數為虧損）," + m.currentProfit + ",,,,,,\n";
+      csv += "合約剩餘未動支預算," + m.remainingBudget + ",,,,,,\n";
+      csv += "協力廠商保留款 (10%)," + m.retention + ",,,,,,\n";
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
@@ -1784,9 +2070,9 @@
       if (typeof Chart === "undefined") return;
       const ctx = document.getElementById("costChart").getContext("2d");
       if (chartInstance) chartInstance.destroy();
-      const palette = ["#64748b", "#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316", "#6366f1", "#84cc16", "#06b6d4", "#eab308", "#f43f5e"];
+      const palette = ["#64748b", "#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316", "#6366f1", "#84cc16"];
       const activeItems = window.appState.wbsBudgets.filter(w => (categoryActuals[w.name] || 0) > 0);
-      const chartItems = activeItems.length > 0 ? activeItems : window.appState.wbsBudgets.slice(0, 6);
+      const chartItems = activeItems.length > 0 ? activeItems : window.appState.wbsBudgets.slice(0, 5);
 
       chartInstance = new Chart(ctx, {
         type: "doughnut",
