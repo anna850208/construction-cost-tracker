@@ -6,6 +6,7 @@
   <title>工地算盤 CivilCost｜土木營造成本與進度控管系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
     .pro-badge { background: linear-gradient(135deg, #f59e0b, #d97706); }
@@ -182,7 +183,7 @@
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
         <p class="text-xs text-slate-500">現場進料登記總筆數</p>
         <p id="kpiRecordCount" class="text-lg md:text-xl font-bold text-slate-800 mt-1">0 筆</p>
-        <span id="kpiEarnedNote" class="text-[11px] text-slate-500">已完成工程產值：NT$ 0</span>
+        <span id="kpiEarnedNote" class="text-[11px] text-slate-500">已附單據照片：0 筆</span>
       </div>
 
       <div id="profitStatusCard" class="bg-white p-4 rounded-xl shadow-sm border-2 transition">
@@ -339,14 +340,34 @@
 
     <!-- 採購與進料明細表 -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-        <h2 class="font-bold text-sm text-slate-800">近期現場記帳明細（進料數量與單據存證）</h2>
-        <span class="text-xs text-slate-400">依日期、材料名稱、規格、數量與單位紀錄</span>
+      <div class="px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <h2 class="font-bold text-sm text-slate-800">近期現場記帳明細（進料數量與單據存證）</h2>
+          <span id="photoTotalBadge" class="text-[11px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded-full">0 張單據</span>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- 勾選後浮現的快速批次下載列 -->
+          <div id="inlineBatchActionBar" class="hidden items-center gap-2 bg-emerald-50 border border-emerald-300 px-2.5 py-1 rounded-lg">
+            <span id="inlineSelectedCountText" class="text-xs font-bold text-emerald-800">已選 0 張</span>
+            <button type="button" onclick="downloadSelectedPhotosZip('inline')" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-md transition shadow-xs">
+              ⬇ 打包下載已選單據 (ZIP)
+            </button>
+          </div>
+
+          <!-- 開啟圖庫式批次選擇下載視窗 -->
+          <button type="button" onclick="openBatchPhotoModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1">
+            📦 批次選擇下載單據
+          </button>
+        </div>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse text-sm">
           <thead>
             <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
+              <th class="py-2.5 px-3 w-9 text-center">
+                <input type="checkbox" id="selectAllPhotosCheckbox" onchange="toggleSelectAllTablePhotos(this.checked)" title="全選所有已附單據照片" class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 cursor-pointer">
+              </th>
               <th class="py-2.5 px-3">日期</th>
               <th class="py-2.5 px-3">名稱</th>
               <th class="py-2.5 px-3">規格</th>
@@ -363,7 +384,46 @@
 
   </main>
 
-  <!-- 視窗 F：送貨單 / 簽收單照片放大檢視視窗 -->
+  <!-- 視窗 G：批次選擇與打包下載送貨單照片（ZIP） -->
+  <div id="batchPhotoModal" class="fixed inset-0 bg-slate-900/75 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-4xl w-full p-5 shadow-2xl space-y-4 my-8">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">📦 批次選擇並下載送貨單 / 簽收單照片</h3>
+          <p class="text-xs text-slate-500 mt-0.5">勾選多張單據後可一鍵打包為 ZIP 壓縮檔，系統會自動以「日期_材料名稱_數量單位」命名</p>
+        </div>
+        <button type="button" onclick="closeBatchPhotoModal()" class="text-slate-400 hover:text-slate-700 text-lg font-bold px-2">✕</button>
+      </div>
+
+      <!-- 批次選取控制工具列 -->
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="batchModalSelectAll(true)" class="text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold px-3 py-1.5 rounded-lg transition">
+            ✅ 全部勾選
+          </button>
+          <button type="button" onclick="batchModalSelectAll(false)" class="text-xs bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 font-medium px-3 py-1.5 rounded-lg transition">
+            取消全選
+          </button>
+          <span id="batchModalCountHint" class="text-xs font-bold text-amber-700 ml-1">已勾選 0 / 0 張</span>
+        </div>
+
+        <button type="button" id="batchModalDownloadBtn" onclick="downloadSelectedPhotosZip('modal')" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+          ⬇ 打包下載已選單據 (ZIP)
+        </button>
+      </div>
+
+      <!-- 格狀縮圖多選區 -->
+      <div id="batchPhotoGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[58vh] overflow-y-auto p-1"></div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-100">
+        <button type="button" onclick="closeBatchPhotoModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded-lg">
+          關閉視窗
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 視窗 F：單張送貨單 / 簽收單照片放大檢視視窗 -->
   <div id="photoViewerModal" class="fixed inset-0 bg-slate-900/80 hidden items-center justify-center z-50 p-4" onclick="closePhotoViewer()">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-4 shadow-2xl space-y-3" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
@@ -705,7 +765,7 @@
       </p>
       <ul class="text-xs text-slate-700 space-y-2 bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
         <li>✅ <strong>無限個工地案場</strong>同時管理與跨案場數量統計</li>
-        <li>✅ <strong>工地送貨單拍照上傳</strong>（自動壓縮雲端存證）</li>
+        <li>✅ <strong>工地送貨單拍照上傳＋多張 ZIP 批次下載</strong></li>
         <li>✅ <strong>變更設計追加減帳</strong>與即時工期控管</li>
         <li>✅ 一鍵匯出<strong>業主估驗計價表</strong>與<strong>廠商保留款明細</strong></li>
       </ul>
@@ -949,14 +1009,15 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（日期/名稱/規格/數量/單位 ＋ Pro 單據照片拍照壓縮存證） -->
+  <!-- 核心業務邏輯（含多選批次打包 ZIP 下載送貨單功能） -->
   <script>
-    const STORAGE_KEY = "civilcost_data_v12";
+    const STORAGE_KEY = "civilcost_data_v13";
     let isPro = false;
     let chartInstance = null;
     let tempWbsList = [];
     let pendingNewReceiptPhoto = "";
     let pendingEditReceiptPhoto = "";
+    let selectedPhotoIndices = new Set();
 
     function getCurrentLocalDate() {
       const now = new Date();
@@ -1053,11 +1114,13 @@
       box.classList.remove("flex");
     }
 
-    function openPhotoViewer(src, titleText) {
+    function openPhotoViewer(src, titleText, downloadFilename) {
       if (!src) return;
       document.getElementById("photoViewerImg").src = src;
       document.getElementById("photoViewerTitle").textContent = titleText || "送貨單 / 簽收單存證照片";
-      document.getElementById("photoDownloadLink").href = src;
+      const link = document.getElementById("photoDownloadLink");
+      link.href = src;
+      link.download = downloadFilename || "送貨單存證.jpg";
       document.getElementById("photoViewerModal").classList.remove("hidden");
       document.getElementById("photoViewerModal").classList.add("flex");
     }
@@ -1066,6 +1129,225 @@
       document.getElementById("photoViewerModal").classList.add("hidden");
       document.getElementById("photoViewerModal").classList.remove("flex");
     }
+
+    /* ========= 批次挑選與 ZIP 打包下載邏輯 ========= */
+    function sanitizeFilename(str) {
+      return String(str || "").replace(/[\\/:*?"<>|]/g, "_").trim();
+    }
+
+    function buildReceiptFilename(exp, indexFallback) {
+      const datePart = sanitizeFilename(exp.date || "未定日期");
+      const namePart = sanitizeFilename(exp.name || "材料單據");
+      const qtyUnitPart = sanitizeFilename((exp.qty || "") + (exp.unit || ""));
+      return datePart + "_" + namePart + (qtyUnitPart ? "_" + qtyUnitPart : "") + "_#" + (indexFallback + 1) + ".jpg";
+    }
+
+    function syncSelectionUI() {
+      const photoEntries = window.appState.expenses
+        .map((e, idx) => ({ e, idx }))
+        .filter(item => Boolean(item.e.photo));
+
+      // 清理無效的 index
+      const validSet = new Set(photoEntries.map(item => item.idx));
+      selectedPhotoIndices.forEach(idx => {
+        if (!validSet.has(idx)) selectedPhotoIndices.delete(idx);
+      });
+
+      const totalPhotos = photoEntries.length;
+      const selectedCount = selectedPhotoIndices.size;
+
+      const totalBadge = document.getElementById("photoTotalBadge");
+      if (totalBadge) totalBadge.textContent = totalPhotos + " 張單據";
+
+      // 同步明細表上的全選框狀態
+      const headerCb = document.getElementById("selectAllPhotosCheckbox");
+      if (headerCb) {
+        headerCb.disabled = totalPhotos === 0;
+        headerCb.checked = totalPhotos > 0 && selectedCount === totalPhotos;
+        headerCb.indeterminate = selectedCount > 0 && selectedCount < totalPhotos;
+      }
+
+      // 同步明細表上的單筆勾選框
+      photoEntries.forEach(({ idx }) => {
+        const rowCb = document.getElementById("rowPhotoCb_" + idx);
+        if (rowCb) rowCb.checked = selectedPhotoIndices.has(idx);
+      });
+
+      // 明細表右上角快捷批次下載列
+      const inlineBar = document.getElementById("inlineBatchActionBar");
+      const inlineText = document.getElementById("inlineSelectedCountText");
+      if (inlineBar && inlineText) {
+        if (selectedCount > 0) {
+          inlineBar.classList.remove("hidden");
+          inlineBar.classList.add("flex");
+          inlineText.textContent = "已選 " + selectedCount + " 張";
+        } else {
+          inlineBar.classList.add("hidden");
+          inlineBar.classList.remove("flex");
+        }
+      }
+
+      // 批次視窗内的計數提示
+      const modalHint = document.getElementById("batchModalCountHint");
+      if (modalHint) {
+        modalHint.textContent = "已勾選 " + selectedCount + " / " + totalPhotos + " 張";
+      }
+    }
+
+    function toggleRowPhotoSelection(idx, isChecked) {
+      if (isChecked) {
+        selectedPhotoIndices.add(idx);
+      } else {
+        selectedPhotoIndices.delete(idx);
+      }
+      syncSelectionUI();
+    }
+
+    function toggleSelectAllTablePhotos(isChecked) {
+      window.appState.expenses.forEach((e, idx) => {
+        if (e.photo) {
+          if (isChecked) selectedPhotoIndices.add(idx);
+          else selectedPhotoIndices.delete(idx);
+        }
+      });
+      syncSelectionUI();
+    }
+
+    function openBatchPhotoModal() {
+      const photoEntries = window.appState.expenses
+        .map((e, idx) => ({ e, idx }))
+        .filter(item => Boolean(item.e.photo));
+
+      if (photoEntries.length === 0) {
+        alert("目前還沒有任何已上傳的送貨單照片喔！\n請先在「現場快速記帳」或點擊明細列的「+ 補傳」上傳單據照片。");
+        return;
+      }
+
+      // 若目前一張都沒選，開啟視窗時貼心預設全選（使用者可隨時取消部分勾選）
+      if (selectedPhotoIndices.size === 0) {
+        photoEntries.forEach(({ idx }) => selectedPhotoIndices.add(idx));
+      }
+
+      renderBatchPhotoGrid();
+      syncSelectionUI();
+
+      document.getElementById("batchPhotoModal").classList.remove("hidden");
+      document.getElementById("batchPhotoModal").classList.add("flex");
+    }
+
+    function closeBatchPhotoModal() {
+      document.getElementById("batchPhotoModal").classList.add("hidden");
+      document.getElementById("batchPhotoModal").classList.remove("flex");
+    }
+
+    function batchModalSelectAll(selectAllFlag) {
+      toggleSelectAllTablePhotos(selectAllFlag);
+      renderBatchPhotoGrid();
+      syncSelectionUI();
+    }
+
+    function toggleBatchCard(idx) {
+      if (selectedPhotoIndices.has(idx)) {
+        selectedPhotoIndices.delete(idx);
+      } else {
+        selectedPhotoIndices.add(idx);
+      }
+      renderBatchPhotoGrid();
+      syncSelectionUI();
+    }
+
+    function renderBatchPhotoGrid() {
+      const grid = document.getElementById("batchPhotoGrid");
+      if (!grid) return;
+
+      const photoEntries = window.appState.expenses
+        .map((e, idx) => ({ e, idx }))
+        .filter(item => Boolean(item.e.photo));
+
+      grid.innerHTML = photoEntries.map(({ e, idx }) => {
+        const isSelected = selectedPhotoIndices.has(idx);
+        const cardClass = isSelected
+          ? "border-2 border-emerald-500 bg-emerald-50/40 shadow-sm"
+          : "border border-slate-200 bg-white opacity-75 hover:opacity-100";
+
+        return '<div onclick="toggleBatchCard(' + idx + ')" class="rounded-xl p-2 cursor-pointer transition select-none flex flex-col justify-between ' + cardClass + '">' +
+          '<div class="relative aspect-[4/3] bg-slate-900 rounded-lg overflow-hidden mb-2">' +
+            '<img src="' + e.photo + '" alt="' + e.name + '" class="w-full h-full object-cover">' +
+            '<div class="absolute top-2 left-2 bg-white/95 rounded-md px-1.5 py-0.5 shadow flex items-center gap-1">' +
+              '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onclick="event.stopPropagation(); toggleBatchCard(' + idx + ')" class="rounded border-slate-400 text-emerald-600 focus:ring-emerald-500 cursor-pointer">' +
+              '<span class="text-[10px] font-bold ' + (isSelected ? 'text-emerald-700' : 'text-slate-500') + '">' + (isSelected ? '已選' : '未選') + '</span>' +
+            '</div>' +
+            '<button type="button" onclick="event.stopPropagation(); openPhotoViewer(window.appState.expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\', \'' + buildReceiptFilename(e, idx).replace(/'/g, "") + '\')" class="absolute bottom-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white text-[10px] px-2 py-1 rounded-md">' +
+              '🔍 放大' +
+            '</button>' +
+          '</div>' +
+          '<div class="space-y-0.5 px-0.5">' +
+            '<p class="text-[11px] text-slate-400">' + (e.date || "-") + '</p>' +
+            '<p class="text-xs font-bold text-slate-800 truncate">' + e.name + ' <span class="font-normal text-slate-500">(' + e.spec + ')</span></p>' +
+            '<p class="text-[11px] font-semibold text-amber-700">' + e.qty.toLocaleString() + ' ' + (e.unit || "式") + '</p>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    }
+
+    async function downloadSelectedPhotosZip(sourceMode) {
+      if (selectedPhotoIndices.size === 0) {
+        alert("請至少勾選 1 張單據照片再下載喔！");
+        return;
+      }
+
+      if (typeof JSZip === "undefined") {
+        alert("打包元件載入中，請稍候 2 秒再試一次。");
+        return;
+      }
+
+      const btn = sourceMode === "modal" ? document.getElementById("batchModalDownloadBtn") : null;
+      const originalBtnText = btn ? btn.innerHTML : "";
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "⏳ 正在打包 " + selectedPhotoIndices.size + " 張單據...";
+      }
+
+      try {
+        const zip = new JSZip();
+        const usedNames = new Set();
+
+        Array.from(selectedPhotoIndices).sort((a, b) => a - b).forEach((idx) => {
+          const exp = window.appState.expenses[idx];
+          if (!exp || !exp.photo) return;
+
+          const base64Data = exp.photo.split(",")[1];
+          if (!base64Data) return;
+
+          let fileName = buildReceiptFilename(exp, idx);
+          if (usedNames.has(fileName)) {
+            fileName = fileName.replace(".jpg", "_" + Date.now() + ".jpg");
+          }
+          usedNames.add(fileName);
+
+          zip.file(fileName, base64Data, { base64: true });
+        });
+
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = sanitizeFilename(window.appState.projectName) + "_送貨單存證_" + getCurrentLocalDate() + ".zip";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+      } catch (err) {
+        console.error("ZIP 打包失敗:", err);
+        alert("批次下載時發生錯誤，請重新再試一次。");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalBtnText;
+        }
+      }
+    }
+    /* =============================================== */
 
     function evaluateDateSchedule(pStart, pEnd, aStart, aEnd, fallbackPct = 0) {
       const parseLocal = (str) => {
@@ -1306,7 +1588,7 @@
 
     function loadState() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v11") || localStorage.getItem("civilcost_data_v10");
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v12") || localStorage.getItem("civilcost_data_v11");
         if (saved) {
           const parsed = JSON.parse(saved);
           const merged = {
@@ -1352,6 +1634,7 @@
 
     function resetDemoData() {
       if (confirm("確定要將合約金額、工期、主/次要工程項目與帳目重置為預設範例（鋼筋 15.6 噸、水泥 50 包、油漆 20 桶）嗎？")) {
+        selectedPhotoIndices.clear();
         window.appState = JSON.parse(JSON.stringify(defaultState));
         saveState();
         renderAll();
@@ -1620,6 +1903,7 @@
 
       renderWBS(m.categoryCounts);
       renderExpenses();
+      syncSelectionUI();
       renderChart(m.categoryCounts);
       updatePlanUI();
     }
@@ -2189,13 +2473,22 @@
     function renderExpenses() {
       const tbody = document.getElementById("expenseTableBody");
       tbody.innerHTML = window.appState.expenses.map((e, idx) => {
-        const photoCellHtml = e.photo
-          ? '<button type="button" onclick="openPhotoViewer(window.appState.expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\')" class="inline-flex items-center gap-1 text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-1 rounded-lg transition">' +
+        const hasPhoto = Boolean(e.photo);
+        const isChecked = selectedPhotoIndices.has(idx);
+
+        const checkboxHtml = hasPhoto
+          ? '<input type="checkbox" id="rowPhotoCb_' + idx + '" ' + (isChecked ? 'checked' : '') + ' onchange="toggleRowPhotoSelection(' + idx + ', this.checked)" title="勾選此單據以批次下載" class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 cursor-pointer">'
+          : '<span class="text-slate-300 text-xs">-</span>';
+
+        const singleFilename = buildReceiptFilename(e, idx).replace(/'/g, "");
+        const photoCellHtml = hasPhoto
+          ? '<button type="button" onclick="openPhotoViewer(window.appState.expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\', \'' + singleFilename + '\')" class="inline-flex items-center gap-1 text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-1 rounded-lg transition">' +
               '📷 檢視單據' +
             '</button>'
           : '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-[11px] text-slate-400 hover:text-amber-700 underline">+ 補傳</button>';
 
-        return '<tr class="hover:bg-slate-50">' +
+        return '<tr class="hover:bg-slate-50 ' + (isChecked ? 'bg-emerald-50/40' : '') + '">' +
+          '<td class="py-2.5 px-3 text-center">' + checkboxHtml + '</td>' +
           '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap text-xs">' + (e.date || "-") + '</td>' +
           '<td class="py-2.5 px-3 font-semibold text-slate-800">' + e.name + '</td>' +
           '<td class="py-2.5 px-3 text-slate-600">' + e.spec + '</td>' +
@@ -2279,6 +2572,11 @@
       const qty = Number(document.getElementById("expQty").value);
       const unit = document.getElementById("expUnit").value.trim() || "式";
 
+      // 新紀錄插入最前面時，原有勾選 index 順移 +1
+      const shifted = new Set();
+      selectedPhotoIndices.forEach(oldIdx => shifted.add(oldIdx + 1));
+      selectedPhotoIndices = shifted;
+
       window.appState.expenses.unshift({
         date,
         category,
@@ -2301,6 +2599,13 @@
 
     function deleteExpense(idx) {
       if (confirm("確定要刪除這筆現場記帳明細嗎？")) {
+        selectedPhotoIndices.delete(idx);
+        const shifted = new Set();
+        selectedPhotoIndices.forEach(oldIdx => {
+          shifted.add(oldIdx > idx ? oldIdx - 1 : oldIdx);
+        });
+        selectedPhotoIndices = shifted;
+
         window.appState.expenses.splice(idx, 1);
         saveState();
         renderAll();
