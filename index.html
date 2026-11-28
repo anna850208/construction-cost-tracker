@@ -45,11 +45,10 @@
           重置範例
         </button>
 
-        <div class="flex items-center gap-1.5 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">
-          <button type="button" id="togglePlanBtn" onclick="togglePlan()" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-600 text-white transition">
-            免費版 Free
-          </button>
-        </div>
+        <!-- 正式方案狀態徽章（點擊可開啟升級/輸入啟用碼視窗） -->
+        <button type="button" id="planStatusBtn" onclick="openUpgradeModal('Pro 專業版授權管理')" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 transition">
+          免費版 Free · 升級
+        </button>
       </div>
     </div>
   </header>
@@ -83,14 +82,15 @@
       </div>
     </section>
 
-    <!-- 案場選擇器 -->
+    <!-- 多案場獨立選擇器與管理列 -->
     <section class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2.5 flex-wrap">
+      <div class="flex items-center gap-2 flex-wrap">
         <label class="text-sm font-semibold text-slate-600">工地案場：</label>
-        <select id="projectSelect" onchange="switchProject()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-amber-500">
-          <option value="0" id="mainProjectOption">新應材龍科廠新建工程</option>
-          <option value="1" id="proProjectOption">🔒 [Pro] 新竹竹北廠房基礎開挖工程（合約 2,800 萬）</option>
+        <select id="projectSelect" onchange="switchProject()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-amber-500 max-w-[280px] sm:max-w-xs truncate">
         </select>
+        <button type="button" id="deleteProjectBtn" onclick="deleteCurrentProject()" title="刪除此案場" class="hidden text-xs text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 font-semibold px-2.5 py-1.5 rounded-lg transition">
+          🗑️ 刪除案場
+        </button>
         <button type="button" onclick="openScheduleModal()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
           📅 全案開工/完工設定
         </button>
@@ -101,8 +101,8 @@
           📊 編輯起迄時間與完成度%
         </button>
       </div>
-      <button type="button" onclick="handleProAction('新增多個工地案場')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition">
-        + 新增案場 <span class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded ml-1">PRO</span>
+      <button type="button" onclick="openNewProjectModal()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition flex items-center gap-1">
+        + 新增案場 <span id="newProjectProBadge" class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded">PRO</span>
       </button>
     </section>
 
@@ -335,16 +335,15 @@
       </div>
     </section>
 
-    <!-- 採購與進料明細表 -->
+    <!-- 採購與進料明細表（含搜尋篩選與材料數量自動加總看板） -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2">
-          <h2 class="font-bold text-sm text-slate-800">近期現場記帳明細（進料數量與單據存證）</h2>
+          <h2 class="font-bold text-sm text-slate-800">現場進料明細與數量統計看板</h2>
           <span id="photoTotalBadge" class="text-[11px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded-full">0 張單據</span>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <!-- 勾選後浮現的快速批次下載列 -->
           <div id="inlineBatchActionBar" class="hidden items-center gap-2 bg-emerald-50 border border-emerald-300 px-2.5 py-1 rounded-lg">
             <span id="inlineSelectedCountText" class="text-xs font-bold text-emerald-800">已選 0 張</span>
             <button type="button" onclick="downloadSelectedPhotosZip('inline')" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-md transition shadow-xs">
@@ -352,18 +351,45 @@
             </button>
           </div>
 
-          <!-- 開啟圖庫式批次選擇下載視窗 -->
           <button type="button" onclick="openBatchPhotoModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1">
             📦 批次選擇下載單據
           </button>
         </div>
       </div>
+
+      <!-- 搜尋與日期區間篩選列 -->
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 space-y-2.5">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+          <div class="sm:col-span-5 relative">
+            <input id="filterKeyword" type="text" oninput="onFilterChange()" placeholder="🔍 搜尋材料名稱或規格（如：鋼筋、4000psi）"
+              class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:border-amber-500 focus:outline-none">
+          </div>
+          <div class="sm:col-span-5 flex items-center gap-1.5 text-xs">
+            <span class="text-slate-500 shrink-0">日期：</span>
+            <input id="filterStartDate" type="date" onchange="onFilterChange()" class="flex-1 bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:border-amber-500 focus:outline-none">
+            <span class="text-slate-400">~</span>
+            <input id="filterEndDate" type="date" onchange="onFilterChange()" class="flex-1 bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:border-amber-500 focus:outline-none">
+          </div>
+          <div class="sm:col-span-2 flex justify-end">
+            <button type="button" onclick="clearExpenseFilters()" class="w-full sm:w-auto text-xs bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 font-medium px-3 py-1.5 rounded-lg transition">
+              清除篩選
+            </button>
+          </div>
+        </div>
+
+        <!-- 材料累計加總動態看板 -->
+        <div class="flex flex-wrap items-center gap-1.5 pt-1">
+          <span class="text-[11px] font-bold text-slate-600 mr-1">📊 篩選結果數量累計：</span>
+          <div id="materialSummaryContainer" class="flex flex-wrap items-center gap-1.5"></div>
+        </div>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse text-sm">
           <thead>
             <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
               <th class="py-2.5 px-3 w-9 text-center">
-                <input type="checkbox" id="selectAllPhotosCheckbox" onchange="toggleSelectAllTablePhotos(this.checked)" title="全選所有已附單據照片" class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 cursor-pointer">
+                <input type="checkbox" id="selectAllPhotosCheckbox" onchange="toggleSelectAllTablePhotos(this.checked)" title="全選目前已顯示的單據照片" class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 cursor-pointer">
               </th>
               <th class="py-2.5 px-3">日期</th>
               <th class="py-2.5 px-3">名稱</th>
@@ -381,6 +407,48 @@
 
   </main>
 
+  <!-- 視窗 H：新增工地案場視窗（Pro 專屬） -->
+  <div id="newProjectModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">➕ 新增獨立工地案場</h3>
+          <p class="text-xs text-slate-500 mt-0.5">每個案場皆有獨立的合約預算、工期進度與現場進料帳本</p>
+        </div>
+        <button type="button" onclick="closeNewProjectModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <form onsubmit="createNewProject(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">新案場名稱</label>
+          <input id="newProjNameInput" type="text" placeholder="如：桃園中壢廠辦新建工程" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">原始合約總金額（元）</label>
+          <input id="newProjContractInput" type="number" min="0" placeholder="如：50000000" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">正式開工日期</label>
+            <input id="newProjStartInput" type="date" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">原始預計完工日</label>
+            <input id="newProjEndInput" type="date" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none">
+          </div>
+        </div>
+        <div class="pt-2 flex gap-2">
+          <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition">
+            建立並切換至此案場
+          </button>
+          <button type="button" onclick="closeNewProjectModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm">
+            取消
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- 視窗 G：批次選擇與打包下載送貨單照片（ZIP） -->
   <div id="batchPhotoModal" class="fixed inset-0 bg-slate-900/75 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-4xl w-full p-5 shadow-2xl space-y-4 my-8">
@@ -392,7 +460,6 @@
         <button type="button" onclick="closeBatchPhotoModal()" class="text-slate-400 hover:text-slate-700 text-lg font-bold px-2">✕</button>
       </div>
 
-      <!-- 批次選取控制工具列 -->
       <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
         <div class="flex items-center gap-2">
           <button type="button" onclick="batchModalSelectAll(true)" class="text-xs bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold px-3 py-1.5 rounded-lg transition">
@@ -409,7 +476,6 @@
         </button>
       </div>
 
-      <!-- 格狀縮圖多選區 -->
       <div id="batchPhotoGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[58vh] overflow-y-auto p-1"></div>
 
       <div class="flex justify-end pt-2 border-t border-slate-100">
@@ -587,7 +653,6 @@
           </div>
         </div>
 
-        <!-- 區塊 1：主要工程項目 ＋ 次要子項目 -->
         <div class="pt-3 border-t border-slate-200 space-y-2.5">
           <div class="flex items-center justify-between">
             <label class="text-xs font-bold text-sky-800">
@@ -609,7 +674,6 @@
           </div>
         </div>
 
-        <!-- 區塊 2：非主要工程項目 -->
         <div class="pt-3 border-t border-slate-200 space-y-2">
           <div class="flex items-center justify-between">
             <label class="text-xs font-bold text-amber-800">
@@ -719,7 +783,6 @@
           </div>
         </div>
 
-        <!-- 編輯視窗内的單據照片管理 -->
         <div class="pt-1">
           <label class="block text-xs font-bold text-slate-700 mb-1">送貨單 / 簽收單照片（PRO）</label>
           <input type="file" id="editReceiptFileInput" accept="image/*" class="hidden" onchange="handleReceiptFileSelected(event, 'edit')">
@@ -749,34 +812,61 @@
     </div>
   </div>
 
-  <!-- 升級 Pro 商業變現引導彈窗 -->
-  <div id="upgradeModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+  <!-- 升級 Pro 正式授權開通與金流引導彈窗 -->
+  <div id="upgradeModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between">
-        <span class="pro-badge text-white text-xs font-bold px-2.5 py-1 rounded-full">升級 CIVILCOST PRO</span>
+        <span class="pro-badge text-white text-xs font-bold px-2.5 py-1 rounded-full">CIVILCOST PRO 專業版方案</span>
         <button type="button" onclick="closeUpgradeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
-      <h3 class="text-lg font-bold text-slate-900">解鎖「<span id="modalFeatureName" class="text-amber-600">進階功能</span>」</h3>
-      <p class="text-sm text-slate-600 leading-relaxed">
-        專為土木營造老闆與工地主任設計，省下每月 15 小時對帳時間，杜絕材料超叫與漏算追加款：
-      </p>
-      <ul class="text-xs text-slate-700 space-y-2 bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
-        <li>✅ <strong>無限個工地案場</strong>同時管理與跨案場數量統計</li>
-        <li>✅ <strong>工地送貨單拍照上傳＋多張 ZIP 批次下載</strong></li>
-        <li>✅ <strong>變更設計追加減帳</strong>與即時工期控管</li>
-      </ul>
-      <div class="pt-2 flex flex-col gap-2">
-        <button type="button" onclick="activateProDemo()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition">
-          立即升級 Pro 版（NT$ 490 / 月）
-        </button>
-        <button type="button" onclick="closeUpgradeModal()" class="w-full text-xs text-slate-400 hover:text-slate-600 py-1">
-          先繼續使用免費版（限單一案場）
+
+      <div id="upgradeLockedView" class="space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">解鎖「<span id="modalFeatureName" class="text-amber-600">進階功能</span>」</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          專為土木營造老闆與工地主任設計，省下每月 15 小時對帳時間，杜絕材料超叫與漏算追加款：
+        </p>
+        <ul class="text-xs text-slate-700 space-y-2 bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
+          <li>✅ <strong>無限個工地案場</strong>獨立建檔與即時切換</li>
+          <li>✅ <strong>工地送貨單拍照上傳＋多張 ZIP 批次下載</strong></li>
+          <li>✅ <strong>雲端跨裝置同步</strong>（手機拍單據、電腦即時看）</li>
+        </ul>
+
+        <!-- 線上金流購買按鈕 -->
+        <div class="space-y-2 pt-1">
+          <button type="button" onclick="goToCheckoutPage()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition flex items-center justify-center gap-1.5">
+            💳 前往線上訂閱開通（NT$ 490 / 月）
+          </button>
+          <p class="text-[11px] text-center text-slate-400">支援信用卡 / LINE Pay / ATM 轉帳，付款後立即取得授權啟用碼</p>
+        </div>
+
+        <!-- Pro 授權啟用碼輸入區塊 -->
+        <div class="pt-3 border-t border-slate-200 space-y-2">
+          <label class="block text-xs font-bold text-slate-700">🔑 已取得授權序號？請輸入啟用碼開通：</label>
+          <div class="flex gap-2">
+            <input id="licenseCodeInput" type="text" placeholder="輸入序號（如：CIVIL2026PRO）" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-xs uppercase font-mono focus:border-amber-500 focus:outline-none">
+            <button type="button" onclick="redeemLicenseCode()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg transition whitespace-nowrap">
+              驗證啟用
+            </button>
+          </div>
+          <p id="licenseErrorMsg" class="hidden text-[11px] text-rose-600 font-medium"></p>
+        </div>
+      </div>
+
+      <!-- 已開通 Pro 狀態檢視 -->
+      <div id="upgradeActiveView" class="hidden space-y-4">
+        <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-4 text-center space-y-1.5">
+          <span class="text-2xl">🎉</span>
+          <h3 class="text-base font-bold text-emerald-900">您目前已是 CivilCost Pro 專業版會員</h3>
+          <p id="proActivePlanInfo" class="text-xs text-emerald-700">已解鎖無限個工地案場、送貨單拍照存證與 ZIP 批次打包下載</p>
+        </div>
+        <button type="button" onclick="closeUpgradeModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-sm transition">
+          繼續使用系統
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Firebase SDK 與即時雲端同步邏輯 -->
+  <!-- Firebase SDK 與多案場 / Pro 授權即時雲端同步邏輯 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import {
@@ -853,13 +943,13 @@
         document.getElementById("userEmailDisplay").textContent = user.displayName || user.email;
 
         updateSyncBadge("syncing", "🔄 載入雲端帳本...");
-        const docRef = doc(db, "users", user.uid, "projects", "default_project");
+        const docRef = doc(db, "users", user.uid, "workspace", "main_workspace");
 
         try {
           const snap = await getDoc(docRef);
           if (!snap.exists()) {
             await setDoc(docRef, {
-              ...window.appState,
+              ...window.workspaceState,
               updatedAt: new Date().toISOString()
             });
           }
@@ -867,7 +957,7 @@
           unsubscribeSnapshot = onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
               const cloudData = docSnap.data();
-              window.applyCloudState(cloudData);
+              window.applyCloudWorkspace(cloudData);
               updateSyncBadge("synced", "☁️ 雲端即時同步中");
             }
           }, (err) => {
@@ -887,13 +977,13 @@
       }
     });
 
-    window.syncToCloud = async function(stateData) {
+    window.syncToCloud = async function(wsData) {
       if (!currentUser) return;
       updateSyncBadge("syncing", "🔄 儲存至雲端...");
       try {
-        const docRef = doc(db, "users", currentUser.uid, "projects", "default_project");
+        const docRef = doc(db, "users", currentUser.uid, "workspace", "main_workspace");
         await setDoc(docRef, {
-          ...stateData,
+          ...wsData,
           updatedAt: new Date().toISOString()
         });
         updateSyncBadge("synced", "☁️ 雲端即時同步中");
@@ -1005,10 +1095,14 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（含多選批次打包 ZIP 下載送貨單功能） -->
+  <!-- 核心業務邏輯（多案場管理、進料篩選加總、Pro 授權開通） -->
   <script>
-    const STORAGE_KEY = "civilcost_data_v13";
-    let isPro = false;
+    const WORKSPACE_STORAGE_KEY = "civilcost_workspace_v14";
+    // 設定你的線上收款連結（如 Portaly / 綠界 / 藍新），未設定時會顯示導引提示
+    const CHECKOUT_PAYMENT_URL = "";
+    // 有效 Pro 授權啟用碼清單（不區分大小寫）
+    const VALID_PRO_CODES = ["CIVIL2026PRO", "CIVILPRO888", "VIP888"];
+
     let chartInstance = null;
     let tempWbsList = [];
     let pendingNewReceiptPhoto = "";
@@ -1061,8 +1155,8 @@
     }
 
     function triggerReceiptUpload(mode) {
-      if (!isPro) {
-        handleProAction("工地送貨單 / 簽收單拍照雲端存證");
+      if (!window.workspaceState.isPro) {
+        openUpgradeModal("工地送貨單 / 簽收單拍照雲端存證");
         return;
       }
       if (mode === "edit") {
@@ -1139,7 +1233,8 @@
     }
 
     function syncSelectionUI() {
-      const photoEntries = window.appState.expenses
+      const proj = getCurrentProject();
+      const photoEntries = proj.expenses
         .map((e, idx) => ({ e, idx }))
         .filter(item => Boolean(item.e.photo));
 
@@ -1154,11 +1249,14 @@
       const totalBadge = document.getElementById("photoTotalBadge");
       if (totalBadge) totalBadge.textContent = totalPhotos + " 張單據";
 
+      const filteredWithPhotos = getFilteredExpenseEntries().filter(item => Boolean(item.e.photo));
       const headerCb = document.getElementById("selectAllPhotosCheckbox");
       if (headerCb) {
-        headerCb.disabled = totalPhotos === 0;
-        headerCb.checked = totalPhotos > 0 && selectedCount === totalPhotos;
-        headerCb.indeterminate = selectedCount > 0 && selectedCount < totalPhotos;
+        headerCb.disabled = filteredWithPhotos.length === 0;
+        const allFilteredSelected = filteredWithPhotos.length > 0 && filteredWithPhotos.every(item => selectedPhotoIndices.has(item.idx));
+        const someFilteredSelected = filteredWithPhotos.some(item => selectedPhotoIndices.has(item.idx));
+        headerCb.checked = allFilteredSelected;
+        headerCb.indeterminate = someFilteredSelected && !allFilteredSelected;
       }
 
       photoEntries.forEach(({ idx }) => {
@@ -1195,7 +1293,7 @@
     }
 
     function toggleSelectAllTablePhotos(isChecked) {
-      window.appState.expenses.forEach((e, idx) => {
+      getFilteredExpenseEntries().forEach(({ e, idx }) => {
         if (e.photo) {
           if (isChecked) selectedPhotoIndices.add(idx);
           else selectedPhotoIndices.delete(idx);
@@ -1205,12 +1303,13 @@
     }
 
     function openBatchPhotoModal() {
-      const photoEntries = window.appState.expenses
+      const proj = getCurrentProject();
+      const photoEntries = proj.expenses
         .map((e, idx) => ({ e, idx }))
         .filter(item => Boolean(item.e.photo));
 
       if (photoEntries.length === 0) {
-        alert("目前還沒有任何已上傳的送貨單照片喔！\n請先在「現場快速記帳」或點擊明細列的「+ 補傳」上傳單據照片。");
+        alert("此案場目前還沒有任何已上傳的送貨單照片喔！\n請先在「現場快速記帳」或點擊明細列的「+ 補傳」上傳單據照片。");
         return;
       }
 
@@ -1231,7 +1330,13 @@
     }
 
     function batchModalSelectAll(selectAllFlag) {
-      toggleSelectAllTablePhotos(selectAllFlag);
+      const proj = getCurrentProject();
+      proj.expenses.forEach((e, idx) => {
+        if (e.photo) {
+          if (selectAllFlag) selectedPhotoIndices.add(idx);
+          else selectedPhotoIndices.delete(idx);
+        }
+      });
       renderBatchPhotoGrid();
       syncSelectionUI();
     }
@@ -1249,8 +1354,9 @@
     function renderBatchPhotoGrid() {
       const grid = document.getElementById("batchPhotoGrid");
       if (!grid) return;
+      const proj = getCurrentProject();
 
-      const photoEntries = window.appState.expenses
+      const photoEntries = proj.expenses
         .map((e, idx) => ({ e, idx }))
         .filter(item => Boolean(item.e.photo));
 
@@ -1267,7 +1373,7 @@
               '<input type="checkbox" ' + (isSelected ? 'checked' : '') + ' onclick="event.stopPropagation(); toggleBatchCard(' + idx + ')" class="rounded border-slate-400 text-emerald-600 focus:ring-emerald-500 cursor-pointer">' +
               '<span class="text-[10px] font-bold ' + (isSelected ? 'text-emerald-700' : 'text-slate-500') + '">' + (isSelected ? '已選' : '未選') + '</span>' +
             '</div>' +
-            '<button type="button" onclick="event.stopPropagation(); openPhotoViewer(window.appState.expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\', \'' + buildReceiptFilename(e, idx).replace(/'/g, "") + '\')" class="absolute bottom-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white text-[10px] px-2 py-1 rounded-md">' +
+            '<button type="button" onclick="event.stopPropagation(); openPhotoViewer(getCurrentProject().expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\', \'' + buildReceiptFilename(e, idx).replace(/'/g, "") + '\')" class="absolute bottom-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white text-[10px] px-2 py-1 rounded-md">' +
               '🔍 放大' +
             '</button>' +
           '</div>' +
@@ -1291,6 +1397,7 @@
         return;
       }
 
+      const proj = getCurrentProject();
       const btn = sourceMode === "modal" ? document.getElementById("batchModalDownloadBtn") : null;
       const originalBtnText = btn ? btn.innerHTML : "";
       if (btn) {
@@ -1303,7 +1410,7 @@
         const usedNames = new Set();
 
         Array.from(selectedPhotoIndices).sort((a, b) => a - b).forEach((idx) => {
-          const exp = window.appState.expenses[idx];
+          const exp = proj.expenses[idx];
           if (!exp || !exp.photo) return;
 
           const base64Data = exp.photo.split(",")[1];
@@ -1322,7 +1429,7 @@
         const url = URL.createObjectURL(zipBlob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = sanitizeFilename(window.appState.projectName) + "_送貨單存證_" + getCurrentLocalDate() + ".zip";
+        a.download = sanitizeFilename(proj.projectName) + "_送貨單存證_" + getCurrentLocalDate() + ".zip";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1337,8 +1444,8 @@
         }
       }
     }
-    /* =============================================== */
 
+    /* ========= 工期與排程評估邏輯 ========= */
     function evaluateDateSchedule(pStart, pEnd, aStart, aEnd, fallbackPct = 0) {
       const parseLocal = (str) => {
         if (!str) return null;
@@ -1434,7 +1541,9 @@
       return '<span class="' + pad + ' rounded font-medium bg-slate-100 text-slate-500">' + evalRes.statusText + '</span>';
     }
 
-    const defaultState = {
+    /* ========= 多案場資料庫結構與初始化 ========= */
+    const defaultProject1 = {
+      id: "proj_default_1",
       projectName: "新應材龍科廠新建工程",
       startDate: "2026-08-02",
       baseEndDate: "2027-06-30",
@@ -1516,10 +1625,64 @@
       expenses: [
         { date: "2026-11-27", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "鋼筋", spec: "SD420W #6~#8", qty: 15.6, unit: "噸", photo: "" },
         { date: "2026-11-26", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "水泥", spec: "品牌一 卜特蘭I型", qty: 50, unit: "包", photo: "" },
+        { date: "2026-11-25", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "鋼筋", spec: "SD420W #4~#5", qty: 12.4, unit: "噸", photo: "" },
         { date: "2026-11-24", category: "3. A棟廠辦新建工程", name: "油漆", spec: "室外耐候乳膠漆", qty: 20, unit: "桶", photo: "" },
         { date: "2026-11-20", category: "1. 土方水保雜項工程（地錨、打樁、開挖、土方、擋土牆）", name: "預拌混凝土", spec: "4000psi", qty: 120, unit: "m³", photo: "" }
       ]
     };
+
+    const defaultProject2 = {
+      id: "proj_default_2",
+      projectName: "新竹竹北廠房基礎開挖工程",
+      startDate: "2026-10-01",
+      baseEndDate: "2027-03-31",
+      extraDays: 0,
+      baseContract: 28000000,
+      extraContract: 1200000,
+      wbsBudgets: [
+        {
+          name: "1. 連續壁與安全支撐工程",
+          budget: 14500000,
+          plannedStart: "2026-10-01",
+          plannedEnd: "2026-12-15",
+          actualStart: "2026-10-01",
+          actualEnd: "",
+          actualPct: 75,
+          isMajor: true,
+          expanded: false,
+          subItems: []
+        },
+        {
+          name: "2. 基地土方開挖與外運",
+          budget: 11200000,
+          plannedStart: "2026-12-16",
+          plannedEnd: "2027-03-31",
+          actualStart: "",
+          actualEnd: "",
+          actualPct: 0,
+          isMajor: true,
+          expanded: false,
+          subItems: []
+        },
+        { name: "參、品管及職安管理費", budget: 2300000, actualPct: 0, isMajor: false, subItems: [] }
+      ],
+      expenses: [
+        { date: "2026-11-22", category: "1. 連續壁與安全支撐工程", name: "H型鋼", spec: "H350x350", qty: 28, unit: "噸", photo: "" },
+        { date: "2026-11-18", category: "1. 連續壁與安全支撐工程", name: "預拌混凝土", spec: "3500psi 水中混凝土", qty: 85, unit: "m³", photo: "" }
+      ]
+    };
+
+    function createDefaultWorkspace() {
+      return {
+        isPro: false,
+        licenseCode: "",
+        activeProjectId: "proj_default_1",
+        projects: [
+          JSON.parse(JSON.stringify(defaultProject1)),
+          JSON.parse(JSON.stringify(defaultProject2))
+        ]
+      };
+    }
 
     function normalizeWbsList(list) {
       return (list || []).map(w => {
@@ -1576,61 +1739,446 @@
       });
     }
 
-    function loadState() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("civilcost_data_v12") || localStorage.getItem("civilcost_data_v11");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          const merged = {
-            ...JSON.parse(JSON.stringify(defaultState)),
-            ...parsed
-          };
-          merged.wbsBudgets = normalizeWbsList(merged.wbsBudgets);
-          merged.expenses = normalizeExpenses(merged.expenses);
-          return merged;
-        }
-      } catch (err) {
-        console.warn("無法讀取 localStorage，改用記憶體模式:", err);
-      }
-      return JSON.parse(JSON.stringify(defaultState));
-    }
-
-    window.appState = loadState();
-
-    window.applyCloudState = function(cloudData) {
-      const merged = {
-        ...JSON.parse(JSON.stringify(defaultState)),
-        ...cloudData
-      };
+    function normalizeProject(rawProj) {
+      const base = JSON.parse(JSON.stringify(defaultProject1));
+      const merged = { ...base, ...rawProj };
+      merged.id = merged.id || ("proj_" + Date.now());
       merged.wbsBudgets = normalizeWbsList(merged.wbsBudgets);
       merged.expenses = normalizeExpenses(merged.expenses);
-      window.appState = merged;
+      return merged;
+    }
+
+    function normalizeWorkspace(rawWs) {
+      const def = createDefaultWorkspace();
+      if (!rawWs) return def;
+
+      // 向下相容舊版單案場資料
+      if (!Array.isArray(rawWs.projects) && rawWs.projectName) {
+        const migrated = normalizeProject(rawWs);
+        migrated.id = "proj_default_1";
+        return {
+          isPro: Boolean(rawWs.isPro),
+          licenseCode: rawWs.licenseCode || "",
+          activeProjectId: migrated.id,
+          projects: [migrated, JSON.parse(JSON.stringify(defaultProject2))]
+        };
+      }
+
+      const projects = (rawWs.projects && rawWs.projects.length > 0)
+        ? rawWs.projects.map(normalizeProject)
+        : def.projects;
+
+      const isPro = Boolean(rawWs.isPro);
+      const activeId = (!isPro)
+        ? projects[0].id
+        : (projects.some(p => p.id === rawWs.activeProjectId) ? rawWs.activeProjectId : projects[0].id);
+
+      return {
+        isPro,
+        licenseCode: rawWs.licenseCode || "",
+        activeProjectId: activeId,
+        projects
+      };
+    }
+
+    function loadWorkspace() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
+        const saved = localStorage.getItem(WORKSPACE_STORAGE_KEY)
+          || localStorage.getItem("civilcost_data_v13")
+          || localStorage.getItem("civilcost_data_v12");
+        if (saved) {
+          return normalizeWorkspace(JSON.parse(saved));
+        }
+      } catch (err) {
+        console.warn("讀取本地儲存失敗:", err);
+      }
+      return createDefaultWorkspace();
+    }
+
+    window.workspaceState = loadWorkspace();
+
+    function getCurrentProject() {
+      const ws = window.workspaceState;
+      const found = ws.projects.find(p => p.id === ws.activeProjectId);
+      return found || ws.projects[0];
+    }
+
+    window.applyCloudWorkspace = function(cloudData) {
+      window.workspaceState = normalizeWorkspace(cloudData);
+      try {
+        localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(window.workspaceState));
       } catch (e) {}
       renderAll();
     };
 
     function saveState() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
+        localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(window.workspaceState));
       } catch (err) {
-        console.warn("無法寫入 localStorage:", err);
+        console.warn("寫入本地儲存失敗:", err);
       }
       if (typeof window.syncToCloud === "function") {
-        window.syncToCloud(window.appState);
+        window.syncToCloud(window.workspaceState);
       }
     }
 
     function resetDemoData() {
-      if (confirm("確定要將合約金額、工期、主/次要工程項目與帳目重置為預設範例（鋼筋 15.6 噸、水泥 50 包、油漆 20 桶）嗎？")) {
+      if (confirm("確定要將所有案場與範例資料重置為系統預設狀態嗎？（將保留您的 Pro 授權狀態）")) {
+        const keepPro = window.workspaceState.isPro;
+        const keepCode = window.workspaceState.licenseCode;
         selectedPhotoIndices.clear();
-        window.appState = JSON.parse(JSON.stringify(defaultState));
+        window.workspaceState = createDefaultWorkspace();
+        window.workspaceState.isPro = keepPro;
+        window.workspaceState.licenseCode = keepCode;
+        clearExpenseFilters(false);
         saveState();
         renderAll();
       }
     }
 
+    /* ========= 多案場切換、新增與刪除 ========= */
+    function renderProjectSelector() {
+      const select = document.getElementById("projectSelect");
+      const delBtn = document.getElementById("deleteProjectBtn");
+      const ws = window.workspaceState;
+      if (!select) return;
+
+      select.innerHTML = ws.projects.map((p, idx) => {
+        const totalWan = Math.round(((p.baseContract || 0) + (p.extraContract || 0)) / 10000).toLocaleString();
+        const isLocked = !ws.isPro && idx > 0;
+        const label = isLocked
+          ? "🔒 [Pro] " + p.projectName + "（合約 " + totalWan + " 萬）"
+          : p.projectName + "（合約 " + totalWan + " 萬）";
+        return '<option value="' + p.id + '">' + label + '</option>';
+      }).join("");
+
+      select.value = getCurrentProject().id;
+
+      if (delBtn) {
+        if (ws.isPro && ws.projects.length > 1) {
+          delBtn.classList.remove("hidden");
+        } else {
+          delBtn.classList.add("hidden");
+        }
+      }
+    }
+
+    function switchProject() {
+      const select = document.getElementById("projectSelect");
+      const targetId = select.value;
+      const ws = window.workspaceState;
+      const targetIdx = ws.projects.findIndex(p => p.id === targetId);
+
+      if (targetIdx > 0 && !ws.isPro) {
+        select.value = ws.projects[0].id;
+        openUpgradeModal("多工地案場獨立切換與管理");
+        return;
+      }
+
+      ws.activeProjectId = targetId;
+      selectedPhotoIndices.clear();
+      clearNewReceiptPhoto();
+      clearExpenseFilters(false);
+      saveState();
+      renderAll();
+    }
+
+    function openNewProjectModal() {
+      if (!window.workspaceState.isPro) {
+        openUpgradeModal("新增多個獨立工地案場");
+        return;
+      }
+      document.getElementById("newProjNameInput").value = "";
+      document.getElementById("newProjContractInput").value = "";
+      document.getElementById("newProjStartInput").value = getCurrentLocalDate();
+      document.getElementById("newProjEndInput").value = "";
+
+      document.getElementById("newProjectModal").classList.remove("hidden");
+      document.getElementById("newProjectModal").classList.add("flex");
+    }
+
+    function closeNewProjectModal() {
+      document.getElementById("newProjectModal").classList.add("hidden");
+      document.getElementById("newProjectModal").classList.remove("flex");
+    }
+
+    function createNewProject(e) {
+      e.preventDefault();
+      if (!window.workspaceState.isPro) return;
+
+      const name = document.getElementById("newProjNameInput").value.trim();
+      const contract = Number(document.getElementById("newProjContractInput").value) || 0;
+      const start = document.getElementById("newProjStartInput").value;
+      const end = document.getElementById("newProjEndInput").value;
+
+      const newProj = {
+        id: "proj_" + Date.now(),
+        projectName: name,
+        startDate: start,
+        baseEndDate: end,
+        extraDays: 0,
+        baseContract: contract,
+        extraContract: 0,
+        wbsBudgets: [
+          {
+            name: "1. 基礎與結構主體工程",
+            budget: Math.round(contract * 0.85),
+            plannedStart: start,
+            plannedEnd: end,
+            actualStart: "",
+            actualEnd: "",
+            actualPct: 0,
+            isMajor: true,
+            expanded: false,
+            subItems: []
+          },
+          {
+            name: "貳、包商利潤及安全衛生管理費",
+            budget: Math.max(0, contract - Math.round(contract * 0.85)),
+            actualPct: 0,
+            isMajor: false,
+            subItems: []
+          }
+        ],
+        expenses: []
+      };
+
+      window.workspaceState.projects.push(newProj);
+      window.workspaceState.activeProjectId = newProj.id;
+      selectedPhotoIndices.clear();
+      clearExpenseFilters(false);
+      saveState();
+      closeNewProjectModal();
+      renderAll();
+    }
+
+    function deleteCurrentProject() {
+      const ws = window.workspaceState;
+      if (ws.projects.length <= 1) {
+        alert("至少需保留 1 個工地案場！");
+        return;
+      }
+      const cur = getCurrentProject();
+      if (confirm("確定要刪除「" + cur.projectName + "」嗎？刪除後此案場的所有進度與進料紀錄將無法復原。")) {
+        ws.projects = ws.projects.filter(p => p.id !== cur.id);
+        ws.activeProjectId = ws.projects[0].id;
+        selectedPhotoIndices.clear();
+        clearExpenseFilters(false);
+        saveState();
+        renderAll();
+      }
+    }
+
+    /* ========= Pro 正式授權開通與金流引導 ========= */
+    function openUpgradeModal(featureName) {
+      const ws = window.workspaceState;
+      const lockedView = document.getElementById("upgradeLockedView");
+      const activeView = document.getElementById("upgradeActiveView");
+      const errMsg = document.getElementById("licenseErrorMsg");
+      if (errMsg) errMsg.classList.add("hidden");
+
+      if (ws.isPro) {
+        lockedView.classList.add("hidden");
+        activeView.classList.remove("hidden");
+        const codeHint = ws.licenseCode ? "（授權序號：" + ws.licenseCode + "）" : "";
+        document.getElementById("proActivePlanInfo").textContent = "已解鎖無限個工地案場、送貨單拍照存證與 ZIP 批次打包下載 " + codeHint;
+      } else {
+        lockedView.classList.remove("hidden");
+        activeView.classList.add("hidden");
+        document.getElementById("modalFeatureName").textContent = featureName || "進階功能";
+        document.getElementById("licenseCodeInput").value = "";
+      }
+
+      document.getElementById("upgradeModal").classList.remove("hidden");
+      document.getElementById("upgradeModal").classList.add("flex");
+    }
+
+    function closeUpgradeModal() {
+      document.getElementById("upgradeModal").classList.add("hidden");
+      document.getElementById("upgradeModal").classList.remove("flex");
+    }
+
+    function goToCheckoutPage() {
+      if (CHECKOUT_PAYMENT_URL) {
+        window.open(CHECKOUT_PAYMENT_URL, "_blank");
+      } else {
+        alert("💳 線上金流結帳導引：\n\n請前往官方收款頁面完成 NT$ 490/月 訂閱後，系統將自動發送 Pro 授權序號至您的信箱。\n\n（測試開通可先在下方輸入預設授權序號：CIVIL2026PRO）");
+        const inp = document.getElementById("licenseCodeInput");
+        if (inp) inp.focus();
+      }
+    }
+
+    function redeemLicenseCode() {
+      const inp = document.getElementById("licenseCodeInput");
+      const errMsg = document.getElementById("licenseErrorMsg");
+      const rawCode = (inp.value || "").trim().toUpperCase();
+
+      if (!rawCode) {
+        errMsg.textContent = "請先輸入 Pro 授權啟用碼！";
+        errMsg.classList.remove("hidden");
+        return;
+      }
+
+      if (VALID_PRO_CODES.includes(rawCode)) {
+        window.workspaceState.isPro = true;
+        window.workspaceState.licenseCode = rawCode;
+        saveState();
+        closeUpgradeModal();
+        renderAll();
+        alert("🎉 驗證成功！已為您正式開通 CivilCost Pro 專業版權限（已同步綁定至您的帳號）。");
+      } else {
+        errMsg.textContent = "❌ 授權序號無效或已過期，請重新確認大小寫與英數字。";
+        errMsg.classList.remove("hidden");
+      }
+    }
+
+    function updatePlanUI() {
+      const btn = document.getElementById("planStatusBtn");
+      const photoProTag = document.getElementById("photoProTag");
+      const newProjTag = document.getElementById("newProjectProBadge");
+      const isPro = window.workspaceState.isPro;
+
+      if (btn) {
+        if (isPro) {
+          btn.textContent = "PRO 專業版已開通 ★";
+          btn.className = "text-xs font-bold px-3 py-1 rounded-full pro-badge text-white transition shadow";
+        } else {
+          btn.textContent = "免費版 Free · 升級";
+          btn.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 transition";
+        }
+      }
+
+      if (photoProTag) {
+        if (isPro) {
+          photoProTag.textContent = "已開通";
+          photoProTag.className = "bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded";
+        } else {
+          photoProTag.textContent = "PRO";
+          photoProTag.className = "pro-badge text-white text-[10px] px-1.5 py-0.5 rounded";
+        }
+      }
+
+      if (newProjTag) {
+        newProjTag.style.display = isPro ? "none" : "inline-block";
+      }
+    }
+
+    /* ========= 進料明細篩選與材料數量自動加總邏輯 ========= */
+    function getFilteredExpenseEntries() {
+      const proj = getCurrentProject();
+      const kwEl = document.getElementById("filterKeyword");
+      const startEl = document.getElementById("filterStartDate");
+      const endEl = document.getElementById("filterEndDate");
+
+      const kw = kwEl ? kwEl.value.trim().toLowerCase() : "";
+      const startDate = startEl ? startEl.value : "";
+      const endDate = endEl ? endEl.value : "";
+
+      return proj.expenses
+        .map((e, idx) => ({ e, idx }))
+        .filter(({ e }) => {
+          if (kw) {
+            const matchName = (e.name || "").toLowerCase().includes(kw);
+            const matchSpec = (e.spec || "").toLowerCase().includes(kw);
+            const matchCat = (e.category || "").toLowerCase().includes(kw);
+            if (!matchName && !matchSpec && !matchCat) return false;
+          }
+          if (startDate && e.date && e.date < startDate) return false;
+          if (endDate && e.date && e.date > endDate) return false;
+          return true;
+        });
+    }
+
+    function onFilterChange() {
+      renderExpensesAndSummary();
+      syncSelectionUI();
+    }
+
+    function clearExpenseFilters(shouldRender = true) {
+      const kwEl = document.getElementById("filterKeyword");
+      const startEl = document.getElementById("filterStartDate");
+      const endEl = document.getElementById("filterEndDate");
+      if (kwEl) kwEl.value = "";
+      if (startEl) startEl.value = "";
+      if (endEl) endEl.value = "";
+      if (shouldRender) {
+        renderExpensesAndSummary();
+        syncSelectionUI();
+      }
+    }
+
+    function renderExpensesAndSummary() {
+      const filteredEntries = getFilteredExpenseEntries();
+
+      // 1. 計算篩選結果的材料數量加總（依「名稱 + 單位」分組累計）
+      const summaryMap = new Map();
+      filteredEntries.forEach(({ e }) => {
+        const cleanName = (e.name || "未命名材料").trim();
+        const cleanUnit = (e.unit || "式").trim();
+        const key = cleanName + "||" + cleanUnit;
+        const prev = summaryMap.get(key) || { name: cleanName, unit: cleanUnit, totalQty: 0, count: 0 };
+        prev.totalQty += Number(e.qty) || 0;
+        prev.count += 1;
+        summaryMap.set(key, prev);
+      });
+
+      const summaryContainer = document.getElementById("materialSummaryContainer");
+      if (summaryContainer) {
+        if (summaryMap.size === 0) {
+          summaryContainer.innerHTML = '<span class="text-[11px] text-slate-400">無符合篩選條件的進料紀錄</span>';
+        } else {
+          summaryContainer.innerHTML = Array.from(summaryMap.values()).map(item => {
+            const roundedQty = Number(item.totalQty.toFixed(3)).toLocaleString();
+            return '<span class="inline-flex items-center gap-1 bg-amber-100/90 text-amber-950 border border-amber-300 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs">' +
+              '<span>' + item.name + '：</span>' +
+              '<span class="text-amber-800">累計 ' + roundedQty + ' ' + item.unit + '</span>' +
+              '<span class="text-[10px] font-normal text-amber-700">(' + item.count + '筆)</span>' +
+            '</span>';
+          }).join("");
+        }
+      }
+
+      // 2. 渲染明細表格列
+      const tbody = document.getElementById("expenseTableBody");
+      if (!tbody) return;
+
+      if (filteredEntries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-xs text-slate-400">找不到符合條件的現場記帳明細</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filteredEntries.map(({ e, idx }) => {
+        const hasPhoto = Boolean(e.photo);
+        const isChecked = selectedPhotoIndices.has(idx);
+
+        const checkboxHtml = hasPhoto
+          ? '<input type="checkbox" id="rowPhotoCb_' + idx + '" ' + (isChecked ? 'checked' : '') + ' onchange="toggleRowPhotoSelection(' + idx + ', this.checked)" title="勾選此單據以批次下載" class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 cursor-pointer">'
+          : '<span class="text-slate-300 text-xs">-</span>';
+
+        const singleFilename = buildReceiptFilename(e, idx).replace(/'/g, "");
+        const photoCellHtml = hasPhoto
+          ? '<button type="button" onclick="openPhotoViewer(getCurrentProject().expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\', \'' + singleFilename + '\')" class="inline-flex items-center gap-1 text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-1 rounded-lg transition">' +
+              '📷 檢視單據' +
+            '</button>'
+          : '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-[11px] text-slate-400 hover:text-amber-700 underline">+ 補傳</button>';
+
+        return '<tr class="hover:bg-slate-50 ' + (isChecked ? 'bg-emerald-50/40' : '') + '">' +
+          '<td class="py-2.5 px-3 text-center">' + checkboxHtml + '</td>' +
+          '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap text-xs">' + (e.date || "-") + '</td>' +
+          '<td class="py-2.5 px-3 font-semibold text-slate-800">' + e.name + '</td>' +
+          '<td class="py-2.5 px-3 text-slate-600">' + e.spec + '</td>' +
+          '<td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">' + e.qty.toLocaleString() + '</td>' +
+          '<td class="py-2.5 px-3 text-slate-700 font-medium whitespace-nowrap">' + (e.unit || "式") + '</td>' +
+          '<td class="py-2.5 px-3 text-center whitespace-nowrap">' + photoCellHtml + '</td>' +
+          '<td class="py-2.5 px-3 text-center whitespace-nowrap space-x-2">' +
+            '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-xs text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-2 py-1 rounded font-semibold transition">編輯</button>' +
+            '<button type="button" onclick="deleteExpense(' + idx + ')" class="text-xs text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded font-semibold transition">刪除</button>' +
+          '</td>' +
+        '</tr>';
+      }).join("");
+    }
+
+    /* ========= 財務與工期計算 ========= */
     function computeScheduleInfo(startStr, baseEndStr, extraDaysVal) {
       const parseLocal = (str) => {
         const [y, m, d] = (str || "2026-08-02").split("-").map(Number);
@@ -1697,65 +2245,38 @@
 
         if (allCompleted) {
           if (maxDelay > 0) {
-            return {
-              pct: 100,
-              diffDays: maxDelay,
-              statusText: "延誤 " + maxDelay + " 天完成",
-              statusType: "delayed",
-              isDelayed: true
-            };
+            return { pct: 100, diffDays: maxDelay, statusText: "延誤 " + maxDelay + " 天完成", statusType: "delayed", isDelayed: true };
           }
           if (maxEarly > 0) {
-            return {
-              pct: 100,
-              diffDays: -maxEarly,
-              statusText: "提早 " + maxEarly + " 天完成",
-              statusType: "early",
-              isDelayed: false
-            };
+            return { pct: 100, diffDays: -maxEarly, statusText: "提早 " + maxEarly + " 天完成", statusType: "early", isDelayed: false };
           }
-          return {
-            pct: 100,
-            diffDays: 0,
-            statusText: "如期全部完成",
-            statusType: "ontime",
-            isDelayed: false
-          };
+          return { pct: 100, diffDays: 0, statusText: "如期全部完成", statusType: "ontime", isDelayed: false };
         }
 
         if (anyInProgress || w.actualStart || fmtPct(w.actualPct) > 0) {
-          return {
-            pct: fmtPct(w.actualPct),
-            diffDays: 0,
-            statusText: "施工中",
-            statusType: "progress",
-            isDelayed: false
-          };
+          return { pct: fmtPct(w.actualPct), diffDays: 0, statusText: "施工中", statusType: "progress", isDelayed: false };
         }
       }
 
       const ev = evaluateDateSchedule(w.plannedStart, w.plannedEnd, w.actualStart, w.actualEnd, w.actualPct);
-      return {
-        ...ev,
-        pct: fmtPct(w.actualPct)
-      };
+      return { ...ev, pct: fmtPct(w.actualPct) };
     }
 
     function calculateMetrics() {
-      const sState = window.appState;
-      const totalContract = sState.baseContract + sState.extraContract;
+      const proj = getCurrentProject();
+      const totalContract = proj.baseContract + proj.extraContract;
       const categoryCounts = {};
-      sState.wbsBudgets.forEach(w => { categoryCounts[w.name] = 0; });
+      proj.wbsBudgets.forEach(w => { categoryCounts[w.name] = 0; });
 
-      sState.expenses.forEach(e => {
+      proj.expenses.forEach(e => {
         if (categoryCounts[e.category] !== undefined) {
           categoryCounts[e.category] += 1;
-        } else if (sState.wbsBudgets.length > 0) {
-          categoryCounts[sState.wbsBudgets[0].name] += 1;
+        } else if (proj.wbsBudgets.length > 0) {
+          categoryCounts[proj.wbsBudgets[0].name] += 1;
         }
       });
 
-      const majorItems = sState.wbsBudgets.filter(w => w.isMajor);
+      const majorItems = proj.wbsBudgets.filter(w => w.isMajor);
       const totalMajorBudget = majorItems.reduce((sum, w) => sum + w.budget, 0);
 
       let weightedActual = 0;
@@ -1781,7 +2302,7 @@
 
       return {
         totalContract,
-        recordCount: sState.expenses.length,
+        recordCount: proj.expenses.length,
         earnedContractValue,
         remainingContract,
         retention,
@@ -1792,9 +2313,11 @@
     }
 
     function renderAll() {
-      const sState = window.appState;
+      const proj = getCurrentProject();
       const m = calculateMetrics();
-      const s = computeScheduleInfo(sState.startDate, sState.baseEndDate, sState.extraDays);
+      const s = computeScheduleInfo(proj.startDate, proj.baseEndDate, proj.extraDays);
+
+      renderProjectSelector();
 
       const dInput = document.getElementById("expDate");
       if (dInput && !dInput.value) {
@@ -1853,8 +2376,6 @@
         alertBanner.classList.add("hidden");
       }
 
-      const totalWan = Math.round(m.totalContract / 10000).toLocaleString();
-      document.getElementById("mainProjectOption").textContent = sState.projectName + "（合約 " + totalWan + " 萬）";
       renderCategorySelect();
 
       document.getElementById("overallActualText").textContent = m.weightedActual + "%";
@@ -1873,10 +2394,10 @@
       }
 
       document.getElementById("kpiBudget").textContent = "NT$ " + m.totalContract.toLocaleString();
-      const extraSign = sState.extraContract >= 0 ? "+" : "";
-      document.getElementById("kpiExtraNote").textContent = "原始 " + Math.round(sState.baseContract / 10000).toLocaleString() + "萬 ｜ 變更 " + extraSign + Math.round(sState.extraContract / 10000).toLocaleString() + "萬";
+      const extraSign = proj.extraContract >= 0 ? "+" : "";
+      document.getElementById("kpiExtraNote").textContent = "原始 " + Math.round(proj.baseContract / 10000).toLocaleString() + "萬 ｜ 變更 " + extraSign + Math.round(proj.extraContract / 10000).toLocaleString() + "萬";
 
-      const photoCount = sState.expenses.filter(e => e.photo).length;
+      const photoCount = proj.expenses.filter(e => e.photo).length;
       document.getElementById("kpiRecordCount").textContent = m.recordCount.toLocaleString() + " 筆";
       document.getElementById("kpiEarnedNote").textContent = "已附單據照片：" + photoCount + " 筆";
 
@@ -1892,16 +2413,17 @@
       document.getElementById("kpiRetentionNote").textContent = "預估保留款(10%)：NT$ " + m.retention.toLocaleString();
 
       renderWBS(m.categoryCounts);
-      renderExpenses();
+      renderExpensesAndSummary();
       syncSelectionUI();
       renderChart(m.categoryCounts);
       updatePlanUI();
     }
 
     function openScheduleModal() {
-      document.getElementById("inputStartDate").value = window.appState.startDate;
-      document.getElementById("inputBaseEndDate").value = window.appState.baseEndDate;
-      document.getElementById("inputExtraDays").value = window.appState.extraDays;
+      const proj = getCurrentProject();
+      document.getElementById("inputStartDate").value = proj.startDate;
+      document.getElementById("inputBaseEndDate").value = proj.baseEndDate;
+      document.getElementById("inputExtraDays").value = proj.extraDays;
       updateSchedulePreview();
 
       document.getElementById("scheduleModal").classList.remove("hidden");
@@ -1930,9 +2452,10 @@
 
     function saveScheduleSettings(e) {
       e.preventDefault();
-      window.appState.startDate = document.getElementById("inputStartDate").value;
-      window.appState.baseEndDate = document.getElementById("inputBaseEndDate").value;
-      window.appState.extraDays = parseInt(document.getElementById("inputExtraDays").value, 10) || 0;
+      const proj = getCurrentProject();
+      proj.startDate = document.getElementById("inputStartDate").value;
+      proj.baseEndDate = document.getElementById("inputBaseEndDate").value;
+      proj.extraDays = parseInt(document.getElementById("inputExtraDays").value, 10) || 0;
 
       saveState();
       closeScheduleModal();
@@ -1942,9 +2465,10 @@
     function renderCategorySelect() {
       const select = document.getElementById("expCategory");
       if (!select) return;
+      const proj = getCurrentProject();
       const currentVal = select.value;
-      const majorItems = window.appState.wbsBudgets.filter(w => w.isMajor);
-      const nonMajorItems = window.appState.wbsBudgets.filter(w => !w.isMajor);
+      const majorItems = proj.wbsBudgets.filter(w => w.isMajor);
+      const nonMajorItems = proj.wbsBudgets.filter(w => !w.isMajor);
 
       let html = "";
       if (majorItems.length > 0) {
@@ -1959,13 +2483,14 @@
       }
       select.innerHTML = html;
 
-      if (window.appState.wbsBudgets.some(w => w.name === currentVal)) {
+      if (proj.wbsBudgets.some(w => w.name === currentVal)) {
         select.value = currentVal;
       }
     }
 
     function toggleSubItems(globalIdx) {
-      const item = window.appState.wbsBudgets[globalIdx];
+      const proj = getCurrentProject();
+      const item = proj.wbsBudgets[globalIdx];
       if (!item) return;
       item.expanded = !item.expanded;
       saveState();
@@ -1978,11 +2503,12 @@
     }
 
     function renderWBS(categoryCounts) {
+      const proj = getCurrentProject();
       const container = document.getElementById("wbsContainer");
-      const majorWithIdx = window.appState.wbsBudgets
+      const majorWithIdx = proj.wbsBudgets
         .map((w, idx) => ({ item: w, idx }))
         .filter(obj => obj.item.isMajor);
-      const nonMajorItems = window.appState.wbsBudgets.filter(w => !w.isMajor);
+      const nonMajorItems = proj.wbsBudgets.filter(w => !w.isMajor);
 
       if (majorWithIdx.length === 0) {
         container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">尚未設定主要工程項目，請點右上角「+ 新增主/次要項目」新增。</p>';
@@ -2091,11 +2617,12 @@
     }
 
     function openBudgetModal(focusNewInput = false) {
-      document.getElementById("inputProjectName").value = window.appState.projectName;
-      document.getElementById("inputBaseContract").value = window.appState.baseContract;
-      document.getElementById("inputExtraContract").value = window.appState.extraContract;
+      const proj = getCurrentProject();
+      document.getElementById("inputProjectName").value = proj.projectName;
+      document.getElementById("inputBaseContract").value = proj.baseContract;
+      document.getElementById("inputExtraContract").value = proj.extraContract;
 
-      tempWbsList = JSON.parse(JSON.stringify(window.appState.wbsBudgets));
+      tempWbsList = JSON.parse(JSON.stringify(proj.wbsBudgets));
       renderTempWbsRows();
 
       document.getElementById("budgetModal").classList.remove("hidden");
@@ -2248,10 +2775,11 @@
 
     function saveBudgetSettings(e) {
       e.preventDefault();
-      window.appState.projectName = document.getElementById("inputProjectName").value.trim();
-      window.appState.baseContract = Number(document.getElementById("inputBaseContract").value) || 0;
-      window.appState.extraContract = Number(document.getElementById("inputExtraContract").value) || 0;
-      window.appState.wbsBudgets = normalizeWbsList(tempWbsList);
+      const proj = getCurrentProject();
+      proj.projectName = document.getElementById("inputProjectName").value.trim();
+      proj.baseContract = Number(document.getElementById("inputBaseContract").value) || 0;
+      proj.extraContract = Number(document.getElementById("inputExtraContract").value) || 0;
+      proj.wbsBudgets = normalizeWbsList(tempWbsList);
 
       saveState();
       closeBudgetModal();
@@ -2259,8 +2787,9 @@
     }
 
     function openProgressModal() {
+      const proj = getCurrentProject();
       const container = document.getElementById("progressInputsContainer");
-      const majorWithIdx = window.appState.wbsBudgets
+      const majorWithIdx = proj.wbsBudgets
         .map((w, idx) => ({ w, idx }))
         .filter(obj => obj.w.isMajor);
 
@@ -2338,7 +2867,8 @@
     }
 
     function recalcMainRow(idx) {
-      const w = window.appState.wbsBudgets[idx];
+      const proj = getCurrentProject();
+      const w = proj.wbsBudgets[idx];
       if (!w) return;
       const pStart = document.getElementById("mainPlanStart_" + idx).value;
       const pEnd = document.getElementById("mainPlanEnd_" + idx).value;
@@ -2354,7 +2884,8 @@
     }
 
     function onSubPctManualChange(idx) {
-      const w = window.appState.wbsBudgets[idx];
+      const proj = getCurrentProject();
+      const w = proj.wbsBudgets[idx];
       if (!w || !w.subItems || w.subItems.length === 0) return;
 
       let sumA = 0;
@@ -2393,31 +2924,16 @@
       if (badgeContainer) {
         if (allCompleted) {
           if (maxDelay > 0) {
-            badgeContainer.innerHTML = renderScheduleStatusBadge({
-              statusText: "延誤 " + maxDelay + " 天完成",
-              statusType: "delayed"
-            }, false);
+            badgeContainer.innerHTML = renderScheduleStatusBadge({ statusText: "延誤 " + maxDelay + " 天完成", statusType: "delayed" }, false);
           } else if (maxEarly > 0) {
-            badgeContainer.innerHTML = renderScheduleStatusBadge({
-              statusText: "提早 " + maxEarly + " 天完成",
-              statusType: "early"
-            }, false);
+            badgeContainer.innerHTML = renderScheduleStatusBadge({ statusText: "提早 " + maxEarly + " 天完成", statusType: "early" }, false);
           } else {
-            badgeContainer.innerHTML = renderScheduleStatusBadge({
-              statusText: "如期全部完成",
-              statusType: "ontime"
-            }, false);
+            badgeContainer.innerHTML = renderScheduleStatusBadge({ statusText: "如期全部完成", statusType: "ontime" }, false);
           }
         } else if (anyInProgress) {
-          badgeContainer.innerHTML = renderScheduleStatusBadge({
-            statusText: "施工中",
-            statusType: "progress"
-          }, false);
+          badgeContainer.innerHTML = renderScheduleStatusBadge({ statusText: "施工中", statusType: "progress" }, false);
         } else {
-          badgeContainer.innerHTML = renderScheduleStatusBadge({
-            statusText: "尚未開始",
-            statusType: "pending"
-          }, false);
+          badgeContainer.innerHTML = renderScheduleStatusBadge({ statusText: "尚未開始", statusType: "pending" }, false);
         }
       }
     }
@@ -2429,7 +2945,8 @@
 
     function saveProgressSettings(e) {
       e.preventDefault();
-      window.appState.wbsBudgets.forEach((w, idx) => {
+      const proj = getCurrentProject();
+      proj.wbsBudgets.forEach((w, idx) => {
         if (!w.isMajor) return;
         const aEl = document.getElementById("actualInput_" + idx);
         if (!aEl) return;
@@ -2460,51 +2977,19 @@
       renderAll();
     }
 
-    function renderExpenses() {
-      const tbody = document.getElementById("expenseTableBody");
-      tbody.innerHTML = window.appState.expenses.map((e, idx) => {
-        const hasPhoto = Boolean(e.photo);
-        const isChecked = selectedPhotoIndices.has(idx);
-
-        const checkboxHtml = hasPhoto
-          ? '<input type="checkbox" id="rowPhotoCb_' + idx + '" ' + (isChecked ? 'checked' : '') + ' onchange="toggleRowPhotoSelection(' + idx + ', this.checked)" title="勾選此單據以批次下載" class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 cursor-pointer">'
-          : '<span class="text-slate-300 text-xs">-</span>';
-
-        const singleFilename = buildReceiptFilename(e, idx).replace(/'/g, "");
-        const photoCellHtml = hasPhoto
-          ? '<button type="button" onclick="openPhotoViewer(window.appState.expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\', \'' + singleFilename + '\')" class="inline-flex items-center gap-1 text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-1 rounded-lg transition">' +
-              '📷 檢視單據' +
-            '</button>'
-          : '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-[11px] text-slate-400 hover:text-amber-700 underline">+ 補傳</button>';
-
-        return '<tr class="hover:bg-slate-50 ' + (isChecked ? 'bg-emerald-50/40' : '') + '">' +
-          '<td class="py-2.5 px-3 text-center">' + checkboxHtml + '</td>' +
-          '<td class="py-2.5 px-3 text-slate-500 whitespace-nowrap text-xs">' + (e.date || "-") + '</td>' +
-          '<td class="py-2.5 px-3 font-semibold text-slate-800">' + e.name + '</td>' +
-          '<td class="py-2.5 px-3 text-slate-600">' + e.spec + '</td>' +
-          '<td class="py-2.5 px-3 text-right font-bold text-slate-800 whitespace-nowrap">' + e.qty.toLocaleString() + '</td>' +
-          '<td class="py-2.5 px-3 text-slate-700 font-medium whitespace-nowrap">' + (e.unit || "式") + '</td>' +
-          '<td class="py-2.5 px-3 text-center whitespace-nowrap">' + photoCellHtml + '</td>' +
-          '<td class="py-2.5 px-3 text-center whitespace-nowrap space-x-2">' +
-            '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-xs text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-2 py-1 rounded font-semibold transition">編輯</button>' +
-            '<button type="button" onclick="deleteExpense(' + idx + ')" class="text-xs text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded font-semibold transition">刪除</button>' +
-          '</td>' +
-        '</tr>';
-      }).join("");
-    }
-
     function openEditExpenseModal(idx) {
-      const exp = window.appState.expenses[idx];
+      const proj = getCurrentProject();
+      const exp = proj.expenses[idx];
       if (!exp) return;
 
       document.getElementById("editExpIndex").value = idx;
       document.getElementById("editExpDate").value = exp.date || getCurrentLocalDate();
 
       const catSelect = document.getElementById("editExpCategory");
-      catSelect.innerHTML = window.appState.wbsBudgets.map(w =>
+      catSelect.innerHTML = proj.wbsBudgets.map(w =>
         '<option value="' + w.name + '">' + w.name + '</option>'
       ).join("");
-      if (window.appState.wbsBudgets.some(w => w.name === exp.category)) {
+      if (proj.wbsBudgets.some(w => w.name === exp.category)) {
         catSelect.value = exp.category;
       }
 
@@ -2535,10 +3020,11 @@
 
     function saveEditedExpense(e) {
       e.preventDefault();
+      const proj = getCurrentProject();
       const idx = Number(document.getElementById("editExpIndex").value);
-      if (!window.appState.expenses[idx]) return;
+      if (!proj.expenses[idx]) return;
 
-      window.appState.expenses[idx] = {
+      proj.expenses[idx] = {
         date: document.getElementById("editExpDate").value,
         category: document.getElementById("editExpCategory").value,
         name: document.getElementById("editExpName").value.trim(),
@@ -2555,6 +3041,7 @@
 
     function addExpense(e) {
       e.preventDefault();
+      const proj = getCurrentProject();
       const date = document.getElementById("expDate").value || getCurrentLocalDate();
       const category = document.getElementById("expCategory").value;
       const name = document.getElementById("expName").value.trim();
@@ -2566,7 +3053,7 @@
       selectedPhotoIndices.forEach(oldIdx => shifted.add(oldIdx + 1));
       selectedPhotoIndices = shifted;
 
-      window.appState.expenses.unshift({
+      proj.expenses.unshift({
         date,
         category,
         name,
@@ -2587,6 +3074,7 @@
     }
 
     function deleteExpense(idx) {
+      const proj = getCurrentProject();
       if (confirm("確定要刪除這筆現場記帳明細嗎？")) {
         selectedPhotoIndices.delete(idx);
         const shifted = new Set();
@@ -2595,82 +3083,23 @@
         });
         selectedPhotoIndices = shifted;
 
-        window.appState.expenses.splice(idx, 1);
+        proj.expenses.splice(idx, 1);
         saveState();
         renderAll();
       }
     }
 
-    function updatePlanUI() {
-      const btn = document.getElementById("togglePlanBtn");
-      const proOpt = document.getElementById("proProjectOption");
-      const photoProTag = document.getElementById("photoProTag");
-      if (!btn || !proOpt) return;
-      if (isPro) {
-        btn.textContent = "進階付費版 PRO ★";
-        btn.className = "text-xs font-bold px-2.5 py-0.5 rounded-full pro-badge text-white transition shadow";
-        proOpt.textContent = "新竹竹北廠房基礎開挖工程（合約 2,800 萬）";
-        if (photoProTag) {
-          photoProTag.textContent = "已開通";
-          photoProTag.className = "bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded";
-        }
-      } else {
-        btn.textContent = "免費版 Free";
-        btn.className = "text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-600 text-white transition";
-        proOpt.textContent = "🔒 [Pro] 新竹竹北廠房基礎開挖工程（合約 2,800 萬）";
-        document.getElementById("projectSelect").value = "0";
-        if (photoProTag) {
-          photoProTag.textContent = "PRO";
-          photoProTag.className = "pro-badge text-white text-[10px] px-1.5 py-0.5 rounded";
-        }
-      }
-    }
-
-    function togglePlan() {
-      isPro = !isPro;
-      renderAll();
-    }
-
-    function switchProject() {
-      const val = document.getElementById("projectSelect").value;
-      if (val === "1" && !isPro) {
-        document.getElementById("projectSelect").value = "0";
-        handleProAction("切換管理多個工地案場");
-      }
-    }
-
-    function handleProAction(featureName) {
-      if (isPro) {
-        alert("✅ [Pro 權限已開通] 正在開啟「" + featureName + "」模組！");
-      } else {
-        document.getElementById("modalFeatureName").textContent = featureName;
-        document.getElementById("upgradeModal").classList.remove("hidden");
-        document.getElementById("upgradeModal").classList.add("flex");
-      }
-    }
-
-    function closeUpgradeModal() {
-      document.getElementById("upgradeModal").classList.add("hidden");
-      document.getElementById("upgradeModal").classList.remove("flex");
-    }
-
-    function activateProDemo() {
-      isPro = true;
-      closeUpgradeModal();
-      renderAll();
-    }
-
     function exportCSV() {
-      const sState = window.appState;
+      const proj = getCurrentProject();
       const m = calculateMetrics();
-      const s = computeScheduleInfo(sState.startDate, sState.baseEndDate, sState.extraDays);
+      const s = computeScheduleInfo(proj.startDate, proj.baseEndDate, proj.extraDays);
 
       const esc = (str) => '"' + String(str).replace(/"/g, '""') + '"';
 
       let csv = "\uFEFF";
       csv += "日期,歸屬工項,名稱,規格,數量,單位,單據存證\n";
 
-      sState.expenses.forEach(e => {
+      proj.expenses.forEach(e => {
         csv += [
           esc(e.date || "-"),
           esc(e.category || "-"),
@@ -2683,7 +3112,7 @@
       });
 
       csv += "\n【專案合約與工期進度總表】,,,,,,\n";
-      csv += "工程案場名稱," + esc(sState.projectName) + ",,,,,\n";
+      csv += "工程案場名稱," + esc(proj.projectName) + ",,,,,\n";
       csv += "正式開工日期," + esc(s.startDate) + ",,,,,\n";
       csv += "原始預計完工日," + esc(s.baseEndDate) + ",,,,,\n";
       csv += "核定追加工期天數," + s.extraDays + " 天,,,,,\n";
@@ -2700,17 +3129,18 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = sState.projectName + "_進料與進度明細表.csv";
+      a.download = proj.projectName + "_進料與進度明細表.csv";
       a.click();
     }
 
     function renderChart(categoryCounts) {
       if (typeof Chart === "undefined") return;
+      const proj = getCurrentProject();
       const ctx = document.getElementById("costChart").getContext("2d");
       if (chartInstance) chartInstance.destroy();
       const palette = ["#64748b", "#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316", "#6366f1", "#84cc16"];
-      const activeItems = window.appState.wbsBudgets.filter(w => (categoryCounts[w.name] || 0) > 0);
-      const chartItems = activeItems.length > 0 ? activeItems : window.appState.wbsBudgets.slice(0, 5);
+      const activeItems = proj.wbsBudgets.filter(w => (categoryCounts[w.name] || 0) > 0);
+      const chartItems = activeItems.length > 0 ? activeItems : proj.wbsBudgets.slice(0, 5);
 
       chartInstance = new Chart(ctx, {
         type: "doughnut",
