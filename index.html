@@ -45,7 +45,7 @@
           重置範例
         </button>
 
-        <button type="button" id="planStatusBtn" onclick="openUpgradeModal('Pro 專業版授權管理')" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 transition">
+        <button type="button" id="planStatusBtn" onclick="openUpgradeModal('PRO 專業版訂閱管理')" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 transition">
           免費版 Free · 升級
         </button>
       </div>
@@ -54,11 +54,22 @@
 
   <main class="max-w-5xl mx-auto px-4 pt-5 space-y-4">
 
-    <!-- 未登入提醒橫幅 -->
+    <!-- 訂閱已到期警告橫幅（未續訂自動停權時顯示） -->
+    <section id="expiredSubscriptionBanner" class="hidden bg-rose-50 border border-rose-300 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+      <div class="flex items-center gap-2 text-xs text-rose-900">
+        <span class="text-base">⚠️</span>
+        <span>您的 <strong>CivilCost PRO 訂閱已到期</strong>，系統已自動切換為免費版（僅限 1 個案場、進料上限 20 筆）。完成續訂後即可立即恢復全部 PRO 權限！</span>
+      </div>
+      <button type="button" onclick="openUpgradeModal('重新續訂 PRO 專業版')" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition shrink-0">
+        立即前往續訂
+      </button>
+    </section>
+
+    <!-- 未登入提醒橫幅（免費版即開放跨裝置雲端同步） -->
     <section id="guestTipBanner" class="bg-amber-50 border border-amber-300 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 shadow-xs">
       <div class="flex items-center gap-2 text-xs text-amber-900">
         <span class="text-base">☁️</span>
-        <span>目前資料僅暫存於此裝置。<strong>登入帳號後即可自動備份至雲端</strong>，在手機與電腦之間即時同步！</span>
+        <span>免費版即享<strong>跨裝置雲端同步</strong>！登入帳號後，手機與電腦皆可即時同步帳本，訂閱 PRO 也能自動綁定您的帳號。</span>
       </div>
       <button type="button" onclick="openAuthModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-1.5 rounded-lg transition">
         立即登入 / 註冊
@@ -241,9 +252,14 @@
 
     <!-- 現場快速記帳表單（日期、名稱、規格、數量、單位、附送貨單照片） -->
     <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-      <div class="mb-3">
-        <h2 class="font-bold text-sm text-slate-800">現場快速記帳（進料數量與單位登記）</h2>
-        <p class="text-[11px] text-slate-400">只需填寫日期、名稱、規格、數量與單位（如：鋼筋 15.6 噸、水泥 50 包、油漆 20 桶）</p>
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div>
+          <h2 class="font-bold text-sm text-slate-800">現場快速記帳（進料數量與單位登記）</h2>
+          <p class="text-[11px] text-slate-400">只需填寫日期、名稱、規格、數量與單位（如：鋼筋 15.6 噸、水泥 50 包、油漆 20 桶）</p>
+        </div>
+        <span id="expenseQuotaBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold border border-slate-200">
+          免費版額度：0 / 20 筆
+        </span>
       </div>
 
       <!-- 常用單位快速參考清單 -->
@@ -321,8 +337,8 @@
           📷 附加送貨單/簽收單照片 <span id="photoProTag" class="pro-badge text-white text-[10px] px-1.5 py-0.5 rounded">PRO</span>
         </button>
         <div class="flex items-center gap-2">
-          <button type="button" onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium">
-            下載進料明細與進度 CSV（免費）
+          <button type="button" id="exportCsvBtn" onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium">
+            下載進料明細 CSV（免費版限前 10 筆）
           </button>
         </div>
       </div>
@@ -345,7 +361,7 @@
           </div>
 
           <button type="button" onclick="openBatchPhotoModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1">
-            📦 批次選擇下載單據
+            📦 批次選擇下載單據 <span id="batchZipProTag" class="bg-slate-900 text-amber-300 text-[10px] px-1.5 py-0.5 rounded">PRO</span>
           </button>
         </div>
       </div>
@@ -400,7 +416,7 @@
 
   </main>
 
-  <!-- 視窗 H：新增工地案場視窗（Pro 專屬） -->
+  <!-- 視窗 H：新增工地案場視窗（PRO 專屬） -->
   <div id="newProjectModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -799,50 +815,81 @@
     </div>
   </div>
 
-  <!-- 升級 Pro 正式授權開通與金流引導彈窗 -->
+  <!-- Portaly 訂閱制方案與自動續訂管理彈窗（無序號設計） -->
   <div id="upgradeModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between">
-        <span class="pro-badge text-white text-xs font-bold px-2.5 py-1 rounded-full">CIVILCOST PRO 專業版方案</span>
+        <span class="pro-badge text-white text-xs font-bold px-2.5 py-1 rounded-full">CIVILCOST PRO 專業版月費訂閱</span>
         <button type="button" onclick="closeUpgradeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
 
+      <!-- 未訂閱 / 已過期視圖 -->
       <div id="upgradeLockedView" class="space-y-4">
-        <h3 class="text-lg font-bold text-slate-900">解鎖「<span id="modalFeatureName" class="text-amber-600">進階功能</span>」</h3>
+        <h3 class="text-lg font-bold text-slate-900">升級解鎖「<span id="modalFeatureName" class="text-amber-600">進階功能</span>」</h3>
         <p class="text-xs text-slate-600 leading-relaxed">
           專為土木營造老闆與工地主任設計，省下每月 15 小時對帳時間，杜絕材料超叫與漏算追加款：
         </p>
-        <ul class="text-xs text-slate-700 space-y-2 bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
-          <li>✅ <strong>無限個工地案場</strong>獨立建檔與即時切換</li>
-          <li>✅ <strong>工地送貨單拍照上傳＋多張 ZIP 批次下載</strong></li>
-          <li>✅ <strong>雲端跨裝置同步</strong>（手機拍單據、電腦即時看）</li>
-        </ul>
 
-        <div class="space-y-2 pt-1">
-          <button type="button" onclick="goToCheckoutPage()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition flex items-center justify-center gap-1.5">
-            💳 前往線上訂閱開通（NT$ 490 / 月）
-          </button>
-          <p class="text-[11px] text-center text-slate-400">支援信用卡 / LINE Pay / ATM 轉帳，付款後立即取得授權啟用碼</p>
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs space-y-1.5">
+          <div class="flex justify-between items-center font-bold text-slate-800 border-b border-slate-200 pb-1.5">
+            <span>功能權益比較</span>
+            <span class="text-amber-700">免費版 ➔ PRO 訂閱制</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-600">工地案場數量</span>
+            <span>限 1 個 ➔ <strong class="text-emerald-700">無上限</strong></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-600">現場進料記帳筆數</span>
+            <span>上限 20 筆 ➔ <strong class="text-emerald-700">無上限</strong></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-600">送貨單拍照存證 & ZIP 下載</span>
+            <span>未開放 ➔ <strong class="text-emerald-700">完整開放</strong></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-600">次要工程與施工日誌</span>
+            <span>僅總進度 ➔ <strong class="text-emerald-700">完整展開編輯</strong></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-600">CSV 報表匯出</span>
+            <span>限前 10 筆 ➔ <strong class="text-emerald-700">完整匯出全部</strong></span>
+          </div>
         </div>
 
-        <div class="pt-3 border-t border-slate-200 space-y-2">
-          <label class="block text-xs font-bold text-slate-700">🔑 已取得授權序號？請輸入啟用碼開通：</label>
-          <div class="flex gap-2">
-            <input id="licenseCodeInput" type="text" placeholder="輸入序號（如：CIVIL2026PRO）" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-xs uppercase font-mono focus:border-amber-500 focus:outline-none">
-            <button type="button" onclick="redeemLicenseCode()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg transition whitespace-nowrap">
-              驗證啟用
-            </button>
-          </div>
-          <p id="licenseErrorMsg" class="hidden text-[11px] text-rose-600 font-medium"></p>
+        <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 text-xs text-amber-900 space-y-1">
+          <p class="font-bold">📌 自動續訂與帳號綁定說明（免輸入序號）：</p>
+          <p class="leading-relaxed">1. 請先點擊右上角「登入 / 註冊同步」登入您的帳號。</p>
+          <p class="leading-relaxed">2. 前往 Portaly 訂閱頁結帳時，請填寫<strong>與您登入相同的 Email</strong>，系統將依您的會員信箱自動開通權限。</p>
+          <p class="leading-relaxed">3. 採<strong>每月自動扣款續訂</strong>（可隨時於付款通知信中一鍵取消）；若取消或未續扣，當期到期後將自動恢復為免費版。</p>
+        </div>
+
+        <div id="userAccountHintBox" class="text-xs bg-sky-50 text-sky-900 border border-sky-200 rounded-lg px-3 py-2 font-medium">
+          正在偵測您的登入帳號...
+        </div>
+
+        <div class="space-y-2 pt-1">
+          <button type="button" onclick="goToPortalySubscribe()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 rounded-xl text-sm shadow transition flex items-center justify-center gap-1.5">
+            💳 前往 Portaly 開通每月自動續訂（NT$ 490 / 月）
+          </button>
+          <p class="text-[11px] text-center text-slate-400">支援信用卡定期定額自動扣款，Portaly 自動開立電子發票</p>
         </div>
       </div>
 
+      <!-- 已訂閱且在有效期限內視圖 -->
       <div id="upgradeActiveView" class="hidden space-y-4">
         <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-4 text-center space-y-1.5">
           <span class="text-2xl">🎉</span>
-          <h3 class="text-base font-bold text-emerald-900">您目前已是 CivilCost Pro 專業版會員</h3>
-          <p id="proActivePlanInfo" class="text-xs text-emerald-700">已解鎖無限個工地案場、送貨單拍照存證與 ZIP 批次打包下載</p>
+          <h3 class="text-base font-bold text-emerald-900">您目前已是 CivilCost PRO 訂閱會員</h3>
+          <p id="proActiveExpireInfo" class="text-xs text-emerald-800 font-semibold">訂閱狀態：有效中（每月自動續訂）</p>
+          <p class="text-[11px] text-emerald-700">已解鎖無限案場、無限筆進料記帳、送貨單拍照 ZIP 下載與完整 CSV 匯出</p>
         </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600 space-y-1">
+          <p class="font-bold text-slate-800">管理每月自動續訂 / 取消訂閱：</p>
+          <p class="leading-relaxed">如需修改付款信用卡或取消下期自動扣款，請開啟您信箱中的 <strong>Portaly 每月付款通知信</strong>，點擊信件內的「管理／取消訂閱」連結即可隨時辦理；取消後仍可使用 PRO 功能至本期結束。</p>
+        </div>
+
         <button type="button" onclick="closeUpgradeModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-sm transition">
           繼續使用系統
         </button>
@@ -850,7 +897,7 @@
     </div>
   </div>
 
-  <!-- Firebase SDK 與多案場 / Pro 授權即時雲端同步邏輯 -->
+  <!-- Firebase SDK 與多案場 / Portaly 訂閱到期自動檢查同步邏輯 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import {
@@ -886,7 +933,7 @@
     const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
 
-    let currentUser = null;
+    window.currentFirebaseUser = null;
     let unsubscribeSnapshot = null;
     let authMode = "login";
 
@@ -909,7 +956,7 @@
     }
 
     onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
+      window.currentFirebaseUser = user;
       const openBtn = document.getElementById("openAuthBtn");
       const userBar = document.getElementById("userAccountBar");
       const guestBanner = document.getElementById("guestTipBanner");
@@ -934,6 +981,7 @@
           if (!snap.exists()) {
             await setDoc(docRef, {
               ...window.workspaceState,
+              userEmail: user.email || "",
               updatedAt: new Date().toISOString()
             });
           }
@@ -962,12 +1010,14 @@
     });
 
     window.syncToCloud = async function(wsData) {
-      if (!currentUser) return;
+      const user = window.currentFirebaseUser;
+      if (!user) return;
       updateSyncBadge("syncing", "🔄 儲存至雲端...");
       try {
-        const docRef = doc(db, "users", currentUser.uid, "workspace", "main_workspace");
+        const docRef = doc(db, "users", user.uid, "workspace", "main_workspace");
         await setDoc(docRef, {
           ...wsData,
+          userEmail: user.email || "",
           updatedAt: new Date().toISOString()
         });
         updateSyncBadge("synced", "☁️ 雲端即時同步中");
@@ -1079,11 +1129,17 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（含小項目施工日誌紀錄、多案場管理、進料篩選加總、Pro 授權開通） -->
+  <!-- 核心業務邏輯（含免費版額度限制、Portaly 自動續訂到期停權判斷） -->
   <script>
-    const WORKSPACE_STORAGE_KEY = "civilcost_workspace_v15";
-    const CHECKOUT_PAYMENT_URL = "";
-    const VALID_PRO_CODES = ["CIVIL2026PRO", "CIVILPRO888", "VIP888"];
+    const WORKSPACE_STORAGE_KEY = "civilcost_workspace_v16";
+
+    // 👉 建立好 Portaly 每月定額贊助/訂閱頁後，請把網址貼在下方引號中（例如 "https://portaly.cc/你的帳號/support"）
+    const PORTALY_SUBSCRIBE_URL = "";
+
+    // 免費版功能額度上限設定
+    const FREE_MAX_PROJECTS = 1;
+    const FREE_MAX_EXPENSES = 20;
+    const FREE_MAX_CSV_ROWS = 10;
 
     let chartInstance = null;
     let tempWbsList = [];
@@ -1091,6 +1147,28 @@
     let pendingNewReceiptPhoto = "";
     let pendingEditReceiptPhoto = "";
     let selectedPhotoIndices = new Set();
+
+    /* ========= 核心訂閱狀態判斷：無序號自動檢查到期時間 ========= */
+    function isProActive() {
+      const ws = window.workspaceState;
+      if (!ws || !ws.isPro) return false;
+
+      // 若有設定 proExpireAt（ISO 時間字串），必須小於現在時間才算有效；一旦過期未續訂自動停權
+      if (ws.proExpireAt) {
+        const expTime = new Date(ws.proExpireAt).getTime();
+        if (!isNaN(expTime) && Date.now() > expTime) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function isProExpired() {
+      const ws = window.workspaceState;
+      if (!ws || !ws.proExpireAt) return false;
+      const expTime = new Date(ws.proExpireAt).getTime();
+      return !isNaN(expTime) && Date.now() > expTime;
+    }
 
     function getCurrentLocalDate() {
       const now = new Date();
@@ -1146,7 +1224,7 @@
     }
 
     function triggerReceiptUpload(mode) {
-      if (!window.workspaceState.isPro) {
+      if (!isProActive()) {
         openUpgradeModal("工地送貨單 / 簽收單拍照雲端存證");
         return;
       }
@@ -1211,7 +1289,7 @@
       document.getElementById("photoViewerModal").classList.remove("flex");
     }
 
-    /* ========= 批次挑選與 ZIP 打包下載邏輯 ========= */
+    /* ========= 批次挑選與 ZIP 打包下載邏輯（PRO 專屬） ========= */
     function sanitizeFilename(str) {
       return String(str || "").replace(/[\\/:*?"<>|]/g, "_").trim();
     }
@@ -1243,7 +1321,7 @@
       const filteredWithPhotos = getFilteredExpenseEntries().filter(item => Boolean(item.e.photo));
       const headerCb = document.getElementById("selectAllPhotosCheckbox");
       if (headerCb) {
-        headerCb.disabled = filteredWithPhotos.length === 0;
+        headerCb.disabled = filteredWithPhotos.length === 0 || !isProActive();
         const allFilteredSelected = filteredWithPhotos.length > 0 && filteredWithPhotos.every(item => selectedPhotoIndices.has(item.idx));
         const someFilteredSelected = filteredWithPhotos.some(item => selectedPhotoIndices.has(item.idx));
         headerCb.checked = allFilteredSelected;
@@ -1258,7 +1336,7 @@
       const inlineBar = document.getElementById("inlineBatchActionBar");
       const inlineText = document.getElementById("inlineSelectedCountText");
       if (inlineBar && inlineText) {
-        if (selectedCount > 0) {
+        if (selectedCount > 0 && isProActive()) {
           inlineBar.classList.remove("hidden");
           inlineBar.classList.add("flex");
           inlineText.textContent = "已選 " + selectedCount + " 張";
@@ -1275,6 +1353,10 @@
     }
 
     function toggleRowPhotoSelection(idx, isChecked) {
+      if (!isProActive()) {
+        openUpgradeModal("送貨單批次打包下載 (ZIP)");
+        return;
+      }
       if (isChecked) {
         selectedPhotoIndices.add(idx);
       } else {
@@ -1284,6 +1366,10 @@
     }
 
     function toggleSelectAllTablePhotos(isChecked) {
+      if (!isProActive()) {
+        openUpgradeModal("送貨單批次打包下載 (ZIP)");
+        return;
+      }
       getFilteredExpenseEntries().forEach(({ e, idx }) => {
         if (e.photo) {
           if (isChecked) selectedPhotoIndices.add(idx);
@@ -1294,6 +1380,11 @@
     }
 
     function openBatchPhotoModal() {
+      if (!isProActive()) {
+        openUpgradeModal("送貨單批次選擇與 ZIP 打包下載");
+        return;
+      }
+
       const proj = getCurrentProject();
       const photoEntries = proj.expenses
         .map((e, idx) => ({ e, idx }))
@@ -1378,11 +1469,14 @@
     }
 
     async function downloadSelectedPhotosZip(sourceMode) {
+      if (!isProActive()) {
+        openUpgradeModal("送貨單批次打包下載 (ZIP)");
+        return;
+      }
       if (selectedPhotoIndices.size === 0) {
         alert("請至少勾選 1 張單據照片再下載喔！");
         return;
       }
-
       if (typeof JSZip === "undefined") {
         alert("打包元件載入中，請稍候 2 秒再試一次。");
         return;
@@ -1696,7 +1790,8 @@
     function createDefaultWorkspace() {
       return {
         isPro: false,
-        licenseCode: "",
+        proExpireAt: "",
+        subscriptionStatus: "free",
         activeProjectId: "proj_default_1",
         projects: [
           JSON.parse(JSON.stringify(defaultProject1)),
@@ -1784,7 +1879,8 @@
         migrated.id = "proj_default_1";
         return {
           isPro: Boolean(rawWs.isPro),
-          licenseCode: rawWs.licenseCode || "",
+          proExpireAt: rawWs.proExpireAt || "",
+          subscriptionStatus: rawWs.subscriptionStatus || (rawWs.isPro ? "active" : "free"),
           activeProjectId: migrated.id,
           projects: [migrated, JSON.parse(JSON.stringify(defaultProject2))]
         };
@@ -1794,14 +1890,23 @@
         ? rawWs.projects.map(normalizeProject)
         : def.projects;
 
-      const isPro = Boolean(rawWs.isPro);
-      const activeId = (!isPro)
+      // 檢查是否有效（包含到期日判斷）
+      let proValid = Boolean(rawWs.isPro);
+      if (proValid && rawWs.proExpireAt) {
+        const expMs = new Date(rawWs.proExpireAt).getTime();
+        if (!isNaN(expMs) && Date.now() > expMs) {
+          proValid = false;
+        }
+      }
+
+      const activeId = (!proValid)
         ? projects[0].id
         : (projects.some(p => p.id === rawWs.activeProjectId) ? rawWs.activeProjectId : projects[0].id);
 
       return {
-        isPro,
-        licenseCode: rawWs.licenseCode || "",
+        isPro: Boolean(rawWs.isPro),
+        proExpireAt: rawWs.proExpireAt || "",
+        subscriptionStatus: rawWs.subscriptionStatus || (proValid ? "active" : "free"),
         activeProjectId: activeId,
         projects
       };
@@ -1810,8 +1915,8 @@
     function loadWorkspace() {
       try {
         const saved = localStorage.getItem(WORKSPACE_STORAGE_KEY)
-          || localStorage.getItem("civilcost_workspace_v14")
-          || localStorage.getItem("civilcost_data_v13");
+          || localStorage.getItem("civilcost_workspace_v15")
+          || localStorage.getItem("civilcost_workspace_v14");
         if (saved) {
           return normalizeWorkspace(JSON.parse(saved));
         }
@@ -1825,6 +1930,9 @@
 
     function getCurrentProject() {
       const ws = window.workspaceState;
+      if (!isProActive()) {
+        return ws.projects[0];
+      }
       const found = ws.projects.find(p => p.id === ws.activeProjectId);
       return found || ws.projects[0];
     }
@@ -1849,13 +1957,15 @@
     }
 
     function resetDemoData() {
-      if (confirm("確定要將所有案場與範例資料重置為系統預設狀態嗎？（將保留您的 Pro 授權狀態）")) {
+      if (confirm("確定要將所有案場與範例資料重置為系統預設狀態嗎？（將保留您的 PRO 訂閱狀態）")) {
         const keepPro = window.workspaceState.isPro;
-        const keepCode = window.workspaceState.licenseCode;
+        const keepExpire = window.workspaceState.proExpireAt;
+        const keepStatus = window.workspaceState.subscriptionStatus;
         selectedPhotoIndices.clear();
         window.workspaceState = createDefaultWorkspace();
         window.workspaceState.isPro = keepPro;
-        window.workspaceState.licenseCode = keepCode;
+        window.workspaceState.proExpireAt = keepExpire;
+        window.workspaceState.subscriptionStatus = keepStatus;
         clearExpenseFilters(false);
         saveState();
         renderAll();
@@ -1867,13 +1977,14 @@
       const select = document.getElementById("projectSelect");
       const delBtn = document.getElementById("deleteProjectBtn");
       const ws = window.workspaceState;
+      const proOk = isProActive();
       if (!select) return;
 
       select.innerHTML = ws.projects.map((p, idx) => {
         const totalWan = Math.round(((p.baseContract || 0) + (p.extraContract || 0)) / 10000).toLocaleString();
-        const isLocked = !ws.isPro && idx > 0;
+        const isLocked = !proOk && idx > 0;
         const label = isLocked
-          ? "🔒 [Pro] " + p.projectName + "（合約 " + totalWan + " 萬）"
+          ? "🔒 [PRO] " + p.projectName + "（合約 " + totalWan + " 萬）"
           : p.projectName + "（合約 " + totalWan + " 萬）";
         return '<option value="' + p.id + '">' + label + '</option>';
       }).join("");
@@ -1881,7 +1992,7 @@
       select.value = getCurrentProject().id;
 
       if (delBtn) {
-        if (ws.isPro && ws.projects.length > 1) {
+        if (proOk && ws.projects.length > 1) {
           delBtn.classList.remove("hidden");
         } else {
           delBtn.classList.add("hidden");
@@ -1895,9 +2006,9 @@
       const ws = window.workspaceState;
       const targetIdx = ws.projects.findIndex(p => p.id === targetId);
 
-      if (targetIdx > 0 && !ws.isPro) {
+      if (targetIdx > 0 && !isProActive()) {
         select.value = ws.projects[0].id;
-        openUpgradeModal("多工地案場獨立切換與管理");
+        openUpgradeModal("多工地案場獨立切換與管理（免費版限 1 案場）");
         return;
       }
 
@@ -1910,8 +2021,8 @@
     }
 
     function openNewProjectModal() {
-      if (!window.workspaceState.isPro) {
-        openUpgradeModal("新增多個獨立工地案場");
+      if (!isProActive()) {
+        openUpgradeModal("新增多個獨立工地案場（免費版限 1 案場）");
         return;
       }
       document.getElementById("newProjNameInput").value = "";
@@ -1930,7 +2041,7 @@
 
     function createNewProject(e) {
       e.preventDefault();
-      if (!window.workspaceState.isPro) return;
+      if (!isProActive()) return;
 
       const name = document.getElementById("newProjNameInput").value.trim();
       const contract = Number(document.getElementById("newProjContractInput").value) || 0;
@@ -1995,24 +2106,42 @@
       }
     }
 
-    /* ========= Pro 正式授權開通與金流引導 ========= */
+    /* ========= Portaly 訂閱制導流與自動到期狀態 UI ========= */
+    function formatExpireDateTW(isoStr) {
+      if (!isoStr) return "自動續訂有效中";
+      const dt = new Date(isoStr);
+      if (isNaN(dt.getTime())) return "自動續訂有效中";
+      return dt.getFullYear() + "-" +
+        String(dt.getMonth() + 1).padStart(2, "0") + "-" +
+        String(dt.getDate()).padStart(2, "0");
+    }
+
     function openUpgradeModal(featureName) {
       const ws = window.workspaceState;
       const lockedView = document.getElementById("upgradeLockedView");
       const activeView = document.getElementById("upgradeActiveView");
-      const errMsg = document.getElementById("licenseErrorMsg");
-      if (errMsg) errMsg.classList.add("hidden");
+      const userHintBox = document.getElementById("userAccountHintBox");
 
-      if (ws.isPro) {
+      if (isProActive()) {
         lockedView.classList.add("hidden");
         activeView.classList.remove("hidden");
-        const codeHint = ws.licenseCode ? "（授權序號：" + ws.licenseCode + "）" : "";
-        document.getElementById("proActivePlanInfo").textContent = "已解鎖無限個工地案場、送貨單拍照存證與 ZIP 批次打包下載 " + codeHint;
+        const expText = ws.proExpireAt
+          ? "訂閱有效期至：" + formatExpireDateTW(ws.proExpireAt) + "（每月自動扣款續訂）"
+          : "訂閱狀態：PRO 專業版有效中（每月自動扣款續訂）";
+        document.getElementById("proActiveExpireInfo").textContent = expText;
       } else {
         lockedView.classList.remove("hidden");
         activeView.classList.add("hidden");
         document.getElementById("modalFeatureName").textContent = featureName || "進階功能";
-        document.getElementById("licenseCodeInput").value = "";
+
+        const fbUser = window.currentFirebaseUser;
+        if (fbUser && fbUser.email) {
+          userHintBox.className = "text-xs bg-emerald-50 text-emerald-900 border border-emerald-300 rounded-lg px-3 py-2 font-medium";
+          userHintBox.innerHTML = "✅ 您目前已登入帳號：<strong>" + fbUser.email + "</strong><br>前往 Portaly 訂閱時請填寫此信箱，系統將自動為此帳號開通 PRO！";
+        } else {
+          userHintBox.className = "text-xs bg-rose-50 text-rose-900 border border-rose-300 rounded-lg px-3 py-2 font-medium";
+          userHintBox.innerHTML = "⚠️ 您目前尚未登入帳號！建議先 <button type='button' onclick='closeUpgradeModal(); openAuthModal();' class='underline font-bold'>點此登入 / 註冊</button>，再前往 Portaly 訂閱以自動綁定權限。";
+        }
       }
 
       document.getElementById("upgradeModal").classList.remove("hidden");
@@ -2024,50 +2153,43 @@
       document.getElementById("upgradeModal").classList.remove("flex");
     }
 
-    function goToCheckoutPage() {
-      if (CHECKOUT_PAYMENT_URL) {
-        window.open(CHECKOUT_PAYMENT_URL, "_blank");
+    function goToPortalySubscribe() {
+      if (PORTALY_SUBSCRIBE_URL) {
+        window.open(PORTALY_SUBSCRIBE_URL, "_blank");
       } else {
-        alert("💳 線上金流結帳導引：\n\n請前往官方收款頁面完成 NT$ 490/月 訂閱後，系統將自動發送 Pro 授權序號至您的信箱。\n\n（測試開通可先在下方輸入預設授權序號：CIVIL2026PRO）");
-        const inp = document.getElementById("licenseCodeInput");
-        if (inp) inp.focus();
-      }
-    }
-
-    function redeemLicenseCode() {
-      const inp = document.getElementById("licenseCodeInput");
-      const errMsg = document.getElementById("licenseErrorMsg");
-      const rawCode = (inp.value || "").trim().toUpperCase();
-
-      if (!rawCode) {
-        errMsg.textContent = "請先輸入 Pro 授權啟用碼！";
-        errMsg.classList.remove("hidden");
-        return;
-      }
-
-      if (VALID_PRO_CODES.includes(rawCode)) {
-        window.workspaceState.isPro = true;
-        window.workspaceState.licenseCode = rawCode;
-        saveState();
-        closeUpgradeModal();
-        renderAll();
-        alert("🎉 驗證成功！已為您正式開通 CivilCost Pro 專業版權限（已同步綁定至您的帳號）。");
-      } else {
-        errMsg.textContent = "❌ 授權序號無效或已過期，請重新確認大小寫與英數字。";
-        errMsg.classList.remove("hidden");
+        alert("🔗 尚未填入 Portaly 訂閱頁網址！\n\n請至 Portaly 後台「變現工具 → 贊助設定」開啟「每月定額（自動扣款）」，取得專屬網址後貼入程式碼中的 PORTALY_SUBSCRIBE_URL 即可正式啟用。");
       }
     }
 
     function updatePlanUI() {
       const btn = document.getElementById("planStatusBtn");
       const photoProTag = document.getElementById("photoProTag");
+      const batchZipProTag = document.getElementById("batchZipProTag");
       const newProjTag = document.getElementById("newProjectProBadge");
-      const isPro = window.workspaceState.isPro;
+      const expiredBanner = document.getElementById("expiredSubscriptionBanner");
+      const quotaBadge = document.getElementById("expenseQuotaBadge");
+      const exportCsvBtn = document.getElementById("exportCsvBtn");
+
+      const proOk = isProActive();
+      const expired = isProExpired();
+      const proj = getCurrentProject();
+      const expCount = proj ? proj.expenses.length : 0;
+
+      if (expiredBanner) {
+        if (!proOk && expired) {
+          expiredBanner.classList.remove("hidden");
+        } else {
+          expiredBanner.classList.add("hidden");
+        }
+      }
 
       if (btn) {
-        if (isPro) {
-          btn.textContent = "PRO 專業版已開通 ★";
+        if (proOk) {
+          btn.textContent = "PRO 專業版訂閱中 ★";
           btn.className = "text-xs font-bold px-3 py-1 rounded-full pro-badge text-white transition shadow";
+        } else if (expired) {
+          btn.textContent = "訂閱已到期 · 重新續訂";
+          btn.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white transition shadow";
         } else {
           btn.textContent = "免費版 Free · 升級";
           btn.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 transition";
@@ -2075,7 +2197,7 @@
       }
 
       if (photoProTag) {
-        if (isPro) {
+        if (proOk) {
           photoProTag.textContent = "已開通";
           photoProTag.className = "bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded";
         } else {
@@ -2084,8 +2206,31 @@
         }
       }
 
+      if (batchZipProTag) {
+        batchZipProTag.style.display = proOk ? "none" : "inline-block";
+      }
+
       if (newProjTag) {
-        newProjTag.style.display = isPro ? "none" : "inline-block";
+        newProjTag.style.display = proOk ? "none" : "inline-block";
+      }
+
+      if (quotaBadge) {
+        if (proOk) {
+          quotaBadge.textContent = "PRO 專業版：不限筆數（目前 " + expCount + " 筆）";
+          quotaBadge.className = "text-[11px] px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200";
+        } else {
+          const isNearFull = expCount >= FREE_MAX_EXPENSES;
+          quotaBadge.textContent = "免費版額度：" + expCount + " / " + FREE_MAX_EXPENSES + " 筆";
+          quotaBadge.className = isNearFull
+            ? "text-[11px] px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 font-bold border border-rose-300"
+            : "text-[11px] px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold border border-slate-200";
+        }
+      }
+
+      if (exportCsvBtn) {
+        exportCsvBtn.textContent = proOk
+          ? "下載完整進料與施工日誌 CSV"
+          : "下載進料明細 CSV（免費版限前 " + FREE_MAX_CSV_ROWS + " 筆）";
       }
     }
 
@@ -2134,6 +2279,7 @@
 
     function renderExpensesAndSummary() {
       const filteredEntries = getFilteredExpenseEntries();
+      const proOk = isProActive();
 
       const summaryMap = new Map();
       filteredEntries.forEach(({ e }) => {
@@ -2172,9 +2318,9 @@
 
       tbody.innerHTML = filteredEntries.map(({ e, idx }) => {
         const hasPhoto = Boolean(e.photo);
-        const isChecked = selectedPhotoIndices.has(idx);
+        const isChecked = selectedPhotoIndices.has(idx) && proOk;
 
-        const checkboxHtml = hasPhoto
+        const checkboxHtml = (hasPhoto && proOk)
           ? '<input type="checkbox" id="rowPhotoCb_' + idx + '" ' + (isChecked ? 'checked' : '') + ' onchange="toggleRowPhotoSelection(' + idx + ', this.checked)" title="勾選此單據以批次下載" class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 cursor-pointer">'
           : '<span class="text-slate-300 text-xs">-</span>';
 
@@ -2183,7 +2329,7 @@
           ? '<button type="button" onclick="openPhotoViewer(getCurrentProject().expenses[' + idx + '].photo, \'' + (e.date + ' ' + e.name).replace(/'/g, "") + ' 送貨單\', \'' + singleFilename + '\')" class="inline-flex items-center gap-1 text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-1 rounded-lg transition">' +
               '📷 檢視單據' +
             '</button>'
-          : '<button type="button" onclick="openEditExpenseModal(' + idx + ')" class="text-[11px] text-slate-400 hover:text-amber-700 underline">+ 補傳</button>';
+          : '<button type="button" onclick="' + (proOk ? 'openEditExpenseModal(' + idx + ')' : 'openUpgradeModal(\'工地送貨單拍照存證\')') + '" class="text-[11px] text-slate-400 hover:text-amber-700 underline">+ 補傳</button>';
 
         return '<tr class="hover:bg-slate-50 ' + (isChecked ? 'bg-emerald-50/40' : '') + '">' +
           '<td class="py-2.5 px-3 text-center">' + checkboxHtml + '</td>' +
@@ -2473,6 +2619,10 @@
     }
 
     function toggleSubItems(globalIdx) {
+      if (!isProActive()) {
+        openUpgradeModal("展開次要工程子項目與施工工作狀況日誌");
+        return;
+      }
       const proj = getCurrentProject();
       const item = proj.wbsBudgets[globalIdx];
       if (!item) return;
@@ -2488,6 +2638,7 @@
 
     function renderWBS() {
       const proj = getCurrentProject();
+      const proOk = isProActive();
       const container = document.getElementById("wbsContainer");
       const majorWithIdx = proj.wbsBudgets
         .map((w, idx) => ({ item: w, idx }))
@@ -2512,13 +2663,13 @@
           }
 
           const toggleBtnHtml = subs.length > 0
-            ? '<button type="button" onclick="toggleSubItems(' + idx + ')" class="text-[11px] bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold px-2 py-0.5 rounded transition">' +
-                (item.expanded ? '▾ 收合次要項目 (' + subs.length + ')' : '▸ 展開次要項目 (' + subs.length + ')') +
+            ? '<button type="button" onclick="toggleSubItems(' + idx + ')" class="text-[11px] bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold px-2 py-0.5 rounded transition flex items-center gap-1">' +
+                (!proOk ? '🔒 展開次要項目與施工日誌 (' + subs.length + ') <span class="pro-badge text-white text-[9px] px-1 rounded">PRO</span>' : (item.expanded ? '▾ 收合次要項目 (' + subs.length + ')' : '▸ 展開次要項目 (' + subs.length + ')')) +
               '</button>'
             : '<button type="button" onclick="openBudgetModal()" class="text-[11px] text-slate-400 hover:text-sky-700 px-1.5 py-0.5 rounded transition">+ 次要項目</button>';
 
           let subTableHtml = "";
-          if (subs.length > 0 && item.expanded) {
+          if (proOk && subs.length > 0 && item.expanded) {
             subTableHtml =
               '<div class="mt-2.5 pt-2.5 border-t border-slate-200/80 space-y-2">' +
                 subs.map(sub => {
@@ -2703,6 +2854,10 @@
     }
 
     function addTempSubItem(parentIdx) {
+      if (!isProActive()) {
+        openUpgradeModal("新增次要工程子項目與施工日誌");
+        return;
+      }
       const inp = document.getElementById("newSubInput_" + parentIdx);
       const val = inp ? inp.value.trim() : "";
       if (!val) {
@@ -2802,6 +2957,7 @@
 
     function renderProgressModalBody() {
       const container = document.getElementById("progressInputsContainer");
+      const proOk = isProActive();
       const majorWithIdx = tempProgressWbsList
         .map((w, idx) => ({ w, idx }))
         .filter(obj => obj.w.isMajor);
@@ -2813,52 +2969,62 @@
 
       container.innerHTML = majorWithIdx.map(({ w, idx }) => {
         const subs = w.subItems || [];
-        const subHtml = subs.map((sub, sIdx) => {
-          const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
-          const logs = Array.isArray(sub.workLogs) ? sub.workLogs : [];
+        let subHtml = "";
 
-          const logRowsHtml = logs.map((lg, lIdx) =>
-            '<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">' +
-              '<input type="date" value="' + escapeHtmlAttr(lg.date || "") + '" onchange="updateSubWorkLogField(' + idx + ', ' + sIdx + ', ' + lIdx + ', \'date\', this.value)" class="border border-slate-300 rounded px-2 py-1 text-[11px] bg-white sm:w-36 shrink-0">' +
-              '<input type="text" value="' + escapeHtmlAttr(lg.content || "") + '" oninput="updateSubWorkLogField(' + idx + ', ' + sIdx + ', ' + lIdx + ', \'content\', this.value)" placeholder="輸入該日／期間施工工作內容（如：B區基坑開挖、抽水機架設）" class="flex-1 border border-slate-300 rounded px-2.5 py-1 text-[11px] bg-white focus:border-amber-500 focus:outline-none">' +
-              '<button type="button" onclick="removeSubWorkLog(' + idx + ', ' + sIdx + ', ' + lIdx + ')" title="刪除此筆施工紀錄" class="text-[11px] text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded font-bold self-end sm:self-center">✕</button>' +
-            '</div>'
-          ).join("");
+        if (subs.length > 0 && !proOk) {
+          subHtml =
+            '<div class="ml-3 p-2.5 bg-amber-50/80 border border-amber-200 rounded-lg flex items-center justify-between gap-2 text-xs">' +
+              '<span class="text-amber-900">🔒 此工項包含 <strong>' + subs.length + '</strong> 個次要小項目與期間施工日誌（PRO 專屬功能）</span>' +
+              '<button type="button" onclick="closeProgressModal(); openUpgradeModal(\'次要工程細部進度與施工工作狀況日誌\')" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-2.5 py-1 rounded-md text-[11px] shrink-0">升級解鎖</button>' +
+            '</div>';
+        } else {
+          subHtml = subs.map((sub, sIdx) => {
+            const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
+            const logs = Array.isArray(sub.workLogs) ? sub.workLogs : [];
 
-          return '<div class="bg-white p-3 rounded-lg border border-slate-200 ml-3 space-y-2.5">' +
-            '<div class="flex flex-wrap items-center justify-between gap-2">' +
-              '<span class="text-xs font-bold text-slate-800">↳ ' + sub.name + '</span>' +
-              '<div class="flex items-center gap-2 text-[11px] flex-wrap">' +
-                '<label class="text-sky-700 font-bold">完成度% ' +
-                  '<input type="number" id="subActPct_' + idx + '_' + sIdx + '" value="' + ev.pct + '" min="0" max="100" step="0.01" oninput="onSubPctManualChange(' + idx + ', ' + sIdx + ', this.value)" class="w-16 border border-sky-400 rounded px-1.5 py-0.5 text-center">' +
-                '</label>' +
-                '<span id="subStatusBadge_' + idx + '_' + sIdx + '">' + renderScheduleStatusBadge(ev, true) + '</span>' +
+            const logRowsHtml = logs.map((lg, lIdx) =>
+              '<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">' +
+                '<input type="date" value="' + escapeHtmlAttr(lg.date || "") + '" onchange="updateSubWorkLogField(' + idx + ', ' + sIdx + ', ' + lIdx + ', \'date\', this.value)" class="border border-slate-300 rounded px-2 py-1 text-[11px] bg-white sm:w-36 shrink-0">' +
+                '<input type="text" value="' + escapeHtmlAttr(lg.content || "") + '" oninput="updateSubWorkLogField(' + idx + ', ' + sIdx + ', ' + lIdx + ', \'content\', this.value)" placeholder="輸入該日／期間施工工作內容（如：B區基坑開挖、抽水機架設）" class="flex-1 border border-slate-300 rounded px-2.5 py-1 text-[11px] bg-white focus:border-amber-500 focus:outline-none">' +
+                '<button type="button" onclick="removeSubWorkLog(' + idx + ', ' + sIdx + ', ' + lIdx + ')" title="刪除此筆施工紀錄" class="text-[11px] text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded font-bold self-end sm:self-center">✕</button>' +
+              '</div>'
+            ).join("");
+
+            return '<div class="bg-white p-3 rounded-lg border border-slate-200 ml-3 space-y-2.5">' +
+              '<div class="flex flex-wrap items-center justify-between gap-2">' +
+                '<span class="text-xs font-bold text-slate-800">↳ ' + sub.name + '</span>' +
+                '<div class="flex items-center gap-2 text-[11px] flex-wrap">' +
+                  '<label class="text-sky-700 font-bold">完成度% ' +
+                    '<input type="number" id="subActPct_' + idx + '_' + sIdx + '" value="' + ev.pct + '" min="0" max="100" step="0.01" oninput="onSubPctManualChange(' + idx + ', ' + sIdx + ', this.value)" class="w-16 border border-sky-400 rounded px-1.5 py-0.5 text-center">' +
+                  '</label>' +
+                  '<span id="subStatusBadge_' + idx + '_' + sIdx + '">' + renderScheduleStatusBadge(ev, true) + '</span>' +
+                '</div>' +
               '</div>' +
-            '</div>' +
 
-            '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
-              '<div><span class="text-slate-400 block">計劃起</span><input type="date" id="subPlanStart_' + idx + '_' + sIdx + '" value="' + (sub.plannedStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
-              '<div><span class="text-slate-400 block">計劃迄</span><input type="date" id="subPlanEnd_' + idx + '_' + sIdx + '" value="' + (sub.plannedEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
-              '<div><span class="text-sky-600 block">實際起</span><input type="date" id="subActStart_' + idx + '_' + sIdx + '" value="' + (sub.actualStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
-              '<div><span class="text-sky-600 block">實際迄</span><input type="date" id="subActEnd_' + idx + '_' + sIdx + '" value="' + (sub.actualEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
-            '</div>' +
+              '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
+                '<div><span class="text-slate-400 block">計劃起</span><input type="date" id="subPlanStart_' + idx + '_' + sIdx + '" value="' + (sub.plannedStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-slate-400 block">計劃迄</span><input type="date" id="subPlanEnd_' + idx + '_' + sIdx + '" value="' + (sub.plannedEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-sky-600 block">實際起</span><input type="date" id="subActStart_' + idx + '_' + sIdx + '" value="' + (sub.actualStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
+                '<div><span class="text-sky-600 block">實際迄</span><input type="date" id="subActEnd_' + idx + '_' + sIdx + '" value="' + (sub.actualEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
+              '</div>' +
 
-            '<div class="pt-2 border-t border-dashed border-slate-200 space-y-1.5">' +
-              '<div class="flex items-center justify-between">' +
-                '<span class="text-[11px] font-bold text-amber-800">📝 期間施工工作狀況紀錄（日期 ／ 工作內容）</span>' +
-                '<button type="button" onclick="addSubWorkLog(' + idx + ', ' + sIdx + ')" class="text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold px-2.5 py-0.5 rounded-md transition">' +
-                  '+ 新增工作紀錄' +
-                '</button>' +
+              '<div class="pt-2 border-t border-dashed border-slate-200 space-y-1.5">' +
+                '<div class="flex items-center justify-between">' +
+                  '<span class="text-[11px] font-bold text-amber-800">📝 期間施工工作狀況紀錄（日期 ／ 工作內容）</span>' +
+                  '<button type="button" onclick="addSubWorkLog(' + idx + ', ' + sIdx + ')" class="text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold px-2.5 py-0.5 rounded-md transition">' +
+                    '+ 新增工作紀錄' +
+                  '</button>' +
+                '</div>' +
+                '<div class="space-y-1.5">' +
+                  (logRowsHtml || '<p class="text-[11px] text-slate-400 py-0.5">尚無工作紀錄，可點右上角「+ 新增工作紀錄」填寫施工日期與內容</p>') +
+                '</div>' +
               '</div>' +
-              '<div class="space-y-1.5">' +
-                (logRowsHtml || '<p class="text-[11px] text-slate-400 py-0.5">尚無工作紀錄，可點右上角「+ 新增工作紀錄」填寫施工日期與內容</p>') +
-              '</div>' +
-            '</div>' +
-          '</div>';
-        }).join("");
+            '</div>';
+          }).join("");
+        }
 
         const mainSummary = getMainItemScheduleSummary(w);
-        const autoHintTag = subs.length > 0
+        const autoHintTag = (subs.length > 0 && proOk)
           ? '<span class="text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-medium">✨ 依子項目自動計算平均</span>'
           : '';
 
@@ -3128,6 +3294,13 @@
     function addExpense(e) {
       e.preventDefault();
       const proj = getCurrentProject();
+
+      // 免費版限制：單一案場最多 20 筆進料記帳
+      if (!isProActive() && proj.expenses.length >= FREE_MAX_EXPENSES) {
+        openUpgradeModal("無限筆現場進料記帳（免費版上限 " + FREE_MAX_EXPENSES + " 筆）");
+        return;
+      }
+
       const date = document.getElementById("expDate").value || getCurrentLocalDate();
       const name = document.getElementById("expName").value.trim();
       const spec = document.getElementById("expSpec").value.trim();
@@ -3144,7 +3317,7 @@
         spec,
         qty,
         unit,
-        photo: pendingNewReceiptPhoto || ""
+        photo: isProActive() ? (pendingNewReceiptPhoto || "") : ""
       });
       saveState();
 
@@ -3177,13 +3350,20 @@
       const proj = getCurrentProject();
       const m = calculateMetrics();
       const s = computeScheduleInfo(proj.startDate, proj.baseEndDate, proj.extraDays);
+      const proOk = isProActive();
 
       const esc = (str) => '"' + String(str).replace(/"/g, '""') + '"';
 
+      // 免費版放寬為匯出最新前 10 筆
+      const rowsToExport = proOk ? proj.expenses : proj.expenses.slice(0, FREE_MAX_CSV_ROWS);
+
       let csv = "\uFEFF";
+      if (!proOk && proj.expenses.length > FREE_MAX_CSV_ROWS) {
+        csv += "【免費版體驗匯出：僅顯示最新前 " + FREE_MAX_CSV_ROWS + " 筆，共 " + proj.expenses.length + " 筆。升級 PRO 可匯出全部資料與施工日誌】,,,,,\n";
+      }
       csv += "日期,名稱,規格,數量,單位,單據存證\n";
 
-      proj.expenses.forEach(e => {
+      rowsToExport.forEach(e => {
         csv += [
           esc(e.date || "-"),
           esc(e.name),
@@ -3194,15 +3374,17 @@
         ].join(",") + "\n";
       });
 
-      csv += "\n【次要工程期間施工工作狀況紀錄】,,,,,\n";
-      csv += "主要工程,次要小項目,施工日期,工作內容紀錄,,\n";
-      proj.wbsBudgets.filter(w => w.isMajor).forEach(w => {
-        (w.subItems || []).forEach(sub => {
-          (sub.workLogs || []).forEach(lg => {
-            csv += [esc(w.name), esc(sub.name), esc(lg.date || "-"), esc(lg.content || "-"), "", ""].join(",") + "\n";
+      if (proOk) {
+        csv += "\n【次要工程期間施工工作狀況紀錄】,,,,,\n";
+        csv += "主要工程,次要小項目,施工日期,工作內容紀錄,,\n";
+        proj.wbsBudgets.filter(w => w.isMajor).forEach(w => {
+          (w.subItems || []).forEach(sub => {
+            (sub.workLogs || []).forEach(lg => {
+              csv += [esc(w.name), esc(sub.name), esc(lg.date || "-"), esc(lg.content || "-"), "", ""].join(",") + "\n";
+            });
           });
         });
-      });
+      }
 
       csv += "\n【專案合約與工期進度總表】,,,,,\n";
       csv += "工程案場名稱," + esc(proj.projectName) + ",,,,\n";
@@ -3222,8 +3404,14 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = proj.projectName + "_進料與進度明細表.csv";
+      a.download = proj.projectName + (proOk ? "_完整進料與進度明細表.csv" : "_進料明細表_免費版前10筆.csv");
       a.click();
+
+      if (!proOk && proj.expenses.length > FREE_MAX_CSV_ROWS) {
+        setTimeout(() => {
+          openUpgradeModal("匯出全部進料明細與施工日誌 CSV（免費版僅匯出前 10 筆）");
+        }, 400);
+      }
     }
 
     function renderChart() {
