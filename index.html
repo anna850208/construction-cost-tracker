@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>工地算盤 CivilCost｜土木營造成本與進度控管系統</title>
+  <title>築帳通 CivilCost｜土木營造成本與進度控管系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -14,38 +14,46 @@
 </head>
 <body class="bg-slate-100 text-slate-800 pb-20">
 
-  <!-- 頂部導覽列 & 雲端帳號狀態 -->
-  <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center font-bold text-slate-900">工</div>
+  <!-- 高識別亮眼頂部導覽列（工程琥珀金漸層 ＋ 深墨黑高對比） -->
+  <header class="bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 text-slate-950 sticky top-0 z-30 shadow-lg border-b-2 border-amber-600/40">
+    <div class="max-w-5xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-2.5">
+      <div class="flex items-center gap-3">
+        <!-- 深色高對比工程圖示徽章 -->
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center shadow-md shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01M9 18v.01" />
+          </svg>
+        </div>
         <div>
-          <h1 class="font-bold text-base leading-tight">工地算盤 CivilCost</h1>
-          <p class="text-xs text-slate-400">土木營造進料數量、工期與即時盈虧控管</p>
+          <div class="flex items-center gap-2">
+            <h1 class="font-black text-lg md:text-xl tracking-tight text-slate-950 leading-none">築帳通</h1>
+            <span class="text-xs font-extrabold tracking-wider bg-slate-900 text-amber-300 px-2 py-0.5 rounded-md shadow-2xs">CivilCost</span>
+          </div>
+          <p class="text-xs font-semibold text-slate-800 mt-1">土木營造進料數量、工期與即時盈虧控管</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <span id="syncStatusBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+        <span id="syncStatusBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-white/90 text-slate-800 border border-amber-700/30 font-semibold shadow-2xs">
           💻 單機模式（未登入）
         </span>
 
-        <button type="button" id="openAuthBtn" onclick="openAuthModal()" class="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-900 px-3 py-1.5 rounded-lg transition shadow-xs">
+        <button type="button" id="openAuthBtn" onclick="openAuthModal()" class="text-xs font-bold bg-slate-900 hover:bg-slate-800 text-amber-300 px-3.5 py-1.5 rounded-lg transition shadow-sm">
           ☁️ 登入 / 註冊同步
         </button>
 
-        <div id="userAccountBar" class="hidden items-center gap-2 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
+        <div id="userAccountBar" class="hidden items-center gap-2 bg-slate-900 px-2.5 py-1 rounded-lg shadow-sm">
           <span id="userEmailDisplay" class="text-xs text-amber-300 font-semibold max-w-[130px] truncate"></span>
-          <button type="button" onclick="handleLogout()" class="text-[11px] text-slate-400 hover:text-white underline">
+          <button type="button" onclick="handleLogout()" class="text-[11px] text-slate-300 hover:text-white underline">
             登出
           </button>
         </div>
 
-        <button type="button" onclick="resetDemoData()" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700 transition">
+        <button type="button" onclick="resetDemoData()" class="text-xs font-semibold text-slate-900 bg-white/75 hover:bg-white px-2.5 py-1 rounded-lg border border-amber-700/30 transition">
           重置範例
         </button>
 
-        <button type="button" id="planStatusBtn" onclick="openUpgradeModal('PRO 專業版訂閱管理')" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 transition">
+        <button type="button" id="planStatusBtn" onclick="openUpgradeModal('PRO 專業版訂閱管理')" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-white transition shadow-sm">
           免費版 Free · 升級
         </button>
       </div>
@@ -58,7 +66,7 @@
     <section id="expiredSubscriptionBanner" class="hidden bg-rose-50 border border-rose-300 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 shadow-xs">
       <div class="flex items-center gap-2 text-xs text-rose-900">
         <span class="text-base">⚠️</span>
-        <span>您的 <strong>CivilCost PRO 訂閱已到期</strong>，系統已自動切換為免費版（僅限 1 個案場、進料上限 20 筆）。完成續訂後即可立即恢復全部 PRO 權限！</span>
+        <span>您的 <strong>築帳通 PRO 訂閱已到期</strong>，系統已自動切換為免費版（僅限 1 個案場、進料上限 20 筆）。完成續訂後即可立即恢復全部 PRO 權限！</span>
       </div>
       <button type="button" onclick="openUpgradeModal('重新續訂 PRO 專業版')" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition shrink-0">
         立即前往續訂
@@ -819,7 +827,7 @@
   <div id="upgradeModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between">
-        <span class="pro-badge text-white text-xs font-bold px-2.5 py-1 rounded-full">CIVILCOST PRO 專業版月費訂閱</span>
+        <span class="pro-badge text-white text-xs font-bold px-2.5 py-1 rounded-full">築帳通 CIVILCOST PRO 專業版月費訂閱</span>
         <button type="button" onclick="closeUpgradeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
 
@@ -880,7 +888,7 @@
       <div id="upgradeActiveView" class="hidden space-y-4">
         <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-4 text-center space-y-1.5">
           <span class="text-2xl">🎉</span>
-          <h3 class="text-base font-bold text-emerald-900">您目前已是 CivilCost PRO 訂閱會員</h3>
+          <h3 class="text-base font-bold text-emerald-900">您目前已是 築帳通 PRO 訂閱會員</h3>
           <p id="proActiveExpireInfo" class="text-xs text-emerald-800 font-semibold">訂閱狀態：有效中（每月自動續訂）</p>
           <p class="text-[11px] text-emerald-700">已解鎖無限案場、無限筆進料記帳、送貨單拍照 ZIP 下載與完整 CSV 匯出</p>
         </div>
@@ -941,16 +949,16 @@
       const badge = document.getElementById("syncStatusBadge");
       if (!badge) return;
       if (status === "synced") {
-        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700 font-semibold";
+        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-emerald-700 text-white border border-emerald-800 font-semibold shadow-2xs";
         badge.textContent = text || "☁️ 雲端已同步";
       } else if (status === "syncing") {
-        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-amber-900/80 text-amber-300 border border-amber-700 font-semibold";
+        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-slate-900 text-amber-300 border border-slate-800 font-semibold shadow-2xs";
         badge.textContent = text || "🔄 同步中...";
       } else if (status === "error") {
-        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-rose-900/80 text-rose-300 border border-rose-700 font-semibold";
+        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-rose-600 text-white border border-rose-700 font-semibold shadow-2xs";
         badge.textContent = text || "⚠️ 同步異常";
       } else {
-        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700";
+        badge.className = "text-[11px] px-2.5 py-1 rounded-full bg-white/90 text-slate-800 border border-amber-700/30 font-semibold shadow-2xs";
         badge.textContent = text || "💻 單機模式（未登入）";
       }
     }
@@ -1153,7 +1161,6 @@
       const ws = window.workspaceState;
       if (!ws || !ws.isPro) return false;
 
-      // 若有設定 proExpireAt（ISO 時間字串），必須小於現在時間才算有效；一旦過期未續訂自動停權
       if (ws.proExpireAt) {
         const expTime = new Date(ws.proExpireAt).getTime();
         if (!isNaN(expTime) && Date.now() > expTime) {
@@ -1890,7 +1897,6 @@
         ? rawWs.projects.map(normalizeProject)
         : def.projects;
 
-      // 檢查是否有效（包含到期日判斷）
       let proValid = Boolean(rawWs.isPro);
       if (proValid && rawWs.proExpireAt) {
         const expMs = new Date(rawWs.proExpireAt).getTime();
@@ -2186,13 +2192,13 @@
       if (btn) {
         if (proOk) {
           btn.textContent = "PRO 專業版訂閱中 ★";
-          btn.className = "text-xs font-bold px-3 py-1 rounded-full pro-badge text-white transition shadow";
+          btn.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white transition shadow-sm";
         } else if (expired) {
           btn.textContent = "訂閱已到期 · 重新續訂";
-          btn.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white transition shadow";
+          btn.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white transition shadow-sm";
         } else {
           btn.textContent = "免費版 Free · 升級";
-          btn.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 transition";
+          btn.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-white transition shadow-sm";
         }
       }
 
@@ -3295,7 +3301,6 @@
       e.preventDefault();
       const proj = getCurrentProject();
 
-      // 免費版限制：單一案場最多 20 筆進料記帳
       if (!isProActive() && proj.expenses.length >= FREE_MAX_EXPENSES) {
         openUpgradeModal("無限筆現場進料記帳（免費版上限 " + FREE_MAX_EXPENSES + " 筆）");
         return;
@@ -3354,12 +3359,11 @@
 
       const esc = (str) => '"' + String(str).replace(/"/g, '""') + '"';
 
-      // 免費版放寬為匯出最新前 10 筆
       const rowsToExport = proOk ? proj.expenses : proj.expenses.slice(0, FREE_MAX_CSV_ROWS);
 
       let csv = "\uFEFF";
       if (!proOk && proj.expenses.length > FREE_MAX_CSV_ROWS) {
-        csv += "【免費版體驗匯出：僅顯示最新前 " + FREE_MAX_CSV_ROWS + " 筆，共 " + proj.expenses.length + " 筆。升級 PRO 可匯出全部資料與施工日誌】,,,,,\n";
+        csv += "【築帳通免費版體驗匯出：僅顯示最新前 " + FREE_MAX_CSV_ROWS + " 筆，共 " + proj.expenses.length + " 筆。升級 PRO 可匯出全部資料與施工日誌】,,,,,\n";
       }
       csv += "日期,名稱,規格,數量,單位,單據存證\n";
 
@@ -3404,7 +3408,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = proj.projectName + (proOk ? "_完整進料與進度明細表.csv" : "_進料明細表_免費版前10筆.csv");
+      a.download = proj.projectName + (proOk ? "_築帳通完整進料與進度明細表.csv" : "_築帳通進料明細表_免費版前10筆.csv");
       a.click();
 
       if (!proOk && proj.expenses.length > FREE_MAX_CSV_ROWS) {
