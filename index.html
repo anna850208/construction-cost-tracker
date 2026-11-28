@@ -45,7 +45,6 @@
           重置範例
         </button>
 
-        <!-- 正式方案狀態徽章（點擊可開啟升級/輸入啟用碼視窗） -->
         <button type="button" id="planStatusBtn" onclick="openUpgradeModal('Pro 專業版授權管理')" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 transition">
           免費版 Free · 升級
         </button>
@@ -98,7 +97,7 @@
           ✎ 設定主/次要工程與預算
         </button>
         <button type="button" onclick="openProgressModal()" class="text-xs bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 font-semibold px-2.5 py-1.5 rounded-lg transition">
-          📊 編輯起迄時間與完成度%
+          📊 編輯起迄、完成度與施工日誌
         </button>
       </div>
       <button type="button" onclick="openNewProjectModal()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500 text-amber-700 hover:bg-amber-50 transition flex items-center gap-1">
@@ -202,20 +201,20 @@
       </div>
     </section>
 
-    <!-- 中間區塊：主要工程項目（含次要子項目、計劃/實際起迄時間、完成度% 與狀態） -->
+    <!-- 中間區塊：主要工程項目（含次要子項目、計劃/實際起迄時間、完成度% 與施工狀況日誌） -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="md:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
           <div>
-            <h2 class="font-bold text-sm text-slate-800">主要工程項目進度（起迄時間、完成度 % 與完工結果）</h2>
-            <p class="text-[11px] text-slate-400">施工中依計劃日期換算完成度 %；填寫實際完工日後自動計算提早或延誤天數</p>
+            <h2 class="font-bold text-sm text-slate-800">主要工程項目進度（起迄時間、完成度 % 與施工日誌）</h2>
+            <p class="text-[11px] text-slate-400">展開次要項目可檢視各期間施工工作內容紀錄；點擊右側按鈕可新增/編輯日誌</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="openBudgetModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg font-semibold transition">
               + 新增主/次要項目
             </button>
             <button type="button" onclick="openProgressModal()" class="text-xs bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg font-semibold shadow-xs transition">
-              📊 編輯起迄與完成度
+              📊 編輯起迄與施工日誌
             </button>
           </div>
         </div>
@@ -712,23 +711,23 @@
     </div>
   </div>
 
-  <!-- 視窗 B：開會進度、起迄時間與完成度（%）編輯表 -->
+  <!-- 視窗 B：開會進度、起迄時間、完成度（%）與施工日誌編輯表 -->
   <div id="progressModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 my-8">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
-          <h3 class="text-lg font-bold text-slate-900">開會進度、起迄時間與完成度（%）編輯表</h3>
-          <p class="text-xs text-slate-500 mt-0.5">施工中依計劃排程換算完成度 %；填寫確定的「實際迄」日期後，自動顯示提早或延誤幾天完成</p>
+          <h3 class="text-lg font-bold text-slate-900">開會進度、起迄時間與施工工作狀況編輯表</h3>
+          <p class="text-xs text-slate-500 mt-0.5">可在每個次要小項目下方新增／修改施工日期與工作內容，記錄該期間實際施工狀況</p>
         </div>
         <button type="button" onclick="closeProgressModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
       </div>
 
       <form onsubmit="saveProgressSettings(event)" class="space-y-3">
-        <div id="progressInputsContainer" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
+        <div id="progressInputsContainer" class="space-y-3 max-h-[62vh] overflow-y-auto pr-1"></div>
 
         <div class="pt-3 flex gap-2 border-t border-slate-100">
           <button type="submit" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 rounded-xl text-sm shadow transition">
-            確認儲存進度與起迄時間
+            確認儲存進度、起迄時間與施工日誌
           </button>
           <button type="button" onclick="closeProgressModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-sm">
             取消
@@ -831,7 +830,6 @@
           <li>✅ <strong>雲端跨裝置同步</strong>（手機拍單據、電腦即時看）</li>
         </ul>
 
-        <!-- 線上金流購買按鈕 -->
         <div class="space-y-2 pt-1">
           <button type="button" onclick="goToCheckoutPage()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-xl text-sm shadow transition flex items-center justify-center gap-1.5">
             💳 前往線上訂閱開通（NT$ 490 / 月）
@@ -839,7 +837,6 @@
           <p class="text-[11px] text-center text-slate-400">支援信用卡 / LINE Pay / ATM 轉帳，付款後立即取得授權啟用碼</p>
         </div>
 
-        <!-- Pro 授權啟用碼輸入區塊 -->
         <div class="pt-3 border-t border-slate-200 space-y-2">
           <label class="block text-xs font-bold text-slate-700">🔑 已取得授權序號？請輸入啟用碼開通：</label>
           <div class="flex gap-2">
@@ -852,7 +849,6 @@
         </div>
       </div>
 
-      <!-- 已開通 Pro 狀態檢視 -->
       <div id="upgradeActiveView" class="hidden space-y-4">
         <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-4 text-center space-y-1.5">
           <span class="text-2xl">🎉</span>
@@ -1095,16 +1091,15 @@
     };
   </script>
 
-  <!-- 核心業務邏輯（多案場管理、進料篩選加總、Pro 授權開通） -->
+  <!-- 核心業務邏輯（含小項目施工日誌紀錄、多案場管理、進料篩選加總、Pro 授權開通） -->
   <script>
-    const WORKSPACE_STORAGE_KEY = "civilcost_workspace_v14";
-    // 設定你的線上收款連結（如 Portaly / 綠界 / 藍新），未設定時會顯示導引提示
+    const WORKSPACE_STORAGE_KEY = "civilcost_workspace_v15";
     const CHECKOUT_PAYMENT_URL = "";
-    // 有效 Pro 授權啟用碼清單（不區分大小寫）
     const VALID_PRO_CODES = ["CIVIL2026PRO", "CIVILPRO888", "VIP888"];
 
     let chartInstance = null;
     let tempWbsList = [];
+    let tempProgressWbsList = [];
     let pendingNewReceiptPhoto = "";
     let pendingEditReceiptPhoto = "";
     let selectedPhotoIndices = new Set();
@@ -1119,6 +1114,14 @@
 
     function fmtPct(num) {
       return Number(Number(num).toFixed(2));
+    }
+
+    function escapeHtmlAttr(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
 
     function compressImageFile(file) {
@@ -1562,8 +1565,30 @@
           isMajor: true,
           expanded: true,
           subItems: [
-            { name: "1.1 土方開挖", plannedStart: "2026-11-02", plannedEnd: "2026-11-26", actualStart: "2026-11-02", actualEnd: "", actualPct: 95 },
-            { name: "1.2 擋土牆", plannedStart: "2026-11-11", plannedEnd: "2026-11-25", actualStart: "2026-11-12", actualEnd: "", actualPct: 88 }
+            {
+              name: "1.1 土方開挖",
+              plannedStart: "2026-11-02",
+              plannedEnd: "2026-11-26",
+              actualStart: "2026-11-02",
+              actualEnd: "",
+              actualPct: 95,
+              workLogs: [
+                { date: "2026-11-10", content: "完成表土清除與放樣測量，怪手進場開挖第一階段" },
+                { date: "2026-11-22", content: "B區基坑開挖至設計高程，同步架設點井抽水" }
+              ]
+            },
+            {
+              name: "1.2 擋土牆",
+              plannedStart: "2026-11-11",
+              plannedEnd: "2026-11-25",
+              actualStart: "2026-11-12",
+              actualEnd: "2026-11-25",
+              actualPct: 100,
+              workLogs: [
+                { date: "2026-11-15", content: "東側基礎鋼筋綁紮與模板組立完成" },
+                { date: "2026-11-25", content: "擋土牆混凝土澆置與養護完成，拆模檢驗合格" }
+              ]
+            }
           ]
         },
         {
@@ -1577,7 +1602,15 @@
           isMajor: true,
           expanded: false,
           subItems: [
-            { name: "2.1 停車格劃線", plannedStart: "2027-04-01", plannedEnd: "2027-04-15", actualStart: "", actualEnd: "", actualPct: 0 }
+            {
+              name: "2.1 停車格劃線",
+              plannedStart: "2027-04-01",
+              plannedEnd: "2027-04-15",
+              actualStart: "",
+              actualEnd: "",
+              actualPct: 0,
+              workLogs: []
+            }
           ]
         },
         {
@@ -1688,12 +1721,19 @@
       return (list || []).map(w => {
         const subs = Array.isArray(w.subItems) ? w.subItems.map(sub => {
           const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
+          const logs = Array.isArray(sub.workLogs)
+            ? sub.workLogs.map(lg => ({
+                date: lg.date || "",
+                content: lg.content || ""
+              }))
+            : [];
           return {
             plannedStart: "",
             plannedEnd: "",
             actualStart: "",
             actualEnd: "",
             ...sub,
+            workLogs: logs,
             actualPct: (sub.plannedStart || sub.actualStart || sub.actualEnd) ? ev.pct : fmtPct(sub.actualPct || 0)
           };
         }) : [];
@@ -1752,7 +1792,6 @@
       const def = createDefaultWorkspace();
       if (!rawWs) return def;
 
-      // 向下相容舊版單案場資料
       if (!Array.isArray(rawWs.projects) && rawWs.projectName) {
         const migrated = normalizeProject(rawWs);
         migrated.id = "proj_default_1";
@@ -1784,8 +1823,8 @@
     function loadWorkspace() {
       try {
         const saved = localStorage.getItem(WORKSPACE_STORAGE_KEY)
-          || localStorage.getItem("civilcost_data_v13")
-          || localStorage.getItem("civilcost_data_v12");
+          || localStorage.getItem("civilcost_workspace_v14")
+          || localStorage.getItem("civilcost_data_v13");
         if (saved) {
           return normalizeWorkspace(JSON.parse(saved));
         }
@@ -2110,7 +2149,6 @@
     function renderExpensesAndSummary() {
       const filteredEntries = getFilteredExpenseEntries();
 
-      // 1. 計算篩選結果的材料數量加總（依「名稱 + 單位」分組累計）
       const summaryMap = new Map();
       filteredEntries.forEach(({ e }) => {
         const cleanName = (e.name || "未命名材料").trim();
@@ -2138,7 +2176,6 @@
         }
       }
 
-      // 2. 渲染明細表格列
       const tbody = document.getElementById("expenseTableBody");
       if (!tbody) return;
 
@@ -2537,32 +2574,52 @@
           let subTableHtml = "";
           if (subs.length > 0 && item.expanded) {
             subTableHtml =
-              '<div class="mt-2.5 pt-2.5 border-t border-slate-200/80 overflow-x-auto">' +
-                '<table class="w-full text-left border-collapse text-[11px]">' +
-                  '<thead>' +
-                    '<tr class="bg-slate-200/60 text-slate-600">' +
-                      '<th class="py-1.5 px-2 rounded-tl">次要工程項目</th>' +
-                      '<th class="py-1.5 px-2 whitespace-nowrap">計劃起迄</th>' +
-                      '<th class="py-1.5 px-2 whitespace-nowrap">實際起迄</th>' +
-                      '<th class="py-1.5 px-2 text-right whitespace-nowrap">完成度 % ／ 狀態</th>' +
-                    '</tr>' +
-                  '</thead>' +
-                  '<tbody class="divide-y divide-slate-200/70 bg-white">' +
-                    subs.map(sub => {
-                      const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
-                      const badgeHtml = renderScheduleStatusBadge(ev, true);
-                      return '<tr>' +
-                        '<td class="py-1.5 px-2 font-medium text-slate-800">' + sub.name + '</td>' +
-                        '<td class="py-1.5 px-2 text-slate-500 whitespace-nowrap">' + formatDateRangeText(sub.plannedStart, sub.plannedEnd) + '</td>' +
-                        '<td class="py-1.5 px-2 text-slate-600 whitespace-nowrap">' + formatDateRangeText(sub.actualStart, sub.actualEnd) + '</td>' +
-                        '<td class="py-1.5 px-2 text-right whitespace-nowrap space-x-1.5">' +
-                          '<span class="font-bold text-slate-800">' + ev.pct + '%</span>' +
-                          badgeHtml +
-                        '</td>' +
-                      '</tr>';
-                    }).join("") +
-                  '</tbody>' +
-                '</table>' +
+              '<div class="mt-2.5 pt-2.5 border-t border-slate-200/80 space-y-2">' +
+                subs.map(sub => {
+                  const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
+                  const badgeHtml = renderScheduleStatusBadge(ev, true);
+                  const logs = Array.isArray(sub.workLogs) ? sub.workLogs : [];
+
+                  let logsHtml = "";
+                  if (logs.length > 0) {
+                    logsHtml =
+                      '<div class="mt-2 pt-2 border-t border-slate-100 space-y-1">' +
+                        '<div class="flex items-center justify-between">' +
+                          '<span class="text-[10px] font-bold text-slate-500">📝 施工工作狀況紀錄（' + logs.length + ' 筆）</span>' +
+                          '<button type="button" onclick="openProgressModal()" class="text-[10px] text-sky-600 hover:underline font-semibold">+ 新增/編輯紀錄</button>' +
+                        '</div>' +
+                        '<div class="space-y-1">' +
+                          logs.map(lg =>
+                            '<div class="flex items-start gap-2 text-[11px] bg-slate-50 px-2 py-1 rounded border border-slate-100">' +
+                              '<span class="font-mono text-[10px] text-slate-500 shrink-0 mt-0.5">' + (lg.date || "未填日期") + '</span>' +
+                              '<span class="text-slate-700 leading-snug">' + escapeHtmlAttr(lg.content) + '</span>' +
+                            '</div>'
+                          ).join("") +
+                        '</div>' +
+                      '</div>';
+                  } else {
+                    logsHtml =
+                      '<div class="mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between">' +
+                        '<span class="text-[10px] text-slate-400">尚未填寫期間施工工作紀錄</span>' +
+                        '<button type="button" onclick="openProgressModal()" class="text-[10px] text-sky-600 hover:underline font-semibold">+ 記錄工作內容</button>' +
+                      '</div>';
+                  }
+
+                  return '<div class="bg-white p-2.5 rounded-lg border border-slate-200/90 text-[11px]">' +
+                    '<div class="flex flex-wrap items-center justify-between gap-1.5">' +
+                      '<span class="font-bold text-slate-800">' + sub.name + '</span>' +
+                      '<div class="flex items-center gap-1.5">' +
+                        '<span class="font-extrabold text-slate-800">' + ev.pct + '%</span>' +
+                        badgeHtml +
+                      '</div>' +
+                    '</div>' +
+                    '<div class="flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-slate-500 mt-1">' +
+                      '<span>計劃起迄：' + formatDateRangeText(sub.plannedStart, sub.plannedEnd) + '</span>' +
+                      '<span class="text-sky-700">實際起迄：' + formatDateRangeText(sub.actualStart, sub.actualEnd) + '</span>' +
+                    '</div>' +
+                    logsHtml +
+                  '</div>';
+                }).join("") +
               '</div>';
           }
 
@@ -2649,7 +2706,7 @@
           const subRowsHtml = subs.map((sub, sIdx) =>
             '<div class="flex items-center gap-1.5 pl-4">' +
               '<span class="text-slate-400 text-xs">↳</span>' +
-              '<input type="text" value="' + sub.name + '" onchange="updateTempSubItem(' + idx + ', ' + sIdx + ', this.value)" placeholder="次要項目名稱" class="flex-1 border border-slate-200 rounded px-2 py-1 text-[11px] bg-white">' +
+              '<input type="text" value="' + escapeHtmlAttr(sub.name) + '" onchange="updateTempSubItem(' + idx + ', ' + sIdx + ', this.value)" placeholder="次要項目名稱" class="flex-1 border border-slate-200 rounded px-2 py-1 text-[11px] bg-white">' +
               '<button type="button" onclick="removeTempSubItem(' + idx + ', ' + sIdx + ')" class="text-[11px] text-rose-400 hover:text-rose-600 px-1">✕</button>' +
             '</div>'
           ).join("");
@@ -2657,7 +2714,7 @@
           majorHtml +=
             '<div class="bg-slate-50 p-2 rounded-lg border border-slate-200 space-y-1.5">' +
               '<div class="flex items-center gap-2">' +
-                '<input type="text" value="' + w.name + '" onchange="updateTempWbs(' + idx + ', \'name\', this.value)" required class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs font-bold text-slate-800 bg-white">' +
+                '<input type="text" value="' + escapeHtmlAttr(w.name) + '" onchange="updateTempWbs(' + idx + ', \'name\', this.value)" required class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs font-bold text-slate-800 bg-white">' +
                 '<input type="number" value="' + w.budget + '" oninput="updateTempWbs(' + idx + ', \'budget\', this.value)" min="0" required class="w-32 border border-slate-300 rounded px-2 py-1 text-xs text-right font-semibold bg-white">' +
                 '<button type="button" onclick="removeTempWbsRow(' + idx + ')" title="刪除此主要項目" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-1.5 py-1">✕</button>' +
               '</div>' +
@@ -2671,7 +2728,7 @@
           nonMajorSum += Number(w.budget) || 0;
           nonMajorHtml +=
             '<div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">' +
-              '<input type="text" value="' + w.name + '" onchange="updateTempWbs(' + idx + ', \'name\', this.value)" required class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs font-semibold text-slate-700 bg-white">' +
+              '<input type="text" value="' + escapeHtmlAttr(w.name) + '" onchange="updateTempWbs(' + idx + ', \'name\', this.value)" required class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs font-semibold text-slate-700 bg-white">' +
               '<input type="number" value="' + w.budget + '" oninput="updateTempWbs(' + idx + ', \'budget\', this.value)" min="0" required class="w-32 border border-slate-300 rounded px-2 py-1 text-xs text-right font-semibold bg-white">' +
               '<button type="button" onclick="removeTempWbsRow(' + idx + ')" title="刪除此項目" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-1.5 py-1">✕</button>' +
             '</div>';
@@ -2714,7 +2771,8 @@
         plannedEnd: "",
         actualStart: "",
         actualEnd: "",
-        actualPct: 0
+        actualPct: 0,
+        workLogs: []
       });
       tempWbsList[parentIdx].expanded = true;
       renderTempWbsRows();
@@ -2786,89 +2844,159 @@
       renderAll();
     }
 
+    /* ========= 開會進度、起迄時間與小項目施工日誌編輯表 ========= */
     function openProgressModal() {
       const proj = getCurrentProject();
-      const container = document.getElementById("progressInputsContainer");
-      const majorWithIdx = proj.wbsBudgets
-        .map((w, idx) => ({ w, idx }))
-        .filter(obj => obj.w.isMajor);
-
-      if (majorWithIdx.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">目前沒有主要工程項目。</p>';
-      } else {
-        container.innerHTML = majorWithIdx.map(({ w, idx }) => {
-          const subs = w.subItems || [];
-          const subHtml = subs.map((sub, sIdx) => {
-            const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
-            return '<div class="bg-white p-2.5 rounded-lg border border-slate-200 ml-3 space-y-2">' +
-              '<div class="flex flex-wrap items-center justify-between gap-2">' +
-                '<span class="text-xs font-semibold text-slate-700">↳ ' + sub.name + '</span>' +
-                '<div class="flex items-center gap-2 text-[11px] flex-wrap">' +
-                  '<label class="text-sky-700 font-bold">完成度% ' +
-                    '<input type="number" id="subActPct_' + idx + '_' + sIdx + '" value="' + ev.pct + '" min="0" max="100" step="0.01" oninput="onSubPctManualChange(' + idx + ')" class="w-16 border border-sky-400 rounded px-1.5 py-0.5 text-center">' +
-                  '</label>' +
-                  '<span id="subStatusBadge_' + idx + '_' + sIdx + '">' + renderScheduleStatusBadge(ev, true) + '</span>' +
-                '</div>' +
-              '</div>' +
-              '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
-                '<div><span class="text-slate-400 block">計劃起</span><input type="date" id="subPlanStart_' + idx + '_' + sIdx + '" value="' + (sub.plannedStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
-                '<div><span class="text-slate-400 block">計劃迄</span><input type="date" id="subPlanEnd_' + idx + '_' + sIdx + '" value="' + (sub.plannedEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
-                '<div><span class="text-sky-600 block">實際起</span><input type="date" id="subActStart_' + idx + '_' + sIdx + '" value="' + (sub.actualStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
-                '<div><span class="text-sky-600 block">實際迄</span><input type="date" id="subActEnd_' + idx + '_' + sIdx + '" value="' + (sub.actualEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
-              '</div>' +
-            '</div>';
-          }).join("");
-
-          const mainSummary = getMainItemScheduleSummary(w);
-          const autoHintTag = subs.length > 0
-            ? '<span class="text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-medium">✨ 依子項目自動計算平均</span>'
-            : '';
-
-          return '<div class="bg-slate-50 p-3 rounded-xl border border-slate-300 space-y-2.5">' +
-            '<div class="flex flex-wrap items-center justify-between gap-2">' +
-              '<div class="flex items-center gap-2 flex-wrap">' +
-                '<span class="text-xs md:text-sm font-bold text-slate-900">' + w.name + '</span>' +
-                autoHintTag +
-              '</div>' +
-              '<div class="flex items-center gap-2 text-xs flex-wrap">' +
-                '<label class="text-sky-800 font-bold">完成度% ' +
-                  '<input type="number" id="actualInput_' + idx + '" value="' + fmtPct(w.actualPct) + '" min="0" max="100" step="0.01" required class="w-16 border border-sky-500 rounded px-1.5 py-1 text-center bg-white transition-colors">' +
-                '</label>' +
-                '<span id="mainStatusBadge_' + idx + '">' + renderScheduleStatusBadge(mainSummary, false) + '</span>' +
-              '</div>' +
-            '</div>' +
-            '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
-              '<div><span class="text-slate-500 block">主工項計劃起</span><input type="date" id="mainPlanStart_' + idx + '" value="' + (w.plannedStart || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
-              '<div><span class="text-slate-500 block">主工項計劃迄</span><input type="date" id="mainPlanEnd_' + idx + '" value="' + (w.plannedEnd || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
-              '<div><span class="text-sky-700 block">主工項實際起</span><input type="date" id="mainActStart_' + idx + '" value="' + (w.actualStart || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
-              '<div><span class="text-sky-700 block">主工項實際迄</span><input type="date" id="mainActEnd_' + idx + '" value="' + (w.actualEnd || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
-            '</div>' +
-            subHtml +
-          '</div>';
-        }).join("");
-      }
+      tempProgressWbsList = JSON.parse(JSON.stringify(proj.wbsBudgets));
+      renderProgressModalBody();
 
       document.getElementById("progressModal").classList.remove("hidden");
       document.getElementById("progressModal").classList.add("flex");
     }
 
+    function renderProgressModalBody() {
+      const container = document.getElementById("progressInputsContainer");
+      const majorWithIdx = tempProgressWbsList
+        .map((w, idx) => ({ w, idx }))
+        .filter(obj => obj.w.isMajor);
+
+      if (majorWithIdx.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">目前沒有主要工程項目。</p>';
+        return;
+      }
+
+      container.innerHTML = majorWithIdx.map(({ w, idx }) => {
+        const subs = w.subItems || [];
+        const subHtml = subs.map((sub, sIdx) => {
+          const ev = evaluateDateSchedule(sub.plannedStart, sub.plannedEnd, sub.actualStart, sub.actualEnd, sub.actualPct);
+          const logs = Array.isArray(sub.workLogs) ? sub.workLogs : [];
+
+          const logRowsHtml = logs.map((lg, lIdx) =>
+            '<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">' +
+              '<input type="date" value="' + escapeHtmlAttr(lg.date || "") + '" onchange="updateSubWorkLogField(' + idx + ', ' + sIdx + ', ' + lIdx + ', \'date\', this.value)" class="border border-slate-300 rounded px-2 py-1 text-[11px] bg-white sm:w-36 shrink-0">' +
+              '<input type="text" value="' + escapeHtmlAttr(lg.content || "") + '" oninput="updateSubWorkLogField(' + idx + ', ' + sIdx + ', ' + lIdx + ', \'content\', this.value)" placeholder="輸入該日／期間施工工作內容（如：B區基坑開挖、抽水機架設）" class="flex-1 border border-slate-300 rounded px-2.5 py-1 text-[11px] bg-white focus:border-amber-500 focus:outline-none">' +
+              '<button type="button" onclick="removeSubWorkLog(' + idx + ', ' + sIdx + ', ' + lIdx + ')" title="刪除此筆施工紀錄" class="text-[11px] text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded font-bold self-end sm:self-center">✕</button>' +
+            '</div>'
+          ).join("");
+
+          return '<div class="bg-white p-3 rounded-lg border border-slate-200 ml-3 space-y-2.5">' +
+            '<div class="flex flex-wrap items-center justify-between gap-2">' +
+              '<span class="text-xs font-bold text-slate-800">↳ ' + sub.name + '</span>' +
+              '<div class="flex items-center gap-2 text-[11px] flex-wrap">' +
+                '<label class="text-sky-700 font-bold">完成度% ' +
+                  '<input type="number" id="subActPct_' + idx + '_' + sIdx + '" value="' + ev.pct + '" min="0" max="100" step="0.01" oninput="onSubPctManualChange(' + idx + ', ' + sIdx + ', this.value)" class="w-16 border border-sky-400 rounded px-1.5 py-0.5 text-center">' +
+                '</label>' +
+                '<span id="subStatusBadge_' + idx + '_' + sIdx + '">' + renderScheduleStatusBadge(ev, true) + '</span>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
+              '<div><span class="text-slate-400 block">計劃起</span><input type="date" id="subPlanStart_' + idx + '_' + sIdx + '" value="' + (sub.plannedStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
+              '<div><span class="text-slate-400 block">計劃迄</span><input type="date" id="subPlanEnd_' + idx + '_' + sIdx + '" value="' + (sub.plannedEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-slate-200 rounded px-1.5 py-1"></div>' +
+              '<div><span class="text-sky-600 block">實際起</span><input type="date" id="subActStart_' + idx + '_' + sIdx + '" value="' + (sub.actualStart || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
+              '<div><span class="text-sky-600 block">實際迄</span><input type="date" id="subActEnd_' + idx + '_' + sIdx + '" value="' + (sub.actualEnd || "") + '" onchange="recalcSubRow(' + idx + ', ' + sIdx + ')" class="w-full border border-sky-200 rounded px-1.5 py-1"></div>' +
+            '</div>' +
+
+            '<!-- 期間施工工作內容紀錄區塊 -->' +
+            '<div class="pt-2 border-t border-dashed border-slate-200 space-y-1.5">' +
+              '<div class="flex items-center justify-between">' +
+                '<span class="text-[11px] font-bold text-amber-800">📝 期間施工工作狀況紀錄（日期 ／ 工作內容）</span>' +
+                '<button type="button" onclick="addSubWorkLog(' + idx + ', ' + sIdx + ')" class="text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold px-2.5 py-0.5 rounded-md transition">' +
+                  '+ 新增工作紀錄' +
+                '</button>' +
+              '</div>' +
+              '<div class="space-y-1.5">' +
+                (logRowsHtml || '<p class="text-[11px] text-slate-400 py-0.5">尚無工作紀錄，可點右上角「+ 新增工作紀錄」填寫施工日期與內容</p>') +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join("");
+
+        const mainSummary = getMainItemScheduleSummary(w);
+        const autoHintTag = subs.length > 0
+          ? '<span class="text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-medium">✨ 依子項目自動計算平均</span>'
+          : '';
+
+        return '<div class="bg-slate-50 p-3 rounded-xl border border-slate-300 space-y-2.5">' +
+          '<div class="flex flex-wrap items-center justify-between gap-2">' +
+            '<div class="flex items-center gap-2 flex-wrap">' +
+              '<span class="text-xs md:text-sm font-bold text-slate-900">' + w.name + '</span>' +
+              autoHintTag +
+            '</div>' +
+            '<div class="flex items-center gap-2 text-xs flex-wrap">' +
+              '<label class="text-sky-800 font-bold">完成度% ' +
+                '<input type="number" id="actualInput_' + idx + '" value="' + fmtPct(w.actualPct) + '" min="0" max="100" step="0.01" oninput="onMainPctManualChange(' + idx + ', this.value)" required class="w-16 border border-sky-500 rounded px-1.5 py-1 text-center bg-white transition-colors">' +
+              '</label>' +
+              '<span id="mainStatusBadge_' + idx + '">' + renderScheduleStatusBadge(mainSummary, false) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">' +
+            '<div><span class="text-slate-500 block">主工項計劃起</span><input type="date" id="mainPlanStart_' + idx + '" value="' + (w.plannedStart || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
+            '<div><span class="text-slate-500 block">主工項計劃迄</span><input type="date" id="mainPlanEnd_' + idx + '" value="' + (w.plannedEnd || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-slate-300 rounded px-2 py-1 bg-white"></div>' +
+            '<div><span class="text-sky-700 block">主工項實際起</span><input type="date" id="mainActStart_' + idx + '" value="' + (w.actualStart || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
+            '<div><span class="text-sky-700 block">主工項實際迄</span><input type="date" id="mainActEnd_' + idx + '" value="' + (w.actualEnd || "") + '" onchange="recalcMainRow(' + idx + ')" class="w-full border border-sky-300 rounded px-2 py-1 bg-white"></div>' +
+          '</div>' +
+          subHtml +
+        '</div>';
+      }).join("");
+    }
+
+    function addSubWorkLog(wIdx, sIdx) {
+      const sub = tempProgressWbsList[wIdx] && tempProgressWbsList[wIdx].subItems[sIdx];
+      if (!sub) return;
+      if (!Array.isArray(sub.workLogs)) sub.workLogs = [];
+      sub.workLogs.push({
+        date: getCurrentLocalDate(),
+        content: ""
+      });
+      renderProgressModalBody();
+    }
+
+    function updateSubWorkLogField(wIdx, sIdx, lIdx, field, val) {
+      const sub = tempProgressWbsList[wIdx] && tempProgressWbsList[wIdx].subItems[sIdx];
+      if (!sub || !sub.workLogs || !sub.workLogs[lIdx]) return;
+      sub.workLogs[lIdx][field] = val;
+    }
+
+    function removeSubWorkLog(wIdx, sIdx, lIdx) {
+      const sub = tempProgressWbsList[wIdx] && tempProgressWbsList[wIdx].subItems[sIdx];
+      if (!sub || !sub.workLogs) return;
+      sub.workLogs.splice(lIdx, 1);
+      renderProgressModalBody();
+    }
+
+    function onMainPctManualChange(idx, val) {
+      if (!tempProgressWbsList[idx]) return;
+      const num = parseFloat(val);
+      tempProgressWbsList[idx].actualPct = fmtPct(Math.min(100, Math.max(0, isNaN(num) ? 0 : num)));
+    }
+
     function recalcSubRow(idx, sIdx) {
+      const w = tempProgressWbsList[idx];
+      const sub = w && w.subItems[sIdx];
+      if (!sub) return;
+
       const pStart = document.getElementById("subPlanStart_" + idx + "_" + sIdx).value;
       const pEnd = document.getElementById("subPlanEnd_" + idx + "_" + sIdx).value;
       const aStart = document.getElementById("subActStart_" + idx + "_" + sIdx).value;
       const aEnd = document.getElementById("subActEnd_" + idx + "_" + sIdx).value;
       const currentPct = parseFloat(document.getElementById("subActPct_" + idx + "_" + sIdx).value) || 0;
 
+      sub.plannedStart = pStart;
+      sub.plannedEnd = pEnd;
+      sub.actualStart = aStart;
+      sub.actualEnd = aEnd;
+
       const ev = evaluateDateSchedule(pStart, pEnd, aStart, aEnd, currentPct);
+      sub.actualPct = ev.pct;
       document.getElementById("subActPct_" + idx + "_" + sIdx).value = ev.pct;
       document.getElementById("subStatusBadge_" + idx + "_" + sIdx).innerHTML = renderScheduleStatusBadge(ev, true);
 
-      onSubPctManualChange(idx);
+      syncMainProgressFromSubs(idx);
     }
 
     function recalcMainRow(idx) {
-      const proj = getCurrentProject();
-      const w = proj.wbsBudgets[idx];
+      const w = tempProgressWbsList[idx];
       if (!w) return;
       const pStart = document.getElementById("mainPlanStart_" + idx).value;
       const pEnd = document.getElementById("mainPlanEnd_" + idx).value;
@@ -2876,16 +3004,29 @@
       const aEnd = document.getElementById("mainActEnd_" + idx).value;
       const currentPct = parseFloat(document.getElementById("actualInput_" + idx).value) || 0;
 
+      w.plannedStart = pStart;
+      w.plannedEnd = pEnd;
+      w.actualStart = aStart;
+      w.actualEnd = aEnd;
+
       const ev = evaluateDateSchedule(pStart, pEnd, aStart, aEnd, currentPct);
       if (!w.subItems || w.subItems.length === 0) {
+        w.actualPct = ev.pct;
         document.getElementById("actualInput_" + idx).value = ev.pct;
       }
       document.getElementById("mainStatusBadge_" + idx).innerHTML = renderScheduleStatusBadge(ev, false);
     }
 
-    function onSubPctManualChange(idx) {
-      const proj = getCurrentProject();
-      const w = proj.wbsBudgets[idx];
+    function onSubPctManualChange(idx, sIdx, val) {
+      const w = tempProgressWbsList[idx];
+      if (!w || !w.subItems || !w.subItems[sIdx]) return;
+      const num = parseFloat(val);
+      w.subItems[sIdx].actualPct = fmtPct(Math.min(100, Math.max(0, isNaN(num) ? 0 : num)));
+      syncMainProgressFromSubs(idx);
+    }
+
+    function syncMainProgressFromSubs(idx) {
+      const w = tempProgressWbsList[idx];
       if (!w || !w.subItems || w.subItems.length === 0) return;
 
       let sumA = 0;
@@ -2894,15 +3035,17 @@
       let anyInProgress = false;
       let allCompleted = true;
 
-      w.subItems.forEach((_, sIdx) => {
+      w.subItems.forEach((sub, sIdx) => {
         const aVal = parseFloat(document.getElementById("subActPct_" + idx + "_" + sIdx).value);
-        sumA += isNaN(aVal) ? 0 : Math.min(100, Math.max(0, aVal));
+        const cleanVal = isNaN(aVal) ? 0 : Math.min(100, Math.max(0, aVal));
+        sub.actualPct = fmtPct(cleanVal);
+        sumA += cleanVal;
 
         const pStart = document.getElementById("subPlanStart_" + idx + "_" + sIdx).value;
         const pEnd = document.getElementById("subPlanEnd_" + idx + "_" + sIdx).value;
         const aStart = document.getElementById("subActStart_" + idx + "_" + sIdx).value;
         const aEnd = document.getElementById("subActEnd_" + idx + "_" + sIdx).value;
-        const ev = evaluateDateSchedule(pStart, pEnd, aStart, aEnd, aVal);
+        const ev = evaluateDateSchedule(pStart, pEnd, aStart, aEnd, cleanVal);
 
         if (!ev.isCompleted) {
           allCompleted = false;
@@ -2913,9 +3056,12 @@
         }
       });
 
+      const avgPct = fmtPct(sumA / w.subItems.length);
+      w.actualPct = avgPct;
+
       const mainActEl = document.getElementById("actualInput_" + idx);
       if (mainActEl) {
-        mainActEl.value = fmtPct(sumA / w.subItems.length);
+        mainActEl.value = avgPct;
         mainActEl.classList.add("bg-sky-50");
         setTimeout(() => mainActEl.classList.remove("bg-sky-50"), 300);
       }
@@ -2946,14 +3092,14 @@
     function saveProgressSettings(e) {
       e.preventDefault();
       const proj = getCurrentProject();
-      proj.wbsBudgets.forEach((w, idx) => {
+
+      tempProgressWbsList.forEach((w, idx) => {
         if (!w.isMajor) return;
         const aEl = document.getElementById("actualInput_" + idx);
         if (!aEl) return;
 
         const rawActual = parseFloat(aEl.value);
         w.actualPct = fmtPct(Math.min(100, Math.max(0, isNaN(rawActual) ? 0 : rawActual)));
-
         w.plannedStart = document.getElementById("mainPlanStart_" + idx).value;
         w.plannedEnd = document.getElementById("mainPlanEnd_" + idx).value;
         w.actualStart = document.getElementById("mainActStart_" + idx).value;
@@ -2969,9 +3115,14 @@
               sub.actualStart = document.getElementById("subActStart_" + idx + "_" + sIdx).value;
               sub.actualEnd = document.getElementById("subActEnd_" + idx + "_" + sIdx).value;
             }
+            if (Array.isArray(sub.workLogs)) {
+              sub.workLogs = sub.workLogs.filter(lg => (lg.date || "").trim() || (lg.content || "").trim());
+            }
           });
         }
       });
+
+      proj.wbsBudgets = normalizeWbsList(tempProgressWbsList);
       saveState();
       closeProgressModal();
       renderAll();
@@ -3109,6 +3260,16 @@
           esc(e.unit || "式"),
           esc(e.photo ? "已附照片" : "未附")
         ].join(",") + "\n";
+      });
+
+      csv += "\n【次要工程期間施工工作狀況紀錄】,,,,,,\n";
+      csv += "主要工程,次要小項目,施工日期,工作內容紀錄,,,\n";
+      proj.wbsBudgets.filter(w => w.isMajor).forEach(w => {
+        (w.subItems || []).forEach(sub => {
+          (sub.workLogs || []).forEach(lg => {
+            csv += [esc(w.name), esc(sub.name), esc(lg.date || "-"), esc(lg.content || "-"), "", "", ""].join(",") + "\n";
+          });
+        });
       });
 
       csv += "\n【專案合約與工期進度總表】,,,,,,\n";
